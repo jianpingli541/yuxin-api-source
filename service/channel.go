@@ -3,11 +3,13 @@ package service
 import (
 	"fmt"
 	"strings"
+	"time"
 
 	"github.com/QuantumNous/new-api/common"
 	"github.com/QuantumNous/new-api/dto"
 	"github.com/QuantumNous/new-api/model"
 	"github.com/QuantumNous/new-api/setting/operation_setting"
+	"github.com/QuantumNous/new-api/service/webhook"
 	"github.com/QuantumNous/new-api/types"
 )
 
@@ -30,6 +32,17 @@ func DisableChannel(channelError types.ChannelError, reason string) {
 		subject := fmt.Sprintf("通道「%s」（#%d）已被禁用", channelError.ChannelName, channelError.ChannelId)
 		content := fmt.Sprintf("通道「%s」（#%d）已被禁用，原因：%s", channelError.ChannelName, channelError.ChannelId, reason)
 		NotifyRootUser(formatNotifyType(channelError.ChannelId, common.ChannelStatusAutoDisabled), subject, content)
+
+		// Webhook: channel down
+		go func() {
+			defer func() { recover() }()
+			webhook.Notify(webhook.EventChannelDown, map[string]interface{}{
+				"channel_id":   channelError.ChannelId,
+				"channel_name": channelError.ChannelName,
+				"reason":       reason,
+				"timestamp":    time.Now().Unix(),
+			})
+		}()
 	}
 }
 

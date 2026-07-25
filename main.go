@@ -27,6 +27,7 @@ import (
 	"github.com/QuantumNous/new-api/relay"
 	"github.com/QuantumNous/new-api/router"
 	"github.com/QuantumNous/new-api/service"
+	mcpsvc "github.com/QuantumNous/new-api/service/mcp"
 	"github.com/QuantumNous/new-api/service/authz"
 	_ "github.com/QuantumNous/new-api/setting/performance_setting"
 	"github.com/QuantumNous/new-api/setting/ratio_setting"
@@ -97,6 +98,9 @@ func main() {
 	// Warm pricing after channel cache initialization so Advanced Custom
 	// endpoint inference can read cached route settings on first request.
 	model.GetPricing()
+
+	// 注册 MCP 内置工具
+	mcpsvc.RegisterBuiltinTools()
 
 	// 热更新配置
 	go model.SyncOptions(common.SyncFrequency)

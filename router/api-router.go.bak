@@ -3,8 +3,6 @@ package router
 import (
 	"github.com/QuantumNous/new-api/controller"
 	"github.com/QuantumNous/new-api/middleware"
-	"github.com/QuantumNous/new-api/service/metrics"
-	mcpsvc "github.com/QuantumNous/new-api/service/mcp"
 
 	// Import oauth package to register providers via init()
 	_ "github.com/QuantumNous/new-api/oauth"
@@ -14,7 +12,6 @@ import (
 )
 
 func SetApiRouter(router *gin.Engine) {
-	router.GET("/metrics", metrics.PrometheusHandler)
 	apiRouter := router.Group("/api")
 	apiRouter.Use(middleware.RouteTag("api"))
 	apiRouter.Use(gzip.Gzip(gzip.DefaultCompression))
@@ -33,10 +30,6 @@ func SetApiRouter(router *gin.Engine) {
 	apiRouter.GET("/public/pricing", controller.PublicPricing)
 	apiRouter.GET("/routing/config", controller.GetRoutingConfig)
 	apiRouter.POST("/routing/config", middleware.AdminAuth(), controller.UpdateRoutingConfig)
-	apiRouter.GET("/mcp/tools", mcpsvc.MCPToolsListHandler)
-	apiRouter.POST("/mcp/execute", middleware.UserAuth(), mcpsvc.MCPExecuteHandler)
-	apiRouter.GET("/mcp/config", mcpsvc.MCPConfigHandler)
-	apiRouter.POST("/mcp/config", middleware.AdminAuth(), mcpsvc.MCPConfigHandler)
 		apiRouter.GET("/user-agreement", controller.GetUserAgreement)
 		apiRouter.GET("/privacy-policy", controller.GetPrivacyPolicy)
 		apiRouter.GET("/about", controller.GetAbout)

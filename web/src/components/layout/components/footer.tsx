@@ -136,7 +136,7 @@ function ProjectAttribution(props: { currentYear: number; inline?: boolean }) {
       >
         {t('New API')}
       </a>
-      . {t(NEW_API_FOOTER_ATTRIBUTION_KEY)}
+      . 惠州市豫鑫网络科技有限公司
     </span>
   )
   if (props.inline) {

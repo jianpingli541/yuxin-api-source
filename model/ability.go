@@ -389,3 +389,10 @@ func FixAbility() (int, int, error) {
 	InitChannelCache()
 	return successCount, failCount, nil
 }
+
+// GetGroupEnabledAbilitiesByModel 获取指定分组和模型的所有启用能力
+func GetGroupEnabledAbilitiesByModel(group string, modelName string) ([]*Ability, error) {
+	var abilities []*Ability
+	err := DB.Where("group = ? AND model = ? AND enabled = true", group, modelName).Find(&abilities).Error
+	return abilities, err
+}
