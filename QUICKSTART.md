@@ -1,4 +1,6 @@
-# 豫鑫 API — 快速上手指南
+# 豫鑫 API 中转站 — 快速上手指南
+
+> **版本**: v1.0.0-yuxin | **更新**: 2026-07-25
 
 ## 首次接管
 
@@ -23,15 +25,25 @@ cd /root/projects/api-gateway
 ./manage.sh stop       # 停止
 ./manage.sh restart    # 重启
 ./manage.sh status     # 看容器+资源
-./manage.sh logs       # new-api日志
+./manage.sh logs       # new-api 日志
 ./manage.sh backup     # 备份数据库+配置
-./manage.sh shell new-api  # 进容器
 ```
+
+## 关键地址
+
+| 服务 | 地址 |
+|------|------|
+| 网站首页 | http://103.55.131.130 |
+| 服务状态页 | http://103.55.131.130/status-page |
+| 模型定价页 | http://103.55.131.130/pricing-page |
+| Prometheus | http://103.55.131.130:9090 |
+| Grafana | http://103.55.131.130:3001 (admin/yuxin2024) |
 
 ## 管理后台
 
 - 地址: http://103.55.131.130
-- 登录后可管理: 渠道/用户/令牌/定价/系统设置
+- 管理员: `lijianping`
+- 登录后可管理: 渠道 / 用户 / 令牌 / 定价 / 系统设置
 
 ## 添加上游渠道
 
@@ -44,7 +56,7 @@ cd /root/projects/api-gateway
 
 1. 登录管理后台
 2. 令牌管理 → 添加令牌
-3. ⚠️ 必须通过界面或API创建，不能直接插数据库
+3. ⚠️ **必须通过界面或 API 创建，不能直接插数据库**
 
 ## 修改代码后部署
 
@@ -66,21 +78,42 @@ docker build -f Dockerfile.custom -t yuxin-api:latest .
 docker compose up -d new-api
 ```
 
-## 重要文件位置
+## 重置管理员密码
+
+```bash
+# 1. 生成 bcrypt 哈希
+python3 -c "import bcrypt;print(bcrypt.hashpw(b'新密码',bcrypt.gensalt()).decode())"
+
+# 2. 更新数据库（注意 $ 转义）
+docker exec gateway-postgres psql -U gateway -d new-api \
+  -c "UPDATE users SET password = E'\$2b\$12\$xxx完整哈希xxx' WHERE username = 'lijianping';"
+
+# 3. 清除缓存 + 重启
+docker exec gateway-redis redis-cli -a <密码> FLUSHALL
+docker compose restart new-api
+```
+
+## 重要文件
 
 | 文件 | 用途 |
 |------|------|
-| .env | 所有密码和配置 |
-| docker-compose.yml | 5个容器编排 |
-| manage.sh | 运维一键脚本 |
-| PROJECT_DOC.md | 完整项目文档 |
-| nginx/conf.d/gateway.conf | Nginx反代 |
-| controller/status_page.go | 状态页API |
-| service/webhook/ | Webhook通知 |
-| service/guardrail/ | 内容过滤 |
-| service/cache/ | 响应缓存 |
+| `.env` | 所有密码和配置 |
+| `docker-compose.yml` | 主容器编排 |
+| `docker-compose.observability.yml` | 监控服务 |
+| `nginx/conf.d/gateway.conf` | Nginx 反代+限速 |
+| `PROJECT_DOC.md` | 完整项目文档 |
+| `manage.sh` | 运维一键脚本 |
 
-## 详细文档
+## 常见问题
 
-完整项目文档见同目录 `PROJECT_DOC.md`
-原项目文档: https://docs.newapi.pro
+**Q: 改了密码登录不上？**  
+A: 需要 `redis-cli FLUSHALL` 清缓存 + `docker compose restart new-api`
+
+**Q: API 调用返回错误？**  
+A: 检查渠道是否配置了有效的上游 API Key
+
+**Q: ClickHouse 显示 unhealthy？**  
+A: 不影响功能，是健康检查脚本兼容性问题
+
+**Q: Nginx 返回 429/503？**  
+A: 触发了限速，检查 `nginx/conf.d/gateway.conf` 中的 `rate` 和 `burst` 值

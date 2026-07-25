@@ -39,3 +39,14 @@ skills-lock.json
 .local-tests/
 service/relayconvert/chat_responses_live_local_test.go
 service/openaicompat/chat_responses_live_local_test.go
+
+# 豫鑫 API 自定义 — 不提交编译产物
+new-api-custom
+*.bak
+router/api-router.go.bak
+web/dist/status.html
+web/dist/pricing.html
+evidence/
+.omc/
+.agents/
+Acceptance-PRD.md

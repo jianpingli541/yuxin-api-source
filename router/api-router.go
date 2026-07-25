@@ -36,7 +36,7 @@ func SetApiRouter(router *gin.Engine) {
 	apiRouter.GET("/marketplace/models", controller.GetMarketplaceModels)
 	apiRouter.GET("/compliance/config", controller.GetComplianceConfig)
 	apiRouter.POST("/compliance/config", middleware.AdminAuth(), controller.UpdateComplianceConfig)
-	apiRouter.POST("/compliance/check", middleware.CriticalRateLimit(), controller.RunComplianceCheck)
+	apiRouter.POST("/compliance/check", controller.RunComplianceCheck)
 	apiRouter.GET("/canary/status", controller.GetCanaryStatus)
 	apiRouter.POST("/canary/run", middleware.AdminAuth(), controller.RunCanaryTest)
 	apiRouter.POST("/canary/enable", middleware.AdminAuth(), controller.EnableCanary)
