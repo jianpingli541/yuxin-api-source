@@ -1,0 +1,30 @@
+=== RUN   TestGetDefaultConfig
+--- PASS: TestGetDefaultConfig (0.00s)
+=== RUN   TestSetDefaultConfig
+--- PASS: TestSetDefaultConfig (0.00s)
+PASS
+ok  	github.com/QuantumNous/new-api/service/routing	0.028s
+=== RUN   TestGetRegistrySingleton
+--- PASS: TestGetRegistrySingleton (0.00s)
+=== RUN   TestToolToJSON
+--- PASS: TestToolToJSON (0.00s)
+PASS
+ok  	github.com/QuantumNous/new-api/service/mcp	0.023s
+=== RUN   TestGetConfig
+--- PASS: TestGetConfig (0.00s)
+=== RUN   TestUpdateConfig
+--- PASS: TestUpdateConfig (0.00s)
+=== RUN   TestCheckAllTextSafe
+--- PASS: TestCheckAllTextSafe (0.00s)
+PASS
+ok  	github.com/QuantumNous/new-api/service/guardrail	0.005s
+=== RUN   TestGetEngineSingleton
+--- PASS: TestGetEngineSingleton (0.00s)
+PASS
+ok  	github.com/QuantumNous/new-api/service/canary	0.023s
+=== RUN   TestRecordCacheCounters
+--- PASS: TestRecordCacheCounters (0.00s)
+=== RUN   TestGetMetricsSummary
+--- PASS: TestGetMetricsSummary (0.00s)
+PASS
+ok  	github.com/QuantumNous/new-api/service/metrics	0.015s

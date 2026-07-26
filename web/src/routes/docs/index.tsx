@@ -74,4 +74,5 @@ export function DocsPage() {
 }
 export const Component = DocsPage
 export const action = async () => {}
-Component.displayName = 'DocsPage'
+// Attach displayName for React DevTools (TanStack Router route component)
+;(Component as React.FunctionComponent).displayName = 'DocsPage'

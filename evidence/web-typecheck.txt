@@ -1,12 +1,1 @@
 $ tsgo -b
-src/components/layout/components/footer.tsx(45,7): error TS6133: 'NEW_API_FOOTER_ATTRIBUTION_KEY' is declared but its value is never read.
-src/routes/docs/index.tsx(77,11): error TS2339: Property 'displayName' does not exist on type '() => Element'.
-error: script "typecheck" exited with code 1
-(node:144024) [DEP0169] DeprecationWarning: `url.parse()` behavior is not standardized and prone to errors that have security implications. Use the WHATWG URL API instead. CVEs are not issued for `url.parse()` vulnerabilities.
-(Use `node --trace-deprecation ...` to show where the warning was created)
-
-> newapi-web@1.0.0 typecheck
-> tsgo -b
-
-src/components/layout/components/footer.tsx(45,7): error TS6133: 'NEW_API_FOOTER_ATTRIBUTION_KEY' is declared but its value is never read.
-src/routes/docs/index.tsx(77,11): error TS2339: Property 'displayName' does not exist on type '() => Element'.
