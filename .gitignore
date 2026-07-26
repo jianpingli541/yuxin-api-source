@@ -46,7 +46,6 @@ new-api-custom
 router/api-router.go.bak
 web/dist/status.html
 web/dist/pricing.html
-evidence/
 .omc/
 .agents/
 Acceptance-PRD.md
