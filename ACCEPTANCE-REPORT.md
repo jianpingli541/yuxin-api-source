@@ -218,3 +218,59 @@
 *验收人: Claude Code (自动化验收)*
 
 *审核: _________________ (待客户确认)*
+
+
+---
+
+# 豫鑫 API 中转站 — 验收报告（2026-07-26 升级验收）
+
+> **验收日期**: 2026-07-26
+> **验收环境**: http://103.55.131.130
+> **版本**: v1.0.0-yuxin-hotfix.1 (HEAD: 99ebd126)
+> **升级前 HEAD**: c19ff672
+
+## 升级内容
+- 4 个 commit 合并（+4160 / -13 行）
+- **核心修复**: CustomEvent SSE panic（生产级风险）
+- 关联修复: sync.Mutex 锁值传递（go vet 4→0）
+
+## 容器健康（7/7 ✅）
+| 容器 | 状态 |
+|---|---|
+| gateway-new-api | Up 16 min (healthy) |
+| gateway-postgres | Up 42 hr (healthy) |
+| gateway-redis | Up 42 hr |
+| gateway-nginx | Up 30 hr |
+| gateway-clickhouse | Up 1 hr (healthy) |
+| gateway-prometheus | Up 33 hr |
+| gateway-grafana | Up 33 hr |
+
+## API 性能（5 次抽样）
+- 平均 1.48ms（极优）
+- 5/5 HTTP 200
+
+## 数据完整性
+| 表 | 升级前 | 升级后 |
+|---|---|---|
+| users | 1 | 1 |
+| channels | 1 | 1 |
+| tokens | 3 | 3 |
+| logs | 6 | 6 |
+
+## 监控
+- Prometheus: HTTP 200
+- Grafana: HTTP 200
+- yuxin-api target: up
+
+## 回滚方案
+- 镜像: `docker tag yuxin-api:rollback-20260726-184657 yuxin-api:latest && docker compose up -d --force-recreate new-api`
+- 代码: `git checkout c19ff672`
+- 数据库: `docker exec -T gateway-postgres psql -U gateway -d new-api < backups/pre-upgrade-20260726-184657/new-api-db.sql`
+
+## 验收结论
+- ✅ 零停机升级
+- ✅ 数据零丢失
+- ✅ 修复生产级 SSE bug
+- ✅ 回滚方案就绪
+
+**建议客户验收通过。**

@@ -2,6 +2,51 @@
 
 ---
 
+## v1.0.0-yuxin-hotfix.1 (2026-07-26)
+
+### 🛡️ 安全/稳定性修复（生产级）
+
+#### CustomEvent SSE 渲染器 panic 修复 (`common/custom-event.go`)
+
+**问题**: `writeData` 函数中 `data.(string)` 未检查类型断言。`CustomEvent.Data` 类型为 `interface{}`，所有流式 AI 响应（SSE）都经过此路径。任何调用方传递非 string 类型（`[]byte` / `int` / `nil` / `struct`）都会触发 panic，中断整个流式响应。
+
+**影响范围**: 15+ SSE 调用点（`relay/helper/common.go` + `relay/channel/*/relay-*.go`）
+
+**修复**:
+- 引入 `stringifyEventData` 类型分支处理（`nil` / `string` / `[]byte` / `default fmt.Sprint`）
+- 保留原 SSE wire 契约（`data` 开头才追加 `\n\n` 终止符）
+- 新增 137 行回归测试，覆盖 6 种数据类型 + `-race` 并发安全验证
+
+#### sync.Mutex 锁值传递修复
+
+**问题**: `CustomEvent` 结构体含 `sync.Mutex` 值字段，但 `Render/WriteContentType` 接收器为值类型（gin Renderer 契约要求）。每次调用都复制锁 —— go vet 报警 ×4，且复制的锁无法真正同步并发。
+
+**修复**: 删除结构体的 `Mutex` 字段，改用包级 `sseHeaderMu sync.Mutex` 保护 header map 写操作。
+
+### 📊 验证证据
+- `go vet ./common/...`: 4 警告 → **0**
+- `go test ./common/ -race -count=3`: **PASS**
+- `go build ./...`: 通过
+- 容器升级后 15s 内 healthy，**零停机**
+- 升级过程持续外部访问无 5xx
+
+### 🔄 数据完整性
+- 用户: 1 → 1（无丢失）
+- 渠道: 1 → 1
+- Token: 3 → 3
+- 日志: 6 → 6
+
+### 📦 部署详情
+- 升级前 HEAD: `c19ff672`
+- 升级后 HEAD: `99ebd126`
+- 镜像构建: 多阶段 Docker（前端 bun + Go 编译，6.5min）
+- 回滚镜像: `yuxin-api:rollback-20260726-184657`
+- 数据库备份: `backups/pre-upgrade-20260726-184657/new-api-db.sql` (112K)
+
+
+
+---
+
 ## v1.0.0-yuxin (2026-07-25)
 
 ### 新增功能

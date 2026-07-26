@@ -1,7 +1,7 @@
 # 豫鑫 API 中转站 — 项目交接文档
 
-> **版本**: v1.0.0-yuxin (Build 20260725)  
-> **最后更新**: 2026-07-25  
+> **版本**: v1.0.0-yuxin-hotfix.1 (Build 20260726)  
+> **最后更新**: 2026-07-26  
 > **公司**: 惠州市豫鑫网络科技有限公司  
 > **项目地址**: /root/projects/api-gateway/ (服务器: 103.55.131.130)  
 > **公网地址**: http://103.55.131.130
@@ -442,3 +442,13 @@ c1668d8 feat: 第三阶段集成完成 — 公开页面+管理Dashboard
 ---
 
 *文档结束。如有疑问请联系开发团队。*
+## 十二、维护历史
+
+### 2026-07-26 — 生产稳定性修复
+
+修复 2 个 `common/custom-event.go` 真实 bug（go vet 报警触发发现）：
+
+1. **CustomEvent SSE 渲染 panic**: `writeData` 的 `data.(string)` 未检查类型断言，非 string 类型会 panic 中断流式 AI 响应。改用 `stringifyEventData` type-switch。
+2. **sync.Mutex 锁值传递**: 结构体含值字段 Mutex 但 Renderer 用值接收器，复制锁无效。改用包级 `sseHeaderMu`。
+
+详见 `CHANGELOG.md` v1.0.0-yuxin-hotfix.1。
