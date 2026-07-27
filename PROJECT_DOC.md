@@ -33,7 +33,7 @@
 | SSH | `ssh feifei` 或 `ssh root@103.55.131.130 -p 11572` |
 | 操作系统 | Ubuntu 24.04.4 LTS |
 | 硬件配置 | 40核 CPU / 62GB 内存 / 915GB 磁盘 |
-| 当前用量 | CPU <10%, 内存 6.2GB/62GB, 磁盘 25GB/915GB (3%) |
+| 当前用量 | CPU <10%, 内存 6.5GB/62GB, 磁盘 31GB/915GB (4%) |
 
 ---
 
@@ -426,11 +426,17 @@ docker exec gateway-redis redis-cli -a <REDIS_PASSWORD> FLUSHALL
 ### Git 提交记录
 
 ```
-c1668d8 feat: 第三阶段集成完成 — 公开页面+管理Dashboard
-25dcb6f feat: 第二阶段集成完成 — 安全合规+Canary+模型广场
-917d064 docs: 更新 PROJECT_DOC.md — 第一阶段集成文档
-4631b84 feat: 第一阶段集成 — 智能路由+公开定价+可观测性+MCP协议
-84a79b6 fix: log response body when parsed upstream error message is empty (上游)
+7f2c20c03 docs: 同步 2026-07-26 升级记录（CustomEvent SSE panic 修复）
+99ebd126b fix(common): CustomEvent SSE renderer panic + lock-by-value vet violations
+4097de3e0 feat: 动作 C 待办全清 — 8 项补完
+27ddbd2eb fix: evidence/ 不应被 .gitignore 排除
+afb8d3b07 docs: 动作 B 完成 — PRD + 质量门禁证据 + 交付清单
+c19ff672f docs: 完整项目文档更新 — 交接文档/验收报告/变更日志/快速上手
+e452d9dd8 feat: 第三阶段集成完成 — 公开页面+管理Dashboard
+ff66e26f5 feat: 第二阶段集成完成 — 安全合规+Canary+模型广场
+1da7b8c5d docs: 更新 PROJECT_DOC.md — 第一阶段集成文档
+181fbc502 feat: 第一阶段集成 — 智能路由+公开定价+可观测性+MCP协议
+406e7a2cb fix: log response body when parsed upstream error message is empty (上游)
 ```
 
 ### 版本历史
@@ -438,13 +444,39 @@ c1668d8 feat: 第三阶段集成完成 — 公开页面+管理Dashboard
 | 版本 | 日期 | 内容 |
 |------|------|------|
 | v1.0.0-yuxin | 2026-07-25 | 三阶段集成完成，通过客户验收 v2 (96%) |
+| v1.0.0-yuxin-hotfix.1 | 2026-07-26 | CustomEvent SSE panic 修复 + Mutex 锁值传递修复（go vet 4→0），零停机升级 |
+| v1.0.0-yuxin-hotfix.2 | 2026-07-27 | 完整自检验收（无代码变更），见 evidence/final-verify-20260727.txt |
 
 ---
 
 *文档结束。如有疑问请联系开发团队。*
+
 ## 十二、维护历史
 
-### 2026-07-26 — 生产稳定性修复
+### 2026-07-27 — 完整自检验收（hotfix.2）
+
+> **触发原因**: 客户在交付前要求"确保所有页面+功能+工作流都正常无误"。
+
+**执行人**: Claude Code (Kali 维护机 → feifei)
+**方法**: 实地 SSH feifei 跑所有命令，**不接受"报告里写过 PASS"作为结论**
+
+**验收结论**:
+- 18/19 维度通过，1 项失败（前端 lint 389 errors，不影响功能）
+- 所有页面、所有 API、所有工作流均正常
+- 7 容器全部 healthy，Prometheus 采集 5 个 yuxin_ 指标
+- hotfix.1 修复在生产中持续有效
+
+**新增发现**:
+- 🟡 前端 lint 失败 389 errors / 83 warnings（建议交付前修）
+
+**新增产物**:
+- `evidence/final-verify-20260727.txt` (134 行原始证据)
+- `OPERATIONS.md` 第七章：可重放的验收脚本
+- 4 个 MD 文件的 hotfix.2 同步
+
+详见 `CHANGELOG.md` v1.0.0-yuxin-hotfix.2 与 `ACCEPTANCE-REPORT.md` 末尾。
+
+### 2026-07-26 — 生产稳定性修复（hotfix.1）
 
 修复 2 个 `common/custom-event.go` 真实 bug（go vet 报警触发发现）：
 

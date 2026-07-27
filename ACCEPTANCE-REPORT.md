@@ -274,3 +274,125 @@
 - ✅ 回滚方案就绪
 
 **建议客户验收通过。**
+
+---
+
+# 豫鑫 API 中转站 — 完整自检验收报告（2026-07-27）
+
+> **验收日期**: 2026-07-27
+> **验收环境**: http://103.55.131.130 (生产)
+> **版本**: v1.0.0-yuxin-hotfix.2 (无代码变更，纯验收同步)
+> **执行人**: Claude Code (Kali 维护机 → feifei)
+> **方法**: 实地 SSH feifei 跑所有命令，**不接受报告里写过 PASS作为结论**
+
+---
+
+## 一、验收范围
+
+应客户确保所有页面+功能+工作流都正常无误要求，本次验收覆盖：
+
+1. 7 个容器健康状态
+2. 9 个公开 API 端点
+3. 5 个前端页面（首页/状态/定价/登录/注册）
+4. 完整用户工作流（注册→登录→鉴权→合规检测）
+5. 鉴权分级（无 token / 普通用户 / 管理员）
+6. Prometheus 指标采集
+7. 6 项质量门禁（go build/vet/test + frontend typecheck/build/lint）
+8. 资源使用
+
+---
+
+## 二、验收结果汇总
+
+| # | 维度 | 结果 | 详情 |
+|---|---|---|---|
+| 1 | 容器健康 | ✅ 7/7 | 详见 evidence/final-verify-20260727.txt [1] |
+| 2 | 公开 API | ✅ 9/9 | 全部 200，响应时间 < 10ms |
+| 3 | 鉴权分级 | ✅ 正确 | 无 token→401，普通用户访问 admin→INSUFFICIENT_PRIVILEGE |
+| 4 | 前端页面 | ✅ 5/5 | 全部 200，Title 正确渲染 |
+| 5 | 静态资源 | ✅ | nginx 服务 dist 中的 JS chunk 200 |
+| 6 | 注册工作流 | ✅ | test_acceptance_001 注册成功 |
+| 7 | 登录工作流 | ✅ | 返回 JWT access_token |
+| 8 | 鉴权后访问 | ✅ | Bearer token 访问 /api/user/self 返回完整 profile |
+| 9 | 合规检测-恶意拦截 | ✅ | PII（phone/idcard/bankcard）三层同时触发 |
+| 10 | 合规检测-正常放行 | ✅ | 普通天气查询通过，data:null |
+| 11 | Prometheus 指标 | ✅ 5/5 | yuxin_api_{requests,tokens,cost,cache,uptime} |
+| 12 | Go 编译 | ✅ | go build ./... 无错 |
+| 13 | Go vet（关键 4 个） | ✅ | custom-event 锁值传递已修 |
+| 14 | Go 单测（关键包） | ✅ 6/6 | common + 5 个扩展 service |
+| 15 | 前端 typecheck | ✅ | exit 0 |
+| 16 | 前端 build | ✅ | exit 0, total 57MB |
+| 17 | 前端 lint | ❌ | **389 errors / 83 warnings** |
+| 18 | ClickHouse 实际健康 | ✅ | 容器 healthy，仅 host:8123 不可达（设计） |
+| 19 | 资源使用 | ✅ | 磁盘 4%, 内存 10% |
+
+**总计**: 18/19 通过, 1 项失败（前端 lint，不影响功能）
+
+---
+
+## 三、新发现的问题
+
+### 🟡 前端 lint 失败（389 errors / 83 warnings）
+
+**严重度**: 中（不影响功能，影响代码质量）
+
+**位置**:
+- `web/scripts/sync-i18n.mjs` — 多处风格问题（nested ternary、curly 缺失、regExp startsWith 建议）
+- 整个 `web/src/**` — nested ternary、no-array-index-key 等 ESLint 规则
+
+**影响**:
+- ✅ 不阻塞 `bun run build`（构建 EXIT 0）
+- ✅ 不阻塞 typecheck
+- ❌ 代码规范不达标
+- ❌ 新代码 PR 时 CI 应挡住
+
+**建议**: 交付前用 `bun run lint --fix` 自动修复大部分，剩余手工处理。
+
+---
+
+## 四、非问题（已澄清，避免误判）
+
+### 1. host:3000 端口从宿主机 curl 不通
+
+- **设计如此**：new-api 容器 3000 端口故意不映射到 host，外部访问统一走 nginx:80
+- **Prometheus 正常**：通过 docker network 内部访问 `new-api:3000`，target=up，5 个 yuxin_ 指标全抓到
+- **结论**: 不是 bug
+
+### 2. ClickHouse host:8123 不可达
+
+- **设计如此**：8123 端口仅暴露在 docker network 内部
+- **容器本身 healthy**：docker inspect 显示 health.Status=healthy
+- **结论**: 不是 bug
+
+---
+
+## 五、遗留事项（来自前几次验收，本次未变更）
+
+### 业务 P1（需客户配置）
+
+1. 🔴 **真实上游 API Key** — 当前渠道 status=unknown
+2. 🟡 **在线充值** — 需配置支付渠道
+3. 🟡 **HTTPS** — 需绑域名 + Let's Encrypt
+4. 🟡 **SMTP 邮件** — 需配 SMTP 服务
+
+### 法律（必填）
+
+5. 🔴 **AGPL-3.0 许可证三选一** — A 开源 / B 商业 / C 担风险
+
+### 代码质量（建议交付前修）
+
+6. 🟡 **前端 lint 389 errors**（本次新发现）
+
+---
+
+## 六、终验结论
+
+
+
+---
+
+*验收人: Claude Code (Kali)*
+*验收时间: 2026-07-27 15:50-16:00 (UTC+8)*
+*原始证据: `evidence/final-verify-20260727.txt`*
+*所有命令可在 feifei 服务器上重放*
+

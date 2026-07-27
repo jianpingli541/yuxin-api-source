@@ -101,3 +101,52 @@
 
 - 基于 new-api (QuantumNous/new-api) v1.0.0-rc.21
 - 许可证: AGPL-3.0
+
+---
+
+## v1.0.0-yuxin-hotfix.2 (2026-07-27)
+
+### 🔍 完整自检验收（无功能变更）
+
+> **触发原因**: 客户在交付前要求 `确保所有页面+功能+工作流都正常无误`。由 Claude Code 在 feifei 生产环境实地验收，未修改任何代码。
+
+### ✅ 验证结果
+
+| 维度 | 通过率 | 详情 |
+|---|---|---|
+| 容器健康 | 7/7 ✅ | new-api / postgres / redis / nginx / clickhouse / prometheus / grafana |
+| 公开 API | 9/9 ✅ | 状态/定价/路由/MCP/合规/Canary 全部 200，响应 < 10ms |
+| 鉴权分级 | ✅ 正确 | 无 token 401，普通用户访问 admin 接口返回 INSUFFICIENT_PRIVILEGE |
+| 前端页面 | 5/5 ✅ | `/`、`/status`、`/pricing`、`/login`、`/register` 全部 200 + 正确 Title |
+| 完整工作流 | ✅ 6/6 | 注册→登录→Bearer 鉴权→`/self`→合规检测 PII 拦截→合规放行 |
+| Prometheus 指标 | ✅ 5/5 | `yuxin_api_{requests,tokens,cost,cache,uptime}` 全部抓到 |
+| Go 编译 | ✅ | `go build ./...` 无错误 |
+| Go 单测（关键包） | ✅ 6/6 | common + 5 个扩展 service 全过 |
+| go vet（关键 4 个） | ✅ 0 警告 | hotfix.1 已修复 CustomEvent 锁值传递 |
+| 前端 typecheck | ✅ | `bun run typecheck` exit 0 |
+| 前端 build | ✅ | `bun run build` exit 0, 57MB |
+| 前端 lint | ❌ 389 errors | **新增发现，不影响功能，需修** |
+
+### 🆕 本次发现
+
+1. **前端 lint 失败 389 errors / 83 warnings**
+   - 不阻塞 build、不影响功能
+   - 主要错误：nested ternary、no-array-index-key、`web/scripts/sync-i18n.mjs` 风格问题
+   - 建议交付前修复以提升代码质量
+
+### 📦 资源使用
+
+- 磁盘：31GB / 915GB (4%)
+- 内存：6.5GB / 62GB (10%)
+- 容器运行时长：new-api 21h（hotfix.1 升级至今零停机）
+
+### 🔄 与 hotfix.1 的关系
+
+- **代码层面**：本次无任何 commit，纯文档+evidence 同步
+- **运行层面**：与 hotfix.1 完全一致
+- **结论**：hotfix.1 的修复在生产中持续有效（SSE panic 未复现、go vet 保持 0 关键警告）
+
+### 📋 终验证据
+
+完整原始输出已保存至 `evidence/final-verify-20260727.txt` (134 行)，所有命令可在 feifei 上重放。
+

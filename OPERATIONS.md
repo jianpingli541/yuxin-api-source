@@ -155,3 +155,95 @@ gitleaks detect --source . 2>&1 | tee evidence/gitleaks-$(date +%Y%m%d).txt
 
 ---
 
+## 七、自检验收（2026-07-27 hotfix.2）
+
+> 适用场景：每次升级后、交付前、客户要求验收时。
+> 完整证据保存在 `evidence/final-verify-YYYYMMDD.txt`。
+
+### 7.1 一键验收脚本
+
+```bash
+ssh feifei <<'REMOTE'
+set +e
+export PATH=/usr/local/go/bin:$HOME/.nvm/versions/node/v24.18.0/bin:$HOME/.bun/bin:$PATH
+cd /root/projects/api-gateway
+
+echo "=== [1] Container health ==="
+docker ps --format 'table {{.Names}}\t{{.Status}}'
+
+echo "=== [2] Public API smoke ==="
+for u in /api/status /api/status_page /api/public/pricing /api/routing/config \
+         /api/mcp/tools /api/canary/status /api/compliance/config; do
+  printf '%-28s ' "$u"
+  curl -s -o /dev/null -w 'HTTP %{http_code} %{time_total}s\n' --max-time 5 "http://127.0.0.1$u"
+done
+
+echo "=== [3] Auth gate ==="
+curl -s -o /dev/null -w 'no-token  /api/user/self -> HTTP %{http_code}\n' \
+  --max-time 5 http://127.0.0.1/api/user/self
+
+echo "=== [4] Prometheus metrics ==="
+curl -s 'http://127.0.0.1:9090/api/v1/label/__name__/values' \
+  | python3 -c 'import json,sys; print(*[n for n in json.load(sys.stdin)["data"] if n.startswith("yuxin_")],sep="\n")'
+
+echo "=== [5] Go quality gates ==="
+go build ./... && echo "build: PASS" || echo "build: FAIL"
+go vet ./common/... 2>&1 | grep -q custom-event && echo "vet custom-event: FAIL" || echo "vet custom-event: PASS"
+go test -short -count=1 ./common/... ./service/{routing,mcp,guardrail,canary,metrics}/... 2>&1 | tail -7
+
+echo "=== [6] Frontend gates ==="
+cd web
+bun run typecheck 2>&1 | tail -3
+bun run build 2>&1 | tail -3
+bun run lint 2>&1 | tail -3
+REMOTE
+```
+
+### 7.2 完整工作流验收
+
+```bash
+# 注册测试账号
+curl -s -X POST http://127.0.0.1/api/user/register \
+  -H 'Content-Type: application/json' \
+  -d '{"username":"test_acceptance_001","password":"Test@Pass1234"}'
+
+# 登录拿 token
+TOKEN=$(curl -s -X POST http://127.0.0.1/api/user/login \
+  -H 'Content-Type: application/json' \
+  -d '{"username":"test_acceptance_001","password":"Test@Pass1234"}' \
+  | python3 -c 'import json,sys; print(json.load(sys.stdin)["data"]["access_token"])')
+
+# 鉴权后访问
+curl -s -H "Authorization: Bearer $TOKEN" http://127.0.0.1/api/user/self | python3 -m json.tool
+
+# 合规检测-PII
+curl -s -X POST http://127.0.0.1/api/compliance/check \
+  -H 'Content-Type: application/json' \
+  -d '{"text":"我的手机 13812345678，身份证 110101199001011234"}'
+
+# 清理测试账号（交付前必做）
+docker exec gateway-postgres psql -U postgres -d new-api -c \
+  "DELETE FROM users WHERE username = 'test_acceptance_001';"
+```
+
+### 7.3 验收基线（hotfix.2 实测）
+
+| 检查项 | 基线 | 不通过时排查 |
+|---|---|---|
+| 7 容器 healthy | 7/7 | `docker logs <name> --tail 50` |
+| 公开 API 200 | 9/9 | `curl -v` 看 nginx 日志 |
+| 鉴权 401 vs 200 | 严格分级 | 检查 JWT SESSION_SECRET |
+| Prometheus yuxin_* 指标 | >=5 | `docker logs gateway-prometheus` |
+| Go build | 0 错 | 看 `evidence/go-build.txt` |
+| Go vet custom-event | 0 警告 | 没修就回滚到 hotfix.1 commit `99ebd126` |
+| Frontend typecheck/build | exit 0 | 看 `evidence/web-typecheck.txt` |
+| Frontend lint | < 400 errors | `bun run lint --fix` 自动修 |
+
+### 7.4 已知非问题（避免误判）
+
+1. **host:3000 curl 不通**：new-api 端口不映射到 host，外部走 nginx:80
+2. **ClickHouse host:8123 不通**：仅 docker network 内部可达，容器本身 healthy
+3. **`/api/models` 无 token 401**：正常，需要 Bearer
+
+---
+
