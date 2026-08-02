@@ -2,6 +2,60 @@
 
 ---
 
+## v1.1.0-yuxin (2026-08-02)
+
+### 🚀 上游大版本合并 + 商用化加固（生产级）
+
+#### 1. 上游 new-api 大版本合并（779 commits）
+- 合并 Calcium-Ion/new-api 自 2026-03-17 分叉点以来的 779 个提交（至 2026-08-01 HEAD），merge commit `cfc35dc0e`，473 文件 +19,964/-2,567 行
+- 232 个冲突按规则分流 + 逐文件评审解决；保留全部定制功能（智能路由/MCP/合规/Canary/可观测性）
+- 适配上游 relaykit 包抽取重构（dto/types/relayconvert/reasonmap 迁入 relaykit 子模块）
+- 兼容性修复：`model.GetGroupEnabledAbilitiesByModel` 用上游 `getChannelQuery` 重新暴露（智能路由依赖）
+
+#### 2. 合并回归修复（`eccd65616`）
+- 恢复 hotfix.1 的 `stringifyEventData`（合并时误用 `checkout --theirs` 整文件覆盖丢失）——SSE 非 string 数据 panic 修复，`TestCustomEvent_NonStringDataMustNotPanic` 恢复通过
+- 修复 relay/helper 计费测试双 dto import 冲突，测试恢复可编译
+
+#### 3. Claude 渠道适配补齐（12 个渠道）
+- 消灭全部 `panic("implement me")`：cloudflare/zhipu/baidu/xunfei/mistral/dify/palm/tencent/cohere 真转换（claude→openai 请求转换），jina/mokaai/replicate 改优雅报错（本不支持 chat）
+- 前端 5 个生产 typecheck 错清零（hasToolSurcharge 导出/badge warning variant/yace 类型声明）
+
+#### 4. 安全加固（M0 + M2，商用级）
+- **Grafana**: 公网 `admin/yuxin2024` → 127.0.0.1 仅内网 + 31 位强随机密码（`.env` 的 `GF_SECURITY_ADMIN_PASSWORD`），访问走 SSH 隧道
+- **Prometheus/Alertmanager**: 公网 → 127.0.0.1 仅内网，禁用 `--web.enable-lifecycle`
+- **`/metrics`**: nginx 层 `allow 内网; deny all`，防业务指标泄漏
+- **CORS**: `AllowAllOrigins=false` + 白名单
+- **session refresh TTL**: 30 天 → 7 天
+- **`/api/routing/config` `/api/compliance/config` GET**: 加 `UserAuth`（防匿名侦察限流阈值）
+- **`.env` / DB 备份**: 权限 644 → 600
+
+#### 5. 运维就绪（M4，商用级）
+- **自动备份**: cron 每日 02:00（PG+Redis+配置，7 天保留），脚本 `scripts/auto-backup.sh`
+- **告警**: 部署 alertmanager + 4 条规则（NewAPIDown/APIHighLatency/APIErrorRateHigh/DiskUsageHigh），prometheus 接线
+- **监控修复**: observability 与 main 两套 Docker 网络打通（`api-gateway_gateway-net` 共享），prometheus scrape 恢复，yuxin_* 指标采集正常
+- **Grafana**: 5 个 dashboard 已加载
+
+#### 6. 商用 scaffold（M1，待填凭据）
+- `.env` 加支付（Waffo/Stripe）/SMTP/Turnstile 占位键
+- 法务三件套 AI 初稿（用户协议/隐私政策/退款条款）已起草，待律师复核+填占位
+
+### 📊 验证证据
+- `go build ./...` PASS，`go vet ./...` 0 警告，前端 typecheck 生产代码 0 错
+- 端到端流程：注册→登录→令牌→定价→状态页全 `success:true`
+- 外网暴露收敛：3001/9090/9093 外网 000，/metrics 403
+- 端到端 Claude 渠道不 panic（0 活跃 panic）
+
+### ⚠️ 遗留/待办（凭据/决策）
+- 退款 cutoff 业务决策（2025-02-22 本地 vs 2026-02-22 上游，service 包唯一测试失败项）
+- 支付/上游 API key/SMTP/Turnstile 凭据待填（`.env` 占位已留）
+- 域名 + HTTPS（当前裸 IP+HTTP，明文凭据，商用 P0）
+- 法务初稿待律师复核（ICP 许可证/算法备案/数据出境合规红线）
+- 告警通知 webhook 待填（当前占位）
+- 9 个 Claude 真转换渠道仅 mistral 端到端响应适配，其余仅请求侧（不 panic）
+
+---
+
+
 ## v1.0.0-yuxin-hotfix.1 (2026-07-26)
 
 ### 🛡️ 安全/稳定性修复（生产级）

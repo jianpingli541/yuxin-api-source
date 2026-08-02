@@ -119,7 +119,18 @@ docker compose exec redis redis-cli INFO memory
 
 ---
 
-## 五、告警（可选，建议接入）
+## 五、告警（已于 2026-08-02 部署）
+
+Alertmanager 已上线（容器 `gateway-alertmanager`，仅 127.0.0.1:9093）。4 条核心规则已配置（`observability/prometheus/rules/yuxin.yml`）：NewAPIDown / APIHighLatency / APIErrorRateHigh / DiskUsageHigh。
+
+**通知渠道待配置**：编辑 `observability/alertmanager/alertmanager.yml` 的 webhook url（当前为占位 `http://127.0.0.1:5001/`），改为你的钉钉/飞书/企业微信 webhook 或 SMTP，然后 `docker compose -f docker-compose.observability.yml up -d alertmanager`。
+
+**备份**：已自动化，cron 每日 02:00 运行 `scripts/auto-backup.sh`（PG+Redis+配置，7 天保留，产物在 `backups/auto/`）。
+
+**Grafana 访问**：仅内网（127.0.0.1:3001）。远程访问用 SSH 隧道：`ssh -L 3001:127.0.0.1:3001 hk5708`，浏览器开 `localhost:3001`，账号 admin，密码见 `.env` 的 `GF_SECURITY_ADMIN_PASSWORD`。
+
+### 原建议接入方案（已被上方实际部署取代）
+
 
 建议接入告警通道：
 - Prometheus AlertManager → 邮件 / 钉钉 / 飞书
