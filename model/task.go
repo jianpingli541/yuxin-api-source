@@ -41,9 +41,9 @@ const (
 	TaskStatusUnknown               = "UNKNOWN"
 )
 
-// TaskRefundLegacyCutoff separates legacy timeout tasks that intentionally
-// do not receive automatic refunds from tasks covered by reconciliation.
-const TaskRefundLegacyCutoff int64 = 1740182400 // 2025-02-22 00:00:00 UTC
+// TaskRefundLegacyCutoff separates tasks created before timeout refunds were
+// introduced. Those legacy tasks are failed without an automatic refund.
+const TaskRefundLegacyCutoff int64 = 1771718400 // 2026-02-22 00:00:00 UTC
 
 type Task struct {
 	ID         int64                 `json:"id" gorm:"primary_key;AUTO_INCREMENT"`
