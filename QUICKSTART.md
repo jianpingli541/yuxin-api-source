@@ -36,8 +36,8 @@ cd /root/projects/api-gateway
 | 网站首页 | http://103.55.131.130 |
 | 服务状态页 | http://103.55.131.130/status-page |
 | 模型定价页 | http://103.55.131.130/pricing-page |
-| Prometheus | http://103.55.131.130:9090 |
-| Grafana | http://103.55.131.130:3001 (admin/yuxin2024) |
+| Prometheus | 仅内网 127.0.0.1:9090，SSH 隧道访问 |
+| Grafana | 仅内网，SSH 隧道 `ssh -L 3001:127.0.0.1:3001 hk5708` 后开 localhost:3001 (admin/见 .env GF_SECURITY_ADMIN_PASSWORD) |
 
 ## 管理后台
 
