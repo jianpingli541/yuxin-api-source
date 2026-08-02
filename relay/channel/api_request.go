@@ -16,6 +16,7 @@ import (
 	"github.com/QuantumNous/new-api/relay/common"
 	"github.com/QuantumNous/new-api/relay/constant"
 	"github.com/QuantumNous/new-api/relay/helper"
+	"github.com/QuantumNous/new-api/relay/reliability"
 	"github.com/QuantumNous/new-api/relaykit/types"
 	"github.com/QuantumNous/new-api/service"
 	"github.com/QuantumNous/new-api/setting/operation_setting"
@@ -510,7 +511,18 @@ func doRequest(c *gin.Context, req *http.Request, info *common.RelayInfo) (*http
 		}
 	}
 
-	resp, err := client.Do(req)
+	// Unified reliability layer (per-channel circuit breaker + same-channel
+	// retry with exponential backoff).  Cross-channel fallback is delegated
+	// to the outer retry loop in controller/relay.go, which selects the next
+	// channel when this returns a retryable error (e.g. a breaker-open
+	// fast-fail).  Config-gated: when reliability is disabled, Execute is a
+	// straight pass-through to client.Do, preserving legacy behaviour.
+	upstreamCall := func() (*http.Response, error) { return client.Do(req) }
+	channelId := 0
+	if info != nil && info.HasChannelMeta() {
+		channelId = info.ChannelId
+	}
+	resp, err := reliability.Execute(c.Request.Context(), channelId, req, upstreamCall)
 	if err != nil {
 		logger.LogError(c, "do request failed: "+err.Error())
 		return nil, types.NewError(err, types.ErrorCodeDoRequestFailed, types.ErrOptionWithHideErrMsg("upstream error: do request failed"))

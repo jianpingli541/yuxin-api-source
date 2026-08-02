@@ -12,10 +12,10 @@ func TestGetDefaultConfig(t *testing.T) {
 	}
 	// Valid strategies: priority/cost/latency/quality
 	valid := map[RoutingStrategy]bool{
-		StrategyPriorityWeight: true,
-		StrategyCostOptimized: true,
+		StrategyPriorityWeight:   true,
+		StrategyCostOptimized:    true,
 		StrategyLatencyOptimized: true,
-		StrategyQualityFirst: true,
+		StrategyQualityFirst:     true,
 	}
 	if !valid[cfg.Strategy] {
 		t.Errorf("default strategy %q is not in valid set", cfg.Strategy)

@@ -2,6 +2,53 @@
 
 ---
 
+## v1.2.0-yuxin (2026-08-03)
+
+### 🛡️ 商用化深化 + 可靠性层（生产级）
+
+#### 1. 统一可靠性层（熔断 + 重试 + fallback）
+- 每上游 channel 一个熔断器（sony/gobreaker v1.0.0），连续失败 5 次开路、30 秒半开探测
+- 同 channel 瞬时错误指数退避重试（默认 2 次、200ms→2000ms），瞬时判定与既有 shouldRetry 语义一致
+- 熔断/重试失败时复用既有 GetRandomSatisfiedChannel 外层循环自动切下一优先级 channel，不另造路由
+- config-gated：setting.Enabled=false 默认，OFF 路径与改造前字节级一致，三子开关独立
+- 计费安全：重试只发生在 client.Do 失败（未调 DoResponse/未扣费），每次成功 client.Do 对应一次扣费
+- 单点接入：relay/channel/api_request.go:doRequest（所有请求类型共用的上游 HTTP 调用收口点）
+
+#### 2. Admin 操作审计日志
+- 新增 model/admin_audit.go（AdminAuditLog 表，GORM 迁移）
+- 扩展 middleware/audit.go：写操作记录管理员变更（action/target/旧值/新值/IP/状态码/成败），敏感字段脱敏，gopool 异步落库不阻塞请求
+- 新增查询端点 GET /api/admin/audit-logs（admin 鉴权，分页/按 action/时间/操作者过滤）
+- PATCH 动词修正：PATCH/PUT 统一映射为 update（原误为 patch）
+
+#### 3. Grafana 运营看板
+- 新增 dashboard-operations.json（11 面板：总成本/成功率/缓存命中率/每日成本按模型/渠道调用量/延迟 P50-P99/渠道错误率矩阵）
+- ClickHouse 数据源 provisioning（明细粒度走 ClickHouse；Prom 仅供总量），SQL 全部实测通过
+
+#### 4. CI/CD 强化
+- ci.yml 加 gofmt / go vet / go test -race / -coverprofile / gitleaks / Trivy 闸口
+- 新增 dependabot.yml（gomod + github-actions 月度）+ trivy.yml（fs + image CVE 扫描）
+- 全仓 gofmt 格式化（15 个文件字段对齐/缩进统一，无逻辑变更）
+
+#### 5. 凭据依赖项产物（客户拿即用）
+- AGPL-3.0 合规方案与商业许可谈判 brief（Path A 对接 support@quantumnous.com，748 commits 回授筹码）
+- HTTPS 上线 runbook + nginx 443 配置模板（域名落地即用）
+- HA 迁移方案（多副本→双机→多 AZ 三阶段）
+- 支付充值接入设计（支付宝/微信/Stripe 三通道 + 幂等对账）
+
+### 📊 验证证据
+- go build / go vet / gofmt -l / go test ./... 全量绿（race 无新增失败）
+- 可靠性层 12 个测试函数全 PASS；审计测试全 PASS
+- 34 项变更 diff 密钥扫描 0 命中（仅 env 占位与格式化）
+
+### ⚠️ 遗留/待办
+- 可靠性层默认 OFF，需显式开启（reliability.enabled=true）后生效
+- Grafana dashboard 需 grafana-clickhouse-datasource 插件
+- 9 渠道 Claude 响应侧端到端（客户凭据，staging 自测）
+- alertmanager webhook 接通真实通知通道；CORS 裸 IP 移除（域名落地后）
+- 智能路由升级（v1.3.0 backlog）；HA 多机实施；充值通道实接（均需外部依赖）
+
+---
+
 ## v1.1.0-yuxin (2026-08-02)
 
 ### 🚀 上游大版本合并 + 商用化加固（生产级）

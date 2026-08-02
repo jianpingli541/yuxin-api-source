@@ -59,8 +59,8 @@ func GetMarketplaceModels(c *gin.Context) {
 		Description  string   `json:"description"`
 		Icon         string   `json:"icon"`
 		Tags         string   `json:"tags"`
-		InputPrice   float64  `json:"input_price"`   // $/1M tokens
-		OutputPrice  float64  `json:"output_price"`  // $/1M tokens
+		InputPrice   float64  `json:"input_price"`  // $/1M tokens
+		OutputPrice  float64  `json:"output_price"` // $/1M tokens
 		Capabilities []string `json:"capabilities"`
 		QuotaType    int      `json:"quota_type"`
 		VendorID     int      `json:"vendor_id"`
@@ -69,16 +69,16 @@ func GetMarketplaceModels(c *gin.Context) {
 	models := make([]MarketModel, 0, len(pricing))
 	for _, p := range pricing {
 		mm := MarketModel{
-			ID:           p.ModelName,
-			Name:         p.ModelName,
-			Provider:     p.OwnerBy,
-			Description:  p.Description,
-			Icon:         p.Icon,
-			Tags:         p.Tags,
-			InputPrice:   p.ModelRatio * 2,
-			OutputPrice:  p.ModelRatio * p.CompletionRatio * 2,
-			QuotaType:    p.QuotaType,
-			VendorID:     p.VendorID,
+			ID:          p.ModelName,
+			Name:        p.ModelName,
+			Provider:    p.OwnerBy,
+			Description: p.Description,
+			Icon:        p.Icon,
+			Tags:        p.Tags,
+			InputPrice:  p.ModelRatio * 2,
+			OutputPrice: p.ModelRatio * p.CompletionRatio * 2,
+			QuotaType:   p.QuotaType,
+			VendorID:    p.VendorID,
 		}
 		models = append(models, mm)
 	}
@@ -86,9 +86,9 @@ func GetMarketplaceModels(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{
 		"success": true,
 		"data": gin.H{
-			"models":      models,
-			"total":       len(models),
-			"vendors":     model.GetVendors(),
+			"models":  models,
+			"total":   len(models),
+			"vendors": model.GetVendors(),
 		},
 	})
 }

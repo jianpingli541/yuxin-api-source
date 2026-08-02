@@ -29,10 +29,10 @@ type ChannelScore struct {
 
 // RoutingContext 路由上下文
 type RoutingContext struct {
-	ModelName   string
-	UserGroup   string
-	Strategy    RoutingStrategy
-	MaxRetries  int
+	ModelName    string
+	UserGroup    string
+	Strategy     RoutingStrategy
+	MaxRetries   int
 	CurrentRetry int
 }
 

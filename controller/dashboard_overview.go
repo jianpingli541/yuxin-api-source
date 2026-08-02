@@ -7,8 +7,8 @@ import (
 	"github.com/QuantumNous/new-api/model"
 	"github.com/QuantumNous/new-api/service/canary"
 	"github.com/QuantumNous/new-api/service/guardrail"
-	"github.com/QuantumNous/new-api/service/metrics"
 	"github.com/QuantumNous/new-api/service/mcp"
+	"github.com/QuantumNous/new-api/service/metrics"
 	"github.com/QuantumNous/new-api/service/routing"
 
 	"github.com/gin-gonic/gin"
@@ -16,14 +16,14 @@ import (
 
 // DashboardData 管理后台聚合数据
 type DashboardData struct {
-	System       SystemInfo        `json:"system"`
-	Channels     []ChannelSummary  `json:"channels"`
-	Metrics      map[string]interface{} `json:"metrics"`
-	Routing      RoutingSummary    `json:"routing"`
-	Security     SecuritySummary   `json:"security"`
-	MCP          MCPSummary        `json:"mcp"`
-	Canary       CanarySummary     `json:"canary"`
-	TopModels    []ModelUsage      `json:"top_models"`
+	System    SystemInfo             `json:"system"`
+	Channels  []ChannelSummary       `json:"channels"`
+	Metrics   map[string]interface{} `json:"metrics"`
+	Routing   RoutingSummary         `json:"routing"`
+	Security  SecuritySummary        `json:"security"`
+	MCP       MCPSummary             `json:"mcp"`
+	Canary    CanarySummary          `json:"canary"`
+	TopModels []ModelUsage           `json:"top_models"`
 }
 
 type SystemInfo struct {
@@ -43,7 +43,7 @@ type ChannelSummary struct {
 }
 
 type RoutingSummary struct {
-	Strategy           string  `json:"strategy"`
+	Strategy            string   `json:"strategy"`
 	AvailableStrategies []string `json:"available_strategies"`
 }
 
@@ -60,15 +60,15 @@ type MCPSummary struct {
 }
 
 type CanarySummary struct {
-	Enabled      bool                          `json:"enabled"`
-	TestCount    int                           `json:"test_count"`
+	Enabled       bool                          `json:"enabled"`
+	TestCount     int                           `json:"test_count"`
 	ChannelHealth map[int]*canary.ChannelHealth `json:"channel_health"`
 }
 
 type ModelUsage struct {
-	ModelName       string  `json:"model_name"`
-	QuotaConsumed   int64   `json:"quota_consumed"`
-	PromptTokens    int64   `json:"prompt_tokens"`
+	ModelName        string `json:"model_name"`
+	QuotaConsumed    int64  `json:"quota_consumed"`
+	PromptTokens     int64  `json:"prompt_tokens"`
 	CompletionTokens int64  `json:"completion_tokens"`
 }
 
@@ -108,7 +108,7 @@ func GetDashboard(c *gin.Context) {
 	// 路由配置
 	routingCfg := routing.GetDefaultConfig()
 	routingSummary := RoutingSummary{
-		Strategy:           string(routingCfg.Strategy),
+		Strategy: string(routingCfg.Strategy),
 		AvailableStrategies: []string{
 			string(routing.StrategyPriorityWeight),
 			string(routing.StrategyCostOptimized),

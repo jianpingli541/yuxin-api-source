@@ -24,12 +24,12 @@ import (
 // but the API contract is `Data interface{}`, so the panic is a latent prod risk.
 func TestCustomEvent_NonStringDataMustNotPanic(t *testing.T) {
 	cases := []interface{}{
-		"normal string",            // happy path
-		[]byte("raw bytes"),        // realistic non-string (e.g. base64 chunk)
-		123,                        // numeric
-		nil,                        // zero value
-		map[string]any{"k": "v"},   // map
-		struct{ X int }{X: 7},      // struct
+		"normal string",          // happy path
+		[]byte("raw bytes"),      // realistic non-string (e.g. base64 chunk)
+		123,                      // numeric
+		nil,                      // zero value
+		map[string]any{"k": "v"}, // map
+		struct{ X int }{X: 7},    // struct
 	}
 	for _, tc := range cases {
 		t.Run(fmtTypeName(tc), func(t *testing.T) {

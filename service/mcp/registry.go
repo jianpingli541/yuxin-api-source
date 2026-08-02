@@ -8,8 +8,8 @@ import (
 
 // ToolDefinition MCP 工具定义
 type ToolDefinition struct {
-	Name        string            `json:"name"`
-	Description string            `json:"description"`
+	Name        string                 `json:"name"`
+	Description string                 `json:"description"`
 	InputSchema map[string]interface{} `json:"input_schema"`
 }
 

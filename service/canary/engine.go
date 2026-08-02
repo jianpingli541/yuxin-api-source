@@ -26,17 +26,17 @@ type CanaryTest struct {
 
 // CanaryResult Canary测试结果
 type CanaryResult struct {
-	ChannelID    int     `json:"channel_id"`
-	ChannelName  string  `json:"channel_name"`
-	ModelName    string  `json:"model_name"`
-	TestID       string  `json:"test_id"`
-	Score        float64 `json:"score"`          // 0-100
-	Pass         bool    `json:"pass"`
-	LatencyMs    int64   `json:"latency_ms"`
-	ResponseLen  int     `json:"response_length"`
-	KeywordsFound int    `json:"keywords_found"`
-	Error        string  `json:"error,omitempty"`
-	TestedAt     int64   `json:"tested_at"`
+	ChannelID     int     `json:"channel_id"`
+	ChannelName   string  `json:"channel_name"`
+	ModelName     string  `json:"model_name"`
+	TestID        string  `json:"test_id"`
+	Score         float64 `json:"score"` // 0-100
+	Pass          bool    `json:"pass"`
+	LatencyMs     int64   `json:"latency_ms"`
+	ResponseLen   int     `json:"response_length"`
+	KeywordsFound int     `json:"keywords_found"`
+	Error         string  `json:"error,omitempty"`
+	TestedAt      int64   `json:"tested_at"`
 }
 
 // ChannelHealth 渠道健康度汇总
@@ -44,8 +44,8 @@ type ChannelHealth struct {
 	ChannelID    int     `json:"channel_id"`
 	ChannelName  string  `json:"channel_name"`
 	ModelName    string  `json:"model_name"`
-	Score        float64 `json:"score"`         // 加权平均分 0-100
-	PassRate     float64 `json:"pass_rate"`     // 通过率 %
+	Score        float64 `json:"score"`     // 加权平均分 0-100
+	PassRate     float64 `json:"pass_rate"` // 通过率 %
 	AvgLatencyMs int64   `json:"avg_latency_ms"`
 	LastTestAt   int64   `json:"last_test_at"`
 	TotalTests   int     `json:"total_tests"`
@@ -103,10 +103,10 @@ var builtinTests = []CanaryTest{
 
 // CanaryEngine Canary 引擎
 type CanaryEngine struct {
-	mu       sync.RWMutex
-	results  map[int][]CanaryResult // channel_id -> results
-	tests    []CanaryTest
-	enabled  bool
+	mu      sync.RWMutex
+	results map[int][]CanaryResult // channel_id -> results
+	tests   []CanaryTest
+	enabled bool
 }
 
 var (
@@ -185,7 +185,7 @@ func (e *CanaryEngine) RunSingleTest(channelID int, channelName, modelName, base
 
 	// 综合评分算法
 	lengthScore := math.Min(float64(responseLen)/float64(test.ExpectedLength), 1.5) * 40 // 长度分 0-60
-	keywordScore := float64(keywordsFound) / float64(len(test.Keywords)) * 40             // 关键词分 0-40
+	keywordScore := float64(keywordsFound) / float64(len(test.Keywords)) * 40            // 关键词分 0-40
 	latencyScore := 20.0
 	if result.LatencyMs > 10000 {
 		latencyScore = 0

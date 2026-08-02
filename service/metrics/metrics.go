@@ -11,26 +11,26 @@ import (
 
 // Metrics 全局指标收集器
 type Metrics struct {
-	TotalRequests       atomic.Int64
-	SuccessRequests     atomic.Int64
-	FailedRequests      atomic.Int64
-	TotalPromptTokens   atomic.Int64
+	TotalRequests         atomic.Int64
+	SuccessRequests       atomic.Int64
+	FailedRequests        atomic.Int64
+	TotalPromptTokens     atomic.Int64
 	TotalCompletionTokens atomic.Int64
-	TotalCostCents      atomic.Int64
-	ChannelRequests     sync.Map
-	ChannelLatencies    sync.Map
-	CacheHits           atomic.Int64
-	CacheMisses         atomic.Int64
-	StartTime           time.Time
+	TotalCostCents        atomic.Int64
+	ChannelRequests       sync.Map
+	ChannelLatencies      sync.Map
+	CacheHits             atomic.Int64
+	CacheMisses           atomic.Int64
+	StartTime             time.Time
 }
 
 type ChannelMetrics struct {
-	Requests          atomic.Int64
-	Successes         atomic.Int64
-	Failures          atomic.Int64
-	PromptTokens      atomic.Int64
-	CompletionTokens  atomic.Int64
-	CostCents         atomic.Int64
+	Requests         atomic.Int64
+	Successes        atomic.Int64
+	Failures         atomic.Int64
+	PromptTokens     atomic.Int64
+	CompletionTokens atomic.Int64
+	CostCents        atomic.Int64
 }
 
 type LatencyMetrics struct {
@@ -74,14 +74,22 @@ func RecordRequest(channelID int, success bool, promptTokens, completionTokens i
 		for {
 			cur := lm.Min.Load()
 			if cur == 0 || latencyMs < cur {
-				if lm.Min.CompareAndSwap(cur, latencyMs) { break }
-			} else { break }
+				if lm.Min.CompareAndSwap(cur, latencyMs) {
+					break
+				}
+			} else {
+				break
+			}
 		}
 		for {
 			cur := lm.Max.Load()
 			if latencyMs > cur {
-				if lm.Max.CompareAndSwap(cur, latencyMs) { break }
-			} else { break }
+				if lm.Max.CompareAndSwap(cur, latencyMs) {
+					break
+				}
+			} else {
+				break
+			}
 		}
 	}
 }

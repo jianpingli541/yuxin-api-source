@@ -27,8 +27,8 @@ import (
 	"github.com/QuantumNous/new-api/relay"
 	"github.com/QuantumNous/new-api/router"
 	"github.com/QuantumNous/new-api/service"
-	mcpsvc "github.com/QuantumNous/new-api/service/mcp"
 	"github.com/QuantumNous/new-api/service/authz"
+	mcpsvc "github.com/QuantumNous/new-api/service/mcp"
 	_ "github.com/QuantumNous/new-api/setting/performance_setting"
 	"github.com/QuantumNous/new-api/setting/ratio_setting"
 

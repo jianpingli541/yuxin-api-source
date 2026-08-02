@@ -22,8 +22,8 @@ type PublicPricingModel struct {
 }
 
 type PublicPricingPrice struct {
-	Prompt          string `json:"prompt"`           // $/1K tokens
-	Completion      string `json:"completion"`       // $/1K tokens
+	Prompt          string `json:"prompt"`     // $/1K tokens
+	Completion      string `json:"completion"` // $/1K tokens
 	Image           string `json:"image,omitempty"`
 	Audio           string `json:"audio,omitempty"`
 	AudioCompletion string `json:"audio_completion,omitempty"`

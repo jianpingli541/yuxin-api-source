@@ -35,14 +35,14 @@ type ComplianceConfig struct {
 	PIIDetection        bool     `json:"pii_detection"`
 	ContentModeration   bool     `json:"content_moderation"`
 	BlockedCategories   []string `json:"blocked_categories"`
-	RateLimitPerUser    int      `json:"rate_limit_per_user"`  // 每分钟
-	RateLimitPerIP      int      `json:"rate_limit_per_ip"`    // 每分钟
+	RateLimitPerUser    int      `json:"rate_limit_per_user"` // 每分钟
+	RateLimitPerIP      int      `json:"rate_limit_per_ip"`   // 每分钟
 }
 
 var (
 	config     *ComplianceConfig
 	configLock sync.RWMutex
-	
+
 	// 敏感信息正则
 	piiPatterns = map[string]*regexp.Regexp{
 		"email":    regexp.MustCompile(`\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b`),
@@ -53,19 +53,19 @@ var (
 		"password": regexp.MustCompile(`(?i)(password|passwd|pwd)[:\s=]+\S+`),
 		"token":    regexp.MustCompile(`(?i)(bearer|token)[:\s=]+\S+`),
 	}
-	
+
 	// Prompt注入模式
 	injectionPatterns = map[string]*regexp.Regexp{
-		"role_override":    regexp.MustCompile(`(?i)(ignore|forget|disregard).{0,20}(previous|all|the).{0,20}(instructions?|rules?|prompt)`),
-		"system_prompt":    regexp.MustCompile(`(?i)(you\s+are|act\s+as|pretend\s+to\s+be|become)\s+(a|an)\s+`),
-		"jailbreak":        regexp.MustCompile(`(?i)(DAN|jailbreak|break\s+free|no\s+restrictions|without\s+limits)`),
-		"hypothetical":     regexp.MustCompile(`(?i)(hypothetically|in\s+theory|what\s+if|suppose)\s+`),
-		"roleplay_bypass":  regexp.MustCompile(`(?i)(roleplay|RP|角色扮演)\s+.*?(bypass|ignore|override)`),
-		"code_injection":   regexp.MustCompile(`(?i)(eval|exec|system|shell_exec|passthru)\s*\(`),
-		"sql_injection":    regexp.MustCompile(`(?i)(UNION\s+SELECT|DROP\s+TABLE|DELETE\s+FROM|INSERT\s+INTO|UPDATE\s+\w+\s+SET)`),
-		"xss":              regexp.MustCompile(`<script[^>]*>.*?</script>`),
+		"role_override":   regexp.MustCompile(`(?i)(ignore|forget|disregard).{0,20}(previous|all|the).{0,20}(instructions?|rules?|prompt)`),
+		"system_prompt":   regexp.MustCompile(`(?i)(you\s+are|act\s+as|pretend\s+to\s+be|become)\s+(a|an)\s+`),
+		"jailbreak":       regexp.MustCompile(`(?i)(DAN|jailbreak|break\s+free|no\s+restrictions|without\s+limits)`),
+		"hypothetical":    regexp.MustCompile(`(?i)(hypothetically|in\s+theory|what\s+if|suppose)\s+`),
+		"roleplay_bypass": regexp.MustCompile(`(?i)(roleplay|RP|角色扮演)\s+.*?(bypass|ignore|override)`),
+		"code_injection":  regexp.MustCompile(`(?i)(eval|exec|system|shell_exec|passthru)\s*\(`),
+		"sql_injection":   regexp.MustCompile(`(?i)(UNION\s+SELECT|DROP\s+TABLE|DELETE\s+FROM|INSERT\s+INTO|UPDATE\s+\w+\s+SET)`),
+		"xss":             regexp.MustCompile(`<script[^>]*>.*?</script>`),
 	}
-	
+
 	// 内容审核类别
 	contentCategories = map[string][]string{
 		"violence": {
@@ -90,7 +90,7 @@ var (
 			"racist", "discrimination", "hate speech", "superiority",
 		},
 	}
-	
+
 	// 速率限制缓存
 	rateLimitCache = make(map[string][]int64)
 	rateLimitLock  sync.RWMutex
@@ -126,21 +126,21 @@ func UpdateConfig(cfg ComplianceConfig) {
 // CheckAll 执行所有安全检查
 func CheckAll(request *http.Request, body []byte) []CheckResult {
 	var results []CheckResult
-	
+
 	cfg := GetConfig()
 	if !cfg.Enabled {
 		return results
 	}
-	
+
 	// 解析请求体
 	var data map[string]interface{}
 	if err := json.Unmarshal(body, &data); err != nil {
 		return results
 	}
-	
+
 	// 提取文本内容
 	texts := extractTexts(data)
-	
+
 	// 层级1: Prompt注入检测
 	if check, _ := checkPromptInjection(texts); !check.Passed {
 		results = append(results, check)
@@ -164,7 +164,7 @@ func CheckAll(request *http.Request, body []byte) []CheckResult {
 	if check, _ := checkRateLimit(request, cfg); !check.Passed {
 		results = append(results, check)
 	}
-	
+
 	return results
 }
 
@@ -201,7 +201,7 @@ func CheckAllText(text string) []CheckResult {
 // extractTexts 从请求体中提取所有文本
 func extractTexts(data map[string]interface{}) []string {
 	var texts []string
-	
+
 	if messages, ok := data["messages"].([]interface{}); ok {
 		for _, msg := range messages {
 			if m, ok := msg.(map[string]interface{}); ok {
@@ -211,15 +211,15 @@ func extractTexts(data map[string]interface{}) []string {
 			}
 		}
 	}
-	
+
 	if prompt, ok := data["prompt"].(string); ok {
 		texts = append(texts, prompt)
 	}
-	
+
 	if input, ok := data["input"].(string); ok {
 		texts = append(texts, input)
 	}
-	
+
 	return texts
 }
 
@@ -243,7 +243,7 @@ func checkPromptInjection(texts []string) (CheckResult, bool) {
 // checkPII 检测敏感信息
 func checkPII(texts []string) (CheckResult, bool) {
 	var details []string
-	
+
 	for _, text := range texts {
 		for name, pattern := range piiPatterns {
 			matches := pattern.FindAllString(text, -1)
@@ -252,7 +252,7 @@ func checkPII(texts []string) (CheckResult, bool) {
 			}
 		}
 	}
-	
+
 	if len(details) > 0 {
 		return CheckResult{
 			Passed:  false,
@@ -261,7 +261,7 @@ func checkPII(texts []string) (CheckResult, bool) {
 			Details: details,
 		}, false
 	}
-	
+
 	return CheckResult{Passed: true, Layer: "pii_detection"}, true
 }
 
@@ -269,13 +269,13 @@ func checkPII(texts []string) (CheckResult, bool) {
 func checkContent(texts []string, blockedCategories []string) (CheckResult, bool) {
 	for _, text := range texts {
 		textLower := strings.ToLower(text)
-		
+
 		for _, category := range blockedCategories {
 			keywords, ok := contentCategories[category]
 			if !ok {
 				continue
 			}
-			
+
 			for _, keyword := range keywords {
 				if strings.Contains(textLower, strings.ToLower(keyword)) {
 					return CheckResult{
@@ -288,18 +288,18 @@ func checkContent(texts []string, blockedCategories []string) (CheckResult, bool
 			}
 		}
 	}
-	
+
 	return CheckResult{Passed: true, Layer: "content_moderation"}, true
 }
 
 // checkRateLimit 速率限制
 func checkRateLimit(request *http.Request, cfg ComplianceConfig) (CheckResult, bool) {
 	now := time.Now().Unix()
-	
+
 	// 获取用户标识和IP
 	userID := request.Header.Get("Authorization")
 	clientIP := request.RemoteAddr
-	
+
 	// 检查用户限制
 	if userID != "" {
 		if !checkLimit(userID, cfg.RateLimitPerUser, now) {
@@ -310,7 +310,7 @@ func checkRateLimit(request *http.Request, cfg ComplianceConfig) (CheckResult, b
 			}, false
 		}
 	}
-	
+
 	// 检查IP限制
 	if clientIP != "" {
 		if !checkLimit(clientIP, cfg.RateLimitPerIP, now) {
@@ -321,31 +321,31 @@ func checkRateLimit(request *http.Request, cfg ComplianceConfig) (CheckResult, b
 			}, false
 		}
 	}
-	
+
 	return CheckResult{Passed: true, Layer: "rate_limit"}, true
 }
 
 func checkLimit(key string, limit int, now int64) bool {
 	rateLimitLock.Lock()
 	defer rateLimitLock.Unlock()
-	
+
 	// 清理过期记录
 	timestamps, ok := rateLimitCache[key]
 	if !ok {
 		timestamps = []int64{}
 	}
-	
+
 	var valid []int64
 	for _, ts := range timestamps {
 		if now-ts < 60 { // 1分钟内
 			valid = append(valid, ts)
 		}
 	}
-	
+
 	// 添加当前时间戳
 	valid = append(valid, now)
 	rateLimitCache[key] = valid
-	
+
 	return len(valid) <= limit
 }
 
@@ -356,13 +356,13 @@ func ComplianceMiddleware() func(*http.Request) bool {
 		if !cfg.Enabled {
 			return true
 		}
-		
+
 		// 读取请求体（需要缓冲）
 		body, err := readRequestBody(r)
 		if err != nil {
 			return true
 		}
-		
+
 		results := CheckAll(r, body)
 		for _, result := range results {
 			if !result.Passed {
@@ -370,7 +370,7 @@ func ComplianceMiddleware() func(*http.Request) bool {
 				return false
 			}
 		}
-		
+
 		return true
 	}
 }
@@ -379,12 +379,12 @@ func readRequestBody(r *http.Request) ([]byte, error) {
 	if r.Body == nil {
 		return []byte{}, nil
 	}
-	
+
 	body := make([]byte, r.ContentLength)
 	_, err := r.Body.Read(body)
 	if err != nil && err.Error() != "EOF" {
 		return nil, err
 	}
-	
+
 	return body, nil
 }
