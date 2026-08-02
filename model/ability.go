@@ -8,7 +8,7 @@ import (
 
 	"github.com/QuantumNous/new-api/common"
 	"github.com/QuantumNous/new-api/constant"
-	"github.com/QuantumNous/new-api/dto"
+	"github.com/QuantumNous/new-api/relaykit/dto"
 
 	"github.com/samber/lo"
 	"gorm.io/gorm"
@@ -390,9 +390,19 @@ func FixAbility() (int, int, error) {
 	return successCount, failCount, nil
 }
 
-// GetGroupEnabledAbilitiesByModel 获取指定分组和模型的所有启用能力
-func GetGroupEnabledAbilitiesByModel(group string, modelName string) ([]*Ability, error) {
-	var abilities []*Ability
-	err := DB.Where("group = ? AND model = ? AND enabled = true", group, modelName).Find(&abilities).Error
-	return abilities, err
+// GetGroupEnabledAbilitiesByModel returns the enabled abilities for a specific
+// (group, model) pair. This function was removed in upstream but is retained
+// here as a compatibility shim for the fork's routing engine (service/routing).
+// It uses the same SQL builder as upstream's GetChannel to ensure consistent
+// behavior.
+func GetGroupEnabledAbilitiesByModel(group string, model string) ([]Ability, error) {
+	channelQuery, err := getChannelQuery(group, model, 0)
+	if err != nil {
+		return nil, err
+	}
+	var abilities []Ability
+	if err := channelQuery.Order("weight DESC").Find(&abilities).Error; err != nil {
+		return nil, err
+	}
+	return abilities, nil
 }
