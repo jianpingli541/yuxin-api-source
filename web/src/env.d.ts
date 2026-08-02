@@ -21,3 +21,15 @@ For commercial licensing, please contact support@quantumnous.com
 declare module '@visactor/react-vchart' {
   export const VChart: React.ComponentType<Record<string, unknown>>
 }
+
+declare module 'yace' {
+  export interface TextareaProps {
+    value: string
+    selectionStart: number
+    selectionEnd: number
+  }
+  export type Plugin = (
+    props: TextareaProps,
+    event: Event
+  ) => TextareaProps | undefined
+}

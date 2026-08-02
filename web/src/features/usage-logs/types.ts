@@ -202,6 +202,13 @@ export interface LogOtherData {
   audio_input_price?: number
   image_generation_call?: boolean
   image_generation_call_price?: number
+  // Structured per-tool surcharges (new billing format). An entry only counts
+  // as a real surcharge when it has a non-blank name and positive count+price.
+  tool_surcharges?: Array<{
+    name?: string
+    count?: number
+    price?: number
+  }>
   is_system_prompt_overwritten?: boolean
   po?: string[]
   billing_source?: string

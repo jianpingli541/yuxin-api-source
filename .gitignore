@@ -49,3 +49,9 @@ web/dist/pricing.html
 .omc/
 .agents/
 Acceptance-PRD.md
+
+# 豫鑫商用化 — 交付前补漏（防敏感备份入 git）
+*.bak.*
+*.m0
+backups/
+docs-backup-*/

@@ -93,6 +93,52 @@ export function isViolationFeeLog(other: LogOtherData | null): boolean {
 }
 
 /**
+ * Whether a log entry carries a billable tool-call surcharge. Supports both
+ * the new structured `tool_surcharges` array and the legacy per-tool fields
+ * (web search / file search / image generation). Empty or zero-priced entries
+ * are not treated as surcharges.
+ */
+export function hasToolSurcharge(other: LogOtherData | null): boolean {
+  if (!other) return false
+
+  if (Array.isArray(other.tool_surcharges)) {
+    const hasCharged = other.tool_surcharges.some(
+      (s) =>
+        typeof s?.name === 'string' &&
+        s.name.trim() !== '' &&
+        (s.count ?? 0) > 0 &&
+        (s.price ?? 0) > 0
+    )
+    if (hasCharged) return true
+  }
+
+  if (
+    other.web_search === true &&
+    (other.web_search_call_count ?? 0) > 0 &&
+    (other.web_search_price ?? 0) > 0
+  ) {
+    return true
+  }
+
+  if (
+    other.file_search === true &&
+    (other.file_search_call_count ?? 0) > 0 &&
+    (other.file_search_price ?? 0) > 0
+  ) {
+    return true
+  }
+
+  if (
+    other.image_generation_call === true &&
+    (other.image_generation_call_price ?? 0) > 0
+  ) {
+    return true
+  }
+
+  return false
+}
+
+/**
  * Parse the 'other' field from JSON string to object
  */
 export function parseLogOther(other: string): LogOtherData | null {
