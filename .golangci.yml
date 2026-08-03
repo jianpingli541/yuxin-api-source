@@ -1,0 +1,48 @@
+# 豫鑫 API 网关 — golangci-lint v2 配置
+#
+# 策略：保守可执行。只启用低噪音、高价值的检查集，保证
+# `golangci-lint run --timeout 5m .` 在现有代码库上 exit 0；
+# 后续迭代再逐步收紧（见 docs/lint.md）。
+version: "2"
+
+run:
+  timeout: 5m
+
+linters:
+  default: none
+  enable:
+    - errcheck    # 未检查的 error 返回值
+    - govet       # Go 官方静态分析
+    - staticcheck # 综合静态分析
+    - unused      # 未使用的符号
+    - ineffassign # 无效赋值
+    - misspell    # 注释/字符串常见英文拼写错误
+  settings:
+    # gocognit / cyclop 本期不启用，仅预留放宽后的阈值，
+    # 供后续收紧迭代时直接开启：
+    gocognit:
+      min-complexity: 30
+    cyclop:
+      max-complexity: 25
+    misspell:
+      locale: US
+  exclusions:
+    # 明确不启用的检查（噪音过大，本期放弃）：
+    #   - stylecheck：风格类警告过多
+    #   - exhaustive：业务枚举很多，全量要求不现实
+    # 目录/文件排除：前端资源、relaykit、测试文件、备份文件
+    paths:
+      - web
+      - relaykit
+      - .*_test\.go
+      - .*\.bak.*
+
+formatters:
+  enable:
+    - gofmt
+  exclusions:
+    paths:
+      - web
+      - relaykit
+      - .*_test\.go
+      - .*\.bak.*
