@@ -55,3 +55,17 @@ Acceptance-PRD.md
 *.m0
 backups/
 docs-backup-*/
+
+# ===== 卫生清理增补（2026-08-03）=====
+# 说明：*.bak、*.bak.*、*.m0、backups/、docs-backup-*/ 已在上方覆盖，本块只补未覆盖项。
+
+# 运行时日志（兜底——nginx volume logs/ 应已挂出，但保险起见）
+nginx/logs/*.log
+
+# 编辑器/补丁临时文件
+*.swp
+*.swo
+*.tmp
+*.orig
+*.rej
+Thumbs.db
