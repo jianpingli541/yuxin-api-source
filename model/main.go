@@ -312,6 +312,10 @@ func migrateDB() error {
 			return err
 		}
 	}
+	if err := MigrateChannelKeysToEncrypted(); err != nil {
+		return err
+	}
+	common.SysLog("database migrated")
 	return nil
 }
 

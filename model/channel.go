@@ -519,6 +519,31 @@ func (channel *Channel) GetStatusCodeMapping() string {
 	return *channel.StatusCodeMapping
 }
 
+// BeforeSave 在写入数据库前自动加密 channel.Key（幂等）。
+func (channel *Channel) BeforeSave(tx *gorm.DB) error {
+	if channel.Key != "" && !common.IsChannelKeyEncrypted(channel.Key) {
+		enc, err := common.ChannelKeyEncrypt(channel.Key)
+		if err != nil {
+			return err
+		}
+		channel.Key = enc
+	}
+	return nil
+}
+
+// AfterFind 在从数据库读取后自动解密 channel.Key（明文透传）。
+func (channel *Channel) AfterFind(tx *gorm.DB) error {
+	if channel.Key != "" {
+		dec, err := common.ChannelKeyDecrypt(channel.Key)
+		if err != nil {
+			common.SysLog(fmt.Sprintf("failed to decrypt channel key (id=%d): %v", channel.Id, err))
+			return nil // 解密失败不阻断读取，保留原始值
+		}
+		channel.Key = dec
+	}
+	return nil
+}
+
 func (channel *Channel) Insert() error {
 	var err error
 	err = DB.Create(channel).Error
