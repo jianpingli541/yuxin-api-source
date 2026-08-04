@@ -76,3 +76,5 @@ nginx/ssl/*.crt
 nginx/ssl/*.pem
 nginx/letsencrypt/
 acceptance/node_modules/
+new-api-custom.*-pre-build
+new-api-custom.*.bak
