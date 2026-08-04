@@ -50,6 +50,12 @@ export type WechatPaymentResponse = ApiResponse<{
   order_id: string
   expire_at: number
 }>
+
+export type AlipayPaymentResponse = ApiResponse<{
+  qr_code: string
+  order_id: string
+  expire_at: number
+}>
 export type WaffoPancakePaymentResponse = ApiResponse<
   | {
       checkout_url?: string
@@ -132,6 +138,17 @@ export interface WechatPayMethod {
   payMethodName?: string
 }
 
+export interface AlipayPayMethod {
+  /** Display name of payment method */
+  name: string
+  /** Optional icon path */
+  icon?: string
+  /** Alipay pay method type (PRECREATE/APP/H5/WAP/PAGE) */
+  payMethodType?: string
+  /** Display subtitle */
+  payMethodName?: string
+}
+
 /**
  * Topup configuration information
  */
@@ -168,6 +185,12 @@ export interface TopupInfo {
   wechat_pay_methods?: WechatPayMethod[]
   /** Minimum topup amount for WeChat */
   wechat_min_topup?: number
+  /** Whether Alipay topup is enabled */
+  enable_alipay_topup?: boolean
+  /** Available Alipay payment methods */
+  alipay_pay_methods?: AlipayPayMethod[]
+  /** Minimum topup amount for Alipay */
+  alipay_min_topup?: number
   /** Whether Waffo Pancake topup is enabled */
   enable_waffo_pancake_topup?: boolean
   /** Minimum topup amount for Waffo Pancake */
@@ -222,6 +245,13 @@ export interface WechatPaymentRequest {
   /** Topup amount */
   amount: number
   /** Optional server-side WeChat payment method index */
+  pay_method_index?: number
+}
+
+export interface AlipayPaymentRequest {
+  /** Topup amount */
+  amount: number
+  /** Optional server-side Alipay payment method index */
   pay_method_index?: number
 }
 

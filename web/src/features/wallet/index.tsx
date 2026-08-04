@@ -30,6 +30,7 @@ import { CreemConfirmDialog } from './components/dialogs/creem-confirm-dialog'
 import { PaymentConfirmDialog } from './components/dialogs/payment-confirm-dialog'
 import { TransferDialog } from './components/dialogs/transfer-dialog'
 import { WechatQrDialog } from './components/dialogs/wechat-qr-dialog'
+import { AlipayQrDialog } from './components/dialogs/alipay-qr-dialog'
 import { RechargeFormCard } from './components/recharge-form-card'
 import { SubscriptionPlansCard } from './components/subscription-plans-card'
 import { WalletStatsCard } from './components/wallet-stats-card'
@@ -43,6 +44,7 @@ import {
   useWaffoPayment,
   useWaffoPancakePayment,
   useWechatPayment,
+  useAlipayPayment,
 } from './hooks'
 import {
   getDefaultPaymentType,
@@ -56,6 +58,7 @@ import type {
   CreemProduct,
   WaffoPayMethod,
   WechatPayMethod,
+  AlipayPayMethod,
 } from './types'
 
 interface WalletProps {
@@ -84,6 +87,8 @@ export function Wallet(props: WalletProps) {
   const [showSubscriptionPanel, setShowSubscriptionPanel] = useState(true)
   const [wechatQrOpen, setWechatQrOpen] = useState(false)
   const [wechatQrAmount, setWechatQrAmount] = useState(0)
+  const [alipayQrOpen, setAlipayQrOpen] = useState(false)
+  const [alipayQrAmount, setAlipayQrAmount] = useState(0)
 
   const { status } = useStatus()
   const { currency } = useSystemConfig()
@@ -120,6 +125,13 @@ export function Wallet(props: WalletProps) {
     processWechatPayment,
     resetWechatPayment,
   } = useWechatPayment()
+  const {
+    qrCodeUrl: alipayQrUrl,
+    orderId: alipayOrderId,
+    expireAt: alipayExpireAt,
+    processAlipayPayment,
+    resetAlipayPayment,
+  } = useAlipayPayment()
 
   // Fetch and refresh user data
   const fetchUser = useCallback(async () => {
@@ -299,6 +311,25 @@ export function Wallet(props: WalletProps) {
     }
   }
 
+  // Handle Alipay precreate: create order then open QR dialog
+  const handleAlipayMethodSelect = async (
+    method: AlipayPayMethod,
+    index: number
+  ) => {
+    if (method.payMethodType && method.payMethodType !== 'PRECREATE') return
+    const loadingKey = `alipay-${index}`
+    setPaymentLoading(loadingKey)
+    try {
+      const result = await processAlipayPayment(topupAmount, index)
+      if (result) {
+        setAlipayQrAmount(topupAmount)
+        setAlipayQrOpen(true)
+      }
+    } finally {
+      setPaymentLoading(null)
+    }
+  }
+
   // Get discount rate for current topup amount
   const getDiscountRate = useCallback(() => {
     return topupInfo?.discount?.[topupAmount] || DEFAULT_DISCOUNT_RATE
@@ -361,6 +392,10 @@ export function Wallet(props: WalletProps) {
                   wechatPayMethods={topupInfo?.wechat_pay_methods}
                   wechatMinTopup={topupInfo?.wechat_min_topup}
                   onWechatMethodSelect={handleWechatMethodSelect}
+                  enableAlipayTopup={topupInfo?.enable_alipay_topup}
+                  alipayPayMethods={topupInfo?.alipay_pay_methods}
+                  alipayMinTopup={topupInfo?.alipay_min_topup}
+                  onAlipayMethodSelect={handleAlipayMethodSelect}
                 />
               </div>
 
@@ -424,6 +459,23 @@ export function Wallet(props: WalletProps) {
         onSuccess={() => {
           setWechatQrOpen(false)
           resetWechatPayment()
+          void fetchUser()
+        }}
+      />
+
+      <AlipayQrDialog
+        open={alipayQrOpen}
+        onOpenChange={(open) => {
+          setAlipayQrOpen(open)
+          if (!open) resetAlipayPayment()
+        }}
+        qrCode={alipayQrUrl}
+        orderId={alipayOrderId}
+        expireAt={alipayExpireAt}
+        topupAmount={alipayQrAmount}
+        onSuccess={() => {
+          setAlipayQrOpen(false)
+          resetAlipayPayment()
           void fetchUser()
         }}
       />

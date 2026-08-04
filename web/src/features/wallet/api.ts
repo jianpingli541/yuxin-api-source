@@ -39,6 +39,8 @@ import type {
   WaffoPaymentResponse,
   WechatPaymentRequest,
   WechatPaymentResponse,
+  AlipayPaymentRequest,
+  AlipayPaymentResponse,
   WaffoPancakePaymentRequest,
   WaffoPancakePaymentResponse,
 } from './types'
@@ -163,6 +165,15 @@ export async function requestWechatPayment(
   request: WechatPaymentRequest
 ): Promise<WechatPaymentResponse> {
   const res = await api.post('/api/user/wechat/pay', request, {
+    skipBusinessError: true,
+  } as Record<string, unknown>)
+  return res.data
+}
+
+export async function requestAlipayPayment(
+  request: AlipayPaymentRequest
+): Promise<AlipayPaymentResponse> {
+  const res = await api.post('/api/user/alipay/pay', request, {
     skipBusinessError: true,
   } as Record<string, unknown>)
   return res.data
