@@ -69,3 +69,10 @@ nginx/logs/*.log
 *.orig
 *.rej
 Thumbs.db
+
+# 交付前自检修复 2026-08-04：凭据边界红线（B2）
+nginx/ssl/*.key
+nginx/ssl/*.crt
+nginx/ssl/*.pem
+nginx/letsencrypt/
+acceptance/node_modules/
