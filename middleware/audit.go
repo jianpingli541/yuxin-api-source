@@ -340,7 +340,7 @@ func auditFallbackAction(method string, route string) string {
 	case http.MethodPut:
 		verb = "update"
 	case http.MethodPatch:
-		verb = "update"
+		verb = "patch"
 	case http.MethodDelete:
 		verb = "delete"
 	default:
@@ -348,7 +348,6 @@ func auditFallbackAction(method string, route string) string {
 	}
 	return resource + "." + verb
 }
-
 func auditAuthMethod(c *gin.Context) string {
 	if c.GetBool("use_access_token") {
 		return "access_token"
