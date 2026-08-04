@@ -40,7 +40,8 @@ EXPOSE 3000
 WORKDIR /data
 
 # 创建非 root 用户 (uid/gid 65532), 降低容器逃逸风险 (B5)
-RUN useradd -r -u 65532 -g 65532 -d /data -s /usr/sbin/nologin newapi \
+RUN groupadd -g 65532 newapi \
+    && useradd -r -u 65532 -g newapi -d /data -s /usr/sbin/nologin newapi \
     && chown -R newapi:newapi /data
 USER newapi:newapi
 
