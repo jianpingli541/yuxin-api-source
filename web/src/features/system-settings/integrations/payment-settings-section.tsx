@@ -513,6 +513,25 @@ export function PaymentSettingsSection({
       WaffoPancakeReturnURL: removeTrailingSlash(
         values.WaffoPancakeReturnURL.trim()
       ),
+      WechatEnabled: values.WechatEnabled,
+      WechatMerchantId: values.WechatMerchantId.trim(),
+      WechatAppId: values.WechatAppId.trim(),
+      WechatApiV3Key: values.WechatApiV3Key.trim(),
+      WechatPrivateKey: values.WechatPrivateKey.trim(),
+      WechatCertSerialNo: values.WechatCertSerialNo.trim(),
+      WechatNotifyUrl: values.WechatNotifyUrl.trim(),
+      WechatReturnUrl: values.WechatReturnUrl.trim(),
+      WechatUnitPrice: values.WechatUnitPrice,
+      WechatMinTopUp: values.WechatMinTopUp,
+      AlipayEnabled: values.AlipayEnabled,
+      AlipayAppId: values.AlipayAppId.trim(),
+      AlipayPrivateKey: values.AlipayPrivateKey.trim(),
+      AlipayPublicKey: values.AlipayPublicKey.trim(),
+      AlipaySandbox: values.AlipaySandbox,
+      AlipayNotifyUrl: values.AlipayNotifyUrl.trim(),
+      AlipayReturnUrl: values.AlipayReturnUrl.trim(),
+      AlipayUnitPrice: values.AlipayUnitPrice,
+      AlipayMinTopUp: values.AlipayMinTopUp,
     }
 
     const initial = {
@@ -560,6 +579,25 @@ export function PaymentSettingsSection({
       WaffoPancakeReturnURL: removeTrailingSlash(
         initialRef.current.WaffoPancakeReturnURL.trim()
       ),
+      WechatEnabled: initialRef.current.WechatEnabled,
+      WechatMerchantId: initialRef.current.WechatMerchantId.trim(),
+      WechatAppId: initialRef.current.WechatAppId.trim(),
+      WechatApiV3Key: initialRef.current.WechatApiV3Key.trim(),
+      WechatPrivateKey: initialRef.current.WechatPrivateKey.trim(),
+      WechatCertSerialNo: initialRef.current.WechatCertSerialNo.trim(),
+      WechatNotifyUrl: initialRef.current.WechatNotifyUrl.trim(),
+      WechatReturnUrl: initialRef.current.WechatReturnUrl.trim(),
+      WechatUnitPrice: initialRef.current.WechatUnitPrice,
+      WechatMinTopUp: initialRef.current.WechatMinTopUp,
+      AlipayEnabled: initialRef.current.AlipayEnabled,
+      AlipayAppId: initialRef.current.AlipayAppId.trim(),
+      AlipayPrivateKey: initialRef.current.AlipayPrivateKey.trim(),
+      AlipayPublicKey: initialRef.current.AlipayPublicKey.trim(),
+      AlipaySandbox: initialRef.current.AlipaySandbox,
+      AlipayNotifyUrl: initialRef.current.AlipayNotifyUrl.trim(),
+      AlipayReturnUrl: initialRef.current.AlipayReturnUrl.trim(),
+      AlipayUnitPrice: initialRef.current.AlipayUnitPrice,
+      AlipayMinTopUp: initialRef.current.AlipayMinTopUp,
     }
 
     const updates: Array<{ key: string; value: string | number | boolean }> = []
@@ -755,6 +793,64 @@ export function PaymentSettingsSection({
       normalizeJsonForComparison(initial.WaffoPayMethods)
     ) {
       updates.push({ key: 'WaffoPayMethods', value: sanitized.WaffoPayMethods })
+    }
+
+    if (sanitized.WechatEnabled !== initial.WechatEnabled) {
+      updates.push({ key: 'WechatEnabled', value: sanitized.WechatEnabled })
+    }
+    if (sanitized.WechatMerchantId !== initial.WechatMerchantId) {
+      updates.push({ key: 'WechatMerchantId', value: sanitized.WechatMerchantId })
+    }
+    if (sanitized.WechatAppId !== initial.WechatAppId) {
+      updates.push({ key: 'WechatAppId', value: sanitized.WechatAppId })
+    }
+    if (sanitized.WechatApiV3Key !== initial.WechatApiV3Key) {
+      updates.push({ key: 'WechatApiV3Key', value: sanitized.WechatApiV3Key })
+    }
+    if (sanitized.WechatPrivateKey !== initial.WechatPrivateKey) {
+      updates.push({ key: 'WechatPrivateKey', value: sanitized.WechatPrivateKey })
+    }
+    if (sanitized.WechatCertSerialNo !== initial.WechatCertSerialNo) {
+      updates.push({ key: 'WechatCertSerialNo', value: sanitized.WechatCertSerialNo })
+    }
+    if (sanitized.WechatNotifyUrl !== initial.WechatNotifyUrl) {
+      updates.push({ key: 'WechatNotifyUrl', value: sanitized.WechatNotifyUrl })
+    }
+    if (sanitized.WechatReturnUrl !== initial.WechatReturnUrl) {
+      updates.push({ key: 'WechatReturnUrl', value: sanitized.WechatReturnUrl })
+    }
+    if (sanitized.WechatUnitPrice !== initial.WechatUnitPrice) {
+      updates.push({ key: 'WechatUnitPrice', value: sanitized.WechatUnitPrice })
+    }
+    if (sanitized.WechatMinTopUp !== initial.WechatMinTopUp) {
+      updates.push({ key: 'WechatMinTopUp', value: sanitized.WechatMinTopUp })
+    }
+    if (sanitized.AlipayEnabled !== initial.AlipayEnabled) {
+      updates.push({ key: 'AlipayEnabled', value: sanitized.AlipayEnabled })
+    }
+    if (sanitized.AlipayAppId !== initial.AlipayAppId) {
+      updates.push({ key: 'AlipayAppId', value: sanitized.AlipayAppId })
+    }
+    if (sanitized.AlipayPrivateKey !== initial.AlipayPrivateKey) {
+      updates.push({ key: 'AlipayPrivateKey', value: sanitized.AlipayPrivateKey })
+    }
+    if (sanitized.AlipayPublicKey !== initial.AlipayPublicKey) {
+      updates.push({ key: 'AlipayPublicKey', value: sanitized.AlipayPublicKey })
+    }
+    if (sanitized.AlipaySandbox !== initial.AlipaySandbox) {
+      updates.push({ key: 'AlipaySandbox', value: sanitized.AlipaySandbox })
+    }
+    if (sanitized.AlipayNotifyUrl !== initial.AlipayNotifyUrl) {
+      updates.push({ key: 'AlipayNotifyUrl', value: sanitized.AlipayNotifyUrl })
+    }
+    if (sanitized.AlipayReturnUrl !== initial.AlipayReturnUrl) {
+      updates.push({ key: 'AlipayReturnUrl', value: sanitized.AlipayReturnUrl })
+    }
+    if (sanitized.AlipayUnitPrice !== initial.AlipayUnitPrice) {
+      updates.push({ key: 'AlipayUnitPrice', value: sanitized.AlipayUnitPrice })
+    }
+    if (sanitized.AlipayMinTopUp !== initial.AlipayMinTopUp) {
+      updates.push({ key: 'AlipayMinTopUp', value: sanitized.AlipayMinTopUp })
     }
 
     const hasWaffoPancakeChanges =
