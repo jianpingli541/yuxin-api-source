@@ -95,11 +95,33 @@ func GetTopUpInfo(c *gin.Context) {
 		}
 	}
 
+
+	// 如果启用了微信支付，添加到支付方法列表
+	enableWechat := isWechatTopUpEnabled()
+	if enableWechat {
+		hasWechat := false
+		for _, method := range payMethods {
+			if method["type"] == model.PaymentMethodWechat {
+				hasWechat = true
+				break
+			}
+		}
+		if !hasWechat {
+			payMethods = append(payMethods, map[string]string{
+				"name":      "微信支付",
+				"type":      model.PaymentMethodWechat,
+				"color":     "#07C160",
+				"min_topup": strconv.Itoa(setting.WechatMinTopUp),
+			})
+		}
+	}
+
 	data := gin.H{
 		"enable_online_topup":              isEpayTopUpEnabled(),
 		"enable_stripe_topup":              isStripeTopUpEnabled(),
 		"enable_creem_topup":               isCreemTopUpEnabled(),
 		"enable_waffo_topup":               enableWaffo,
+		"enable_wechat_topup":              enableWechat,
 		"enable_waffo_pancake_topup":       enableWaffoPancake,
 		"enable_redemption":                complianceConfirmed,
 		"payment_compliance_confirmed":     complianceConfirmed,
@@ -111,10 +133,17 @@ func GetTopUpInfo(c *gin.Context) {
 			return nil
 		}(),
 		"creem_products":          setting.CreemProducts,
+		"wechat_pay_methods": func() interface{} {
+			if enableWechat {
+				return setting.GetWechatPayMethods()
+			}
+			return nil
+		}(),
 		"pay_methods":             payMethods,
 		"min_topup":               operation_setting.MinTopUp,
 		"stripe_min_topup":        setting.StripeMinTopUp,
 		"waffo_min_topup":         setting.WaffoMinTopUp,
+		"wechat_min_topup":        setting.WechatMinTopUp,
 		"waffo_pancake_min_topup": setting.WaffoPancakeMinTopUp,
 		"amount_options":          operation_setting.GetPaymentSetting().AmountOptions,
 		"discount":                operation_setting.GetPaymentSetting().AmountDiscount,

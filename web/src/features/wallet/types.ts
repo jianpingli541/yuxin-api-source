@@ -45,6 +45,11 @@ export type CreemPaymentResponse = ApiResponse<{ checkout_url: string }>
 export type WaffoPaymentResponse = ApiResponse<
   { payment_url?: string } | string
 >
+export type WechatPaymentResponse = ApiResponse<{
+  code_url: string
+  order_id: string
+  expire_at: number
+}>
 export type WaffoPancakePaymentResponse = ApiResponse<
   | {
       checkout_url?: string
@@ -116,6 +121,17 @@ export interface WaffoPayMethod {
   payMethodName?: string
 }
 
+export interface WechatPayMethod {
+  /** Display name of payment method */
+  name: string
+  /** Optional icon path */
+  icon?: string
+  /** WeChat pay method type (NATIVE/JSAPI/H5) */
+  payMethodType?: string
+  /** Display subtitle */
+  payMethodName?: string
+}
+
 /**
  * Topup configuration information
  */
@@ -146,6 +162,12 @@ export interface TopupInfo {
   waffo_pay_methods?: WaffoPayMethod[]
   /** Minimum topup amount for Waffo */
   waffo_min_topup?: number
+  /** Whether WeChat (Native) topup is enabled */
+  enable_wechat_topup?: boolean
+  /** Available WeChat payment methods */
+  wechat_pay_methods?: WechatPayMethod[]
+  /** Minimum topup amount for WeChat */
+  wechat_min_topup?: number
   /** Whether Waffo Pancake topup is enabled */
   enable_waffo_pancake_topup?: boolean
   /** Minimum topup amount for Waffo Pancake */
@@ -193,6 +215,13 @@ export interface WaffoPaymentRequest {
   /** Topup amount */
   amount: number
   /** Optional server-side Waffo payment method index */
+  pay_method_index?: number
+}
+
+export interface WechatPaymentRequest {
+  /** Topup amount */
+  amount: number
+  /** Optional server-side WeChat payment method index */
   pay_method_index?: number
 }
 

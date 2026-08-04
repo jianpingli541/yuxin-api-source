@@ -166,6 +166,7 @@ require (
 	github.com/ClickHouse/clickhouse-go/v2 v2.32.0
 	github.com/QuantumNous/new-api/relaykit v0.0.0
 	github.com/sony/gobreaker v1.0.0
+	github.com/wechatpay-apiv3/wechatpay-go v0.2.21
 )
 
 replace github.com/QuantumNous/new-api/relaykit => ./relaykit

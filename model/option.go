@@ -116,6 +116,17 @@ func InitOptionMap() {
 	common.OptionMap["WaffoPancakeMinTopUp"] = strconv.Itoa(setting.WaffoPancakeMinTopUp)
 	common.OptionMap["WaffoPancakeStoreID"] = setting.WaffoPancakeStoreID
 	common.OptionMap["WaffoPancakeProductID"] = setting.WaffoPancakeProductID
+	common.OptionMap["WechatEnabled"] = strconv.FormatBool(setting.WechatEnabled)
+	common.OptionMap["WechatMerchantId"] = setting.WechatMerchantId
+	common.OptionMap["WechatAppId"] = setting.WechatAppId
+	common.OptionMap["WechatApiV3Key"] = setting.WechatApiV3Key
+	common.OptionMap["WechatPrivateKey"] = setting.WechatPrivateKey
+	common.OptionMap["WechatCertSerialNo"] = setting.WechatCertSerialNo
+	common.OptionMap["WechatNotifyUrl"] = setting.WechatNotifyUrl
+	common.OptionMap["WechatReturnUrl"] = setting.WechatReturnUrl
+	common.OptionMap["WechatUnitPrice"] = strconv.FormatFloat(setting.WechatUnitPrice, 'f', -1, 64)
+	common.OptionMap["WechatMinTopUp"] = strconv.Itoa(setting.WechatMinTopUp)
+	common.OptionMap["WechatPayMethods"] = setting.WechatPayMethods2JsonString()
 	common.OptionMap["TopupGroupRatio"] = common.TopupGroupRatio2JSONString()
 	common.OptionMap["Chats"] = setting.Chats2JsonString()
 	common.OptionMap["AutoGroups"] = setting.AutoGroups2JsonString()
@@ -495,6 +506,28 @@ func updateOptionMap(key string, value string) (err error) {
 		setting.WaffoPancakeUnitPrice, _ = strconv.ParseFloat(value, 64)
 	case "WaffoPancakeMinTopUp":
 		setting.WaffoPancakeMinTopUp, _ = strconv.Atoi(value)
+	case "WechatEnabled":
+		setting.WechatEnabled = value == "true"
+	case "WechatMerchantId":
+		setting.WechatMerchantId = value
+	case "WechatAppId":
+		setting.WechatAppId = value
+	case "WechatApiV3Key":
+		setting.WechatApiV3Key = value
+	case "WechatPrivateKey":
+		setting.WechatPrivateKey = value
+	case "WechatCertSerialNo":
+		setting.WechatCertSerialNo = value
+	case "WechatNotifyUrl":
+		setting.WechatNotifyUrl = value
+	case "WechatReturnUrl":
+		setting.WechatReturnUrl = value
+	case "WechatUnitPrice":
+		setting.WechatUnitPrice, _ = strconv.ParseFloat(value, 64)
+	case "WechatMinTopUp":
+		setting.WechatMinTopUp, _ = strconv.Atoi(value)
+	case "WechatPayMethods":
+		_ = setting.SetWechatPayMethodsFromJSON(value)
 	case "TopupGroupRatio":
 		err = common.UpdateTopupGroupRatioByJSONString(value)
 	case "GitHubClientId":

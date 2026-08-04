@@ -29,6 +29,7 @@ import { BillingHistoryDialog } from './components/dialogs/billing-history-dialo
 import { CreemConfirmDialog } from './components/dialogs/creem-confirm-dialog'
 import { PaymentConfirmDialog } from './components/dialogs/payment-confirm-dialog'
 import { TransferDialog } from './components/dialogs/transfer-dialog'
+import { WechatQrDialog } from './components/dialogs/wechat-qr-dialog'
 import { RechargeFormCard } from './components/recharge-form-card'
 import { SubscriptionPlansCard } from './components/subscription-plans-card'
 import { WalletStatsCard } from './components/wallet-stats-card'
@@ -41,6 +42,7 @@ import {
   useCreemPayment,
   useWaffoPayment,
   useWaffoPancakePayment,
+  useWechatPayment,
 } from './hooks'
 import {
   getDefaultPaymentType,
@@ -53,6 +55,7 @@ import type {
   PresetAmount,
   CreemProduct,
   WaffoPayMethod,
+  WechatPayMethod,
 } from './types'
 
 interface WalletProps {
@@ -79,6 +82,8 @@ export function Wallet(props: WalletProps) {
   const [selectedCreemProduct, setSelectedCreemProduct] =
     useState<CreemProduct | null>(null)
   const [showSubscriptionPanel, setShowSubscriptionPanel] = useState(true)
+  const [wechatQrOpen, setWechatQrOpen] = useState(false)
+  const [wechatQrAmount, setWechatQrAmount] = useState(0)
 
   const { status } = useStatus()
   const { currency } = useSystemConfig()
@@ -108,6 +113,13 @@ export function Wallet(props: WalletProps) {
   const { processing: waffoProcessing, processWaffoPayment } = useWaffoPayment()
   const { processing: pancakeProcessing, processWaffoPancakePayment } =
     useWaffoPancakePayment()
+  const {
+    qrCodeUrl: wechatQrUrl,
+    orderId: wechatOrderId,
+    expireAt: wechatExpireAt,
+    processWechatPayment,
+    resetWechatPayment,
+  } = useWechatPayment()
 
   // Fetch and refresh user data
   const fetchUser = useCallback(async () => {
@@ -268,6 +280,25 @@ export function Wallet(props: WalletProps) {
     }
   }
 
+  // Handle WeChat Native payment: create order then open QR dialog
+  const handleWechatMethodSelect = async (
+    method: WechatPayMethod,
+    index: number
+  ) => {
+    if (method.payMethodType && method.payMethodType !== 'NATIVE') return
+    const loadingKey = `wechat-${index}`
+    setPaymentLoading(loadingKey)
+    try {
+      const result = await processWechatPayment(topupAmount, index)
+      if (result) {
+        setWechatQrAmount(topupAmount)
+        setWechatQrOpen(true)
+      }
+    } finally {
+      setPaymentLoading(null)
+    }
+  }
+
   // Get discount rate for current topup amount
   const getDiscountRate = useCallback(() => {
     return topupInfo?.discount?.[topupAmount] || DEFAULT_DISCOUNT_RATE
@@ -326,6 +357,10 @@ export function Wallet(props: WalletProps) {
                   enableWaffoPancakeTopup={
                     topupInfo?.enable_waffo_pancake_topup
                   }
+                  enableWechatTopup={topupInfo?.enable_wechat_topup}
+                  wechatPayMethods={topupInfo?.wechat_pay_methods}
+                  wechatMinTopup={topupInfo?.wechat_min_topup}
+                  onWechatMethodSelect={handleWechatMethodSelect}
                 />
               </div>
 
@@ -374,6 +409,23 @@ export function Wallet(props: WalletProps) {
       <BillingHistoryDialog
         open={billingDialogOpen}
         onOpenChange={setBillingDialogOpen}
+      />
+
+      <WechatQrDialog
+        open={wechatQrOpen}
+        onOpenChange={(open) => {
+          setWechatQrOpen(open)
+          if (!open) resetWechatPayment()
+        }}
+        codeUrl={wechatQrUrl}
+        orderId={wechatOrderId}
+        expireAt={wechatExpireAt}
+        topupAmount={wechatQrAmount}
+        onSuccess={() => {
+          setWechatQrOpen(false)
+          resetWechatPayment()
+          void fetchUser()
+        }}
       />
 
       <CreemConfirmDialog
