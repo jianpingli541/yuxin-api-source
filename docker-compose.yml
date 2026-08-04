@@ -12,9 +12,13 @@ services:
     restart: always
     ports:
       - "80:80"
+      - "443:443"
     volumes:
       - ./nginx/conf.d:/etc/nginx/conf.d:ro
       - ./nginx/logs:/var/log/nginx
+      - ./nginx/ssl:/etc/nginx/ssl:ro
+      - ./nginx/certbot:/var/www/certbot
+      - ./nginx/letsencrypt:/etc/letsencrypt:ro
     depends_on:
       - new-api
     networks:
