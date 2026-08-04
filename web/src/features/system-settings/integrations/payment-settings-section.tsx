@@ -48,6 +48,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Textarea } from '@/components/ui/textarea'
 import { cn } from '@/lib/utils'
 
+import { AlipaySettingsSection, type AlipaySettingsValues } from './alipay-settings-section'
+import { WechatSettingsSection, type WechatSettingsValues } from './wechat-settings-section'
 import { confirmPaymentCompliance } from '../api'
 import {
   SettingsForm,
@@ -176,13 +178,35 @@ const paymentSchema = z.object({
   WaffoPancakeMerchantID: z.string(),
   WaffoPancakePrivateKey: z.string(),
   WaffoPancakeReturnURL: z.string(),
+  WechatEnabled: z.boolean(),
+  WechatMerchantId: z.string(),
+  WechatAppId: z.string(),
+  WechatApiV3Key: z.string(),
+  WechatPrivateKey: z.string(),
+  WechatCertSerialNo: z.string(),
+  WechatNotifyUrl: z.string(),
+  WechatReturnUrl: z.string(),
+  WechatUnitPrice: z.coerce.number().min(0),
+  WechatMinTopUp: z.coerce.number().min(1),
+  AlipayEnabled: z.boolean(),
+  AlipayAppId: z.string(),
+  AlipayPrivateKey: z.string(),
+  AlipayPublicKey: z.string(),
+  AlipaySandbox: z.boolean(),
+  AlipayNotifyUrl: z.string(),
+  AlipayReturnUrl: z.string(),
+  AlipayUnitPrice: z.coerce.number().min(0),
+  AlipayMinTopUp: z.coerce.number().min(1),
 })
 
 type PaymentFormValues = z.infer<typeof paymentSchema>
 type WaffoFormFieldValues = Omit<WaffoSettingsValues, 'WaffoPayMethods'>
 type PaymentBaseFormValues = Omit<
   PaymentFormValues,
-  keyof WaffoFormFieldValues | keyof WaffoPancakeSettingsValues
+  | keyof WaffoFormFieldValues
+  | keyof WaffoPancakeSettingsValues
+  | keyof WechatSettingsValues
+  | keyof AlipaySettingsValues
 >
 
 const CURRENT_COMPLIANCE_TERMS_VERSION = 'v1'
@@ -199,6 +223,8 @@ type PaymentSettingsSectionProps = {
   defaultValues: PaymentBaseFormValues
   waffoDefaultValues: WaffoSettingsValues
   waffoPancakeDefaultValues: WaffoPancakeSettingsValues
+  wechatDefaultValues: WechatSettingsValues
+  alipayDefaultValues: AlipaySettingsValues
   waffoPancakeProvisionedStoreID?: string
   waffoPancakeProvisionedProductID?: string
   complianceDefaults: PaymentComplianceDefaults
@@ -217,6 +243,8 @@ export function PaymentSettingsSection({
   defaultValues,
   waffoDefaultValues,
   waffoPancakeDefaultValues,
+  wechatDefaultValues,
+  alipayDefaultValues,
   waffoPancakeProvisionedStoreID,
   waffoPancakeProvisionedProductID,
   complianceDefaults,
@@ -229,8 +257,10 @@ export function PaymentSettingsSection({
       ...defaultValues,
       ...waffoDefaultValues,
       ...waffoPancakeDefaultValues,
+      ...wechatDefaultValues,
+      ...alipayDefaultValues,
     }),
-    [defaultValues, waffoDefaultValues, waffoPancakeDefaultValues]
+    [defaultValues, waffoDefaultValues, waffoPancakeDefaultValues, wechatDefaultValues, alipayDefaultValues]
   )
   const initialRef = React.useRef(initialFormValues)
   const defaultsSignature = React.useMemo(
@@ -390,6 +420,32 @@ export function PaymentSettingsSection({
     },
     [setPaymentValue]
   )
+  const setWechatValue = React.useCallback(
+    <K extends keyof WechatSettingsValues>(
+      key: K,
+      value: WechatSettingsValues[K]
+    ) => {
+      setPaymentValue(
+        key as keyof PaymentFormValues,
+        value as PaymentFormValues[keyof PaymentFormValues]
+      )
+    },
+    [setPaymentValue]
+  )
+
+  const setAlipayValue = React.useCallback(
+    <K extends keyof AlipaySettingsValues>(
+      key: K,
+      value: AlipaySettingsValues[K]
+    ) => {
+      setPaymentValue(
+        key as keyof PaymentFormValues,
+        value as PaymentFormValues[keyof PaymentFormValues]
+      )
+    },
+    [setPaymentValue]
+  )
+
 
   const setWaffoPancakeValue = React.useCallback(
     <K extends keyof WaffoPancakeSettingsValues>(
@@ -773,6 +829,32 @@ export function PaymentSettingsSection({
   }
 
   const currentFormValues = form.watch()
+  const values = form.watch()
+  const wechatValues: WechatSettingsValues = {
+    WechatEnabled: values.WechatEnabled,
+    WechatMerchantId: values.WechatMerchantId,
+    WechatAppId: values.WechatAppId,
+    WechatApiV3Key: values.WechatApiV3Key,
+    WechatPrivateKey: values.WechatPrivateKey,
+    WechatCertSerialNo: values.WechatCertSerialNo,
+    WechatNotifyUrl: values.WechatNotifyUrl,
+    WechatReturnUrl: values.WechatReturnUrl,
+    WechatUnitPrice: values.WechatUnitPrice,
+    WechatMinTopUp: values.WechatMinTopUp,
+  }
+
+  const alipayValues: AlipaySettingsValues = {
+    AlipayEnabled: values.AlipayEnabled,
+    AlipayAppId: values.AlipayAppId,
+    AlipayPrivateKey: values.AlipayPrivateKey,
+    AlipayPublicKey: values.AlipayPublicKey,
+    AlipaySandbox: values.AlipaySandbox,
+    AlipayNotifyUrl: values.AlipayNotifyUrl,
+    AlipayReturnUrl: values.AlipayReturnUrl,
+    AlipayUnitPrice: values.AlipayUnitPrice,
+    AlipayMinTopUp: values.AlipayMinTopUp,
+  }
+
   const waffoValues: WaffoSettingsValues = {
     WaffoEnabled: currentFormValues.WaffoEnabled,
     WaffoApiKey: currentFormValues.WaffoApiKey,
@@ -884,6 +966,8 @@ export function PaymentSettingsSection({
                 <TabsTrigger value='creem'>Creem</TabsTrigger>
                 <TabsTrigger value='waffo-pancake'>Waffo Pancake</TabsTrigger>
                 <TabsTrigger value='waffo'>Waffo</TabsTrigger>
+                <TabsTrigger value='wechat'>微信支付</TabsTrigger>
+                <TabsTrigger value='alipay'>支付宝</TabsTrigger>
               </TabsList>
             </div>
 
@@ -1608,6 +1692,26 @@ export function PaymentSettingsSection({
                 onValueChange={setWaffoValue}
                 payMethods={waffoPayMethods}
                 onPayMethodsChange={setWaffoPayMethods}
+              />
+            </TabsContent>
+
+            <TabsContent
+              value='wechat'
+              className={paymentTabContentClassName}
+            >
+              <WechatSettingsSection
+                values={wechatValues}
+                onValueChange={setWechatValue}
+              />
+            </TabsContent>
+
+            <TabsContent
+              value='alipay'
+              className={paymentTabContentClassName}
+            >
+              <AlipaySettingsSection
+                values={alipayValues}
+                onValueChange={setAlipayValue}
               />
             </TabsContent>
           </Tabs>
