@@ -1,3 +1,5 @@
+> **豫鑫商用 API 网关** | v1.2.1-yuxin | 2026-08-04 | fork of new-api
+
 <div align="center">
 
 ![new-api](/web/public/logo.png)
