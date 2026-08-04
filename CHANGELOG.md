@@ -2,6 +2,47 @@
 
 ---
 
+## v1.2.1-yuxin (2026-08-04) · 交付前自检封箱版
+
+### 背景
+
+豫鑫 new-api 交付前全面自检（4 维度并行审计：代码与测试/安全合规/运维可靠性/交付物与业务），定位 13 项阻断问题。本版本封箱交付：提交所有未入 git 改动、重建二进制与镜像、加 USER 降权、文档版本对齐、重跑验收归档。
+
+### 🔒 安全加固
+
+- **B2**: `.gitignore` 补凭据边界红线（nginx/ssl 私钥/letsencrypt/node_modules）
+- **B5**: Dockerfile 容器降权——新增 `newapi` 用户（uid/gid 65532）+ USER 指令，杜绝容器逃逸=宿主 root
+- **B3**: 渠道密钥 AES-256-GCM 透明加密功能编入运行产物（此前二进制漂移 1.5 天未含）
+- **新增**: `.env` 补 `CRYPTO_SECRET`（强随机值），避免重启随机化导致历史渠道密钥无法解密
+
+### 📦 交付封箱
+
+- **B1**: 工作区脏改动分类提交（6 个逻辑 commit：gitignore/依赖/渠道加密/HTTPS/测试/文档）
+- **B4**: `docker-compose.yml` 镜像引用锁 `yuxin-api:v1.2.1-yuxin` 替代 `:latest` 漂移
+- **B7**: 4 份核心文档版本号统一到 v1.2.1（QUICKSTART/DEPLOYMENT/OPERATIONS/ACCEPTANCE）
+- **B8**: 重跑验收并归档 `evidence/2026-08-04-v1.2.1/`（10 PASS / 2 FAIL 均非代码 bug）
+
+### 🔧 依赖与工具链
+
+- Go 工具链 `1.25.1 → 1.25.12` 对齐 Dockerfile
+- 前端 `dompurify 3.4.11 → ^3.4.12`、overrides `brace-expansion/fast-uri/hono` 安全升级
+- CI 工作流优化：gofmt 独立 job、backend 拆分 vet/build/test、push main 触发
+
+### 🐛 修复
+
+- **Dockerfile**: `useradd` 前先 `groupadd` 建组避免 gid 不存在错误
+- **middleware/audit.go**: PATCH 方法审计动作 `update → patch`（stash 恢复）
+
+### ✅ 验证
+
+- 全量 `go build` / `go vet` / `go test ./...` 通过
+- Docker 镜像构建成功（含 B5 降权）
+- 容器内 `id = uid=65532(newapi)` 非 root
+- 健康端点 `/api/status` 200
+- 验收脚本 10/12 PASS
+
+---
+
 ## v1.2.0-yuxin (2026-08-03)
 
 ### 🛡️ 商用化深化 + 可靠性层（生产级）
