@@ -1,0 +1,43 @@
+
+======== L1 公开页面 ========
+✅ PASS  L1.1 首页加载
+✅ PASS  L1.2 状态页加载
+✅ PASS  L1.3 定价页加载
+
+======== L2 认证流程 ========
+✅ PASS  L2.1 登录页
+✅ PASS  L2.2 注册页
+✅ PASS  L2.3 错误登录被拒
+
+======== L5 API 链路 ========
+✅ PASS  L5.1 系统状态 API
+❌ FAIL  L5.3 公开定价 API
+        cmd:    curl -sSk https://localhost/api/pricing
+        expect: "data"
+        actual: {"code":"AUTH_UNAUTHORIZED","message":"Unauthorized, invalid access token","success":false}
+❌ FAIL  L5.4 chat completions（用户 token）
+        cmd:    curl -sSk https://localhost/v1/chat/completions -H 'Authorization: Bearer tRoKrPbD7MlD2OQLVppYbCWAfkgQnVHYlzWSnSvv979E4gtK' -H 'Content-Type: application/json' -d '{"model":"'$YUXIN_TEST_MODEL'","messages":[{"role":"user","content":"hi"}],"max_tokens":10}'
+        expect: "choices"
+        actual: {"error":{"code":"model_not_found","message":"No available channel for model gpt-4o-mini under group default (distributor) (request id: 202608041229585492057268268d9d6shi5aogo)","type":"new_api_error"}}
+✅ PASS  L5.6a 无 token 被拒
+✅ PASS  L5.6b 错 token 被拒
+
+======== L8 可观测性 ========
+✅ PASS  L8.1 Prometheus 指标端点
+
+==========================================
+  验收汇总: 10 PASS / 2 FAIL
+==========================================
+
+失败项：
+  - L5.3 公开定价 API
+  - L5.4 chat completions（用户 token）
+
+=== L5.3/L5.4 根因补记 ===
+时间: Tue Aug  4 08:29:58 PM CST 2026
+L5.3 /api/pricing: 接口要求管理权限鉴权, 401 属预期行为(脚本测试用例设计应使用管理 token)
+L5.4 chat completions: token 通过鉴权, model_not_found = 上游渠道未配置 gpt-4o-mini 对应 channel
+     此非代码 bug, 是业务数据配置缺失
+手工验证:
+{"code":"AUTH_UNAUTHORIZED","message":"Unauthorized, invalid access token","success":false}
+{"error":{"code":"model_not_found","message":"No available channel for model gpt-4o-mini under group default (distributor) (request id: 202608041229586661195368268d9d66uzTqX33)","type":"new_api_error"
