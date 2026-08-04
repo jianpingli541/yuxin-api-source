@@ -38,4 +38,10 @@ COPY --from=builder2 /build/new-api /
 COPY LICENSE NOTICE THIRD-PARTY-LICENSES.md /licenses/
 EXPOSE 3000
 WORKDIR /data
+
+# 创建非 root 用户 (uid/gid 65532), 降低容器逃逸风险 (B5)
+RUN useradd -r -u 65532 -g 65532 -d /data -s /usr/sbin/nologin newapi \
+    && chown -R newapi:newapi /data
+USER newapi:newapi
+
 ENTRYPOINT ["/new-api"]
