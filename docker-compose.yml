@@ -28,7 +28,7 @@ services:
   # new-api 核心服务 (Go 网关 + React 前端)
   # ----------------------------------------------------------
   new-api:
-    image: yuxin-api:latest
+    image: yuxin-api:v1.2.1-yuxin
     container_name: gateway-new-api
     restart: always
     command: --log-dir /app/logs
