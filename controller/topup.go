@@ -382,6 +382,11 @@ func EpayNotify(c *gin.Context) {
 			logger.LogWarn(c.Request.Context(), fmt.Sprintf("易支付 订单支付网关不匹配 trade_no=%s order_provider=%s callback_type=%s client_ip=%s", verifyInfo.ServiceTradeNo, topUp.PaymentProvider, verifyInfo.Type, c.ClientIP()))
 			return
 		}
+		// 2026-08-04 安全修复: 校验回调实付金额与订单金额一致(容差0.01元), 防止少付多充
+		if paid, parseErr := strconv.ParseFloat(verifyInfo.Money, 64); parseErr != nil || paid-topUp.Money > 0.01 || topUp.Money-paid > 0.01 {
+			logger.LogWarn(c.Request.Context(), fmt.Sprintf("易支付 回调金额与订单不一致, 拒绝入账 trade_no=%s paid=%s order=%.2f client_ip=%s", verifyInfo.ServiceTradeNo, verifyInfo.Money, topUp.Money, c.ClientIP()))
+			return
+		}
 		if topUp.Status == common.TopUpStatusPending {
 			if topUp.PaymentMethod != verifyInfo.Type {
 				logger.LogInfo(c.Request.Context(), fmt.Sprintf("易支付 实际支付方式与订单不同 trade_no=%s order_payment_method=%s actual_type=%s client_ip=%s", verifyInfo.ServiceTradeNo, topUp.PaymentMethod, verifyInfo.Type, c.ClientIP()))

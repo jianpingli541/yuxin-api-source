@@ -62,6 +62,13 @@ func checkProtectedFetchRedirect(req *http.Request, via []*http.Request) error {
 	return nil
 }
 
+// CheckSSRFProtectedFetchRedirect 是 checkProtectedFetchRedirect 的导出包装，
+// 供其他包（如 relay/channel/ollama 的裸 http.Client 路径）复用 SSRF 重定向防护。
+// 用法: client := &http.Client{CheckRedirect: service.CheckSSRFProtectedFetchRedirect}
+func CheckSSRFProtectedFetchRedirect(req *http.Request, via []*http.Request) error {
+	return checkProtectedFetchRedirect(req, via)
+}
+
 func validateURLWithCurrentFetchSetting(urlStr string, applyDomainIPFilter bool) error {
 	fetchSetting := system_setting.GetFetchSetting()
 	return common.ValidateURLWithFetchSetting(urlStr, fetchSetting.EnableSSRFProtection, fetchSetting.AllowPrivateIp, fetchSetting.DomainFilterMode, fetchSetting.IpFilterMode, fetchSetting.DomainList, fetchSetting.IpList, fetchSetting.AllowedPorts, applyDomainIPFilter && fetchSetting.ApplyIPFilterForDomain)

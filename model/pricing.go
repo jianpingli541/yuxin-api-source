@@ -401,7 +401,7 @@ func updatePricing() {
 			pricing.AudioCompletionRatio = &audioCompletionRatio
 		}
 		if billingMode := billing_setting.GetBillingMode(model); billingMode == "tiered_expr" {
-			if expr, ok := billing_setting.GetBillingExpr(model); ok && strings.TrimSpace(expr) != "" {
+			if expr, ok := billing_setting.GetBillingExpr(model); ok && strings.TrimSpace(expr) != "" && common.IsSafeBillingExpr(expr) {
 				pricing.BillingMode = billingMode
 				pricing.BillingExpr = expr
 			}

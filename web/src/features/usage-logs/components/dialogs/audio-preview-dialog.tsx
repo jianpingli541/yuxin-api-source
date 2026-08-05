@@ -70,12 +70,15 @@ function AudioClipCard({ clip }: { clip: AudioClip }) {
   const duration = clip.duration || clip.metadata?.duration
   const imageUrl = clip.image_url || clip.image_large_url
   const audioUrl = clip.audio_url
+  // 2026-08-04 安全修复: 仅允许 http/https/blob/data scheme, 拦截 javascript:
+  // 等危险协议注入(window.open/audio src 均不可执行 javascript:)
+  const safeAudioUrl = /^(https?:|blob:|data:)/i.test(audioUrl || '') ? audioUrl : null
 
-  if (!audioUrl) return null
+  if (!safeAudioUrl) return null
 
   return (
     <div className='bg-card flex gap-4 rounded-lg border p-4'>
-      {imageUrl && (
+      {imageUrl && /^(https?:|blob:|data:)/i.test(imageUrl) && (
         <img
           src={imageUrl}
           alt={title}
@@ -111,7 +114,7 @@ function AudioClipCard({ clip }: { clip: AudioClip }) {
               variant='outline'
               size='sm'
               className='h-7 gap-1 text-xs'
-              onClick={() => window.open(audioUrl, '_blank')}
+              onClick={() => window.open(safeAudioUrl, '_blank')}
             >
               <ExternalLink className='h-3 w-3' />
               {t('Open in new tab')}
@@ -121,7 +124,7 @@ function AudioClipCard({ clip }: { clip: AudioClip }) {
               size='sm'
               className='h-7 gap-1 text-xs'
               onClick={() => {
-                navigator.clipboard.writeText(audioUrl)
+                navigator.clipboard.writeText(safeAudioUrl)
                 toast.success(t('Copied'))
               }}
             >
@@ -132,7 +135,7 @@ function AudioClipCard({ clip }: { clip: AudioClip }) {
         ) : (
           <audio
             ref={audioRef}
-            src={audioUrl}
+            src={safeAudioUrl}
             controls
             preload='none'
             onError={() => setHasError(true)}

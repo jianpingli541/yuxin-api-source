@@ -1282,6 +1282,21 @@ func FetchModels(c *gin.Context) {
 		return
 	}
 
+	// SSRF 防护(2026-08-04 加固): 请求体传入的目标地址仅允许公网/白名单地址,
+	// 拒绝私网/回环/链路本地/元数据地址及非白名单端口。
+	if req.BaseURL != nil {
+		target := strings.TrimSpace(*req.BaseURL)
+		if target != "" {
+			if err := service.ValidateSSRFProtectedFetchURL(target); err != nil {
+				c.JSON(http.StatusOK, gin.H{
+					"success": false,
+					"message": "目标地址不允许访问（SSRF 防护已拦截）",
+				})
+				return
+			}
+		}
+	}
+
 	var channel *model.Channel
 	if req.Type == constant.ChannelTypeAdvancedCustom || req.ChannelID > 0 {
 		var err error

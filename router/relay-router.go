@@ -206,7 +206,12 @@ func SetRelayRouter(router *gin.Engine) {
 }
 
 func registerMjRouterGroup(relayMjRouter *gin.RouterGroup) {
-	relayMjRouter.GET("/image/:id", relay.RelayMidjourneyImage)
+	// 2026-08-04 安全修复: 图片代理端点原本无认证, 任何匿名者可读取任意用户
+	// Midjourney 任务图片(IDOR, 高危)。挂 TokenAuth 并配合 handler 内
+	// GetByMJId(userId, ...) 归属校验。MJ 功能当前前端未集成, 无浏览器
+	// <img> 无头加载兼容性负担; 后续若需前端展示, 应采用 fetch+blob 或
+	// 短时签名 URL 方案。
+	relayMjRouter.GET("/image/:id", middleware.TokenAuth(), relay.RelayMidjourneyImage)
 	relayMjRouter.Use(middleware.TokenAuth(), middleware.Distribute())
 	{
 		relayMjRouter.POST("/submit/action", controller.RelayMidjourney)

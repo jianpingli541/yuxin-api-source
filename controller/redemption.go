@@ -85,6 +85,11 @@ func AddRedemption(c *gin.Context) {
 		common.ApiErrorI18n(c, i18n.MsgRedemptionCountMax)
 		return
 	}
+	// 2026-08-04 安全修复: 面额须为正数且设上限, 防止铸造负额/超大额兑换码
+	if redemption.Quota <= 0 || redemption.Quota > 10_000_000_000_000 {
+		c.JSON(http.StatusOK, gin.H{"success": false, "message": "兑换码面额无效（须为 1 ~ 10000000000000）"})
+		return
+	}
 	if valid, msg := validateExpiredTime(c, redemption.ExpiredTime); !valid {
 		c.JSON(http.StatusOK, gin.H{"success": false, "message": msg})
 		return
@@ -155,6 +160,11 @@ func UpdateRedemption(c *gin.Context) {
 	if statusOnly == "" {
 		if valid, msg := validateExpiredTime(c, redemption.ExpiredTime); !valid {
 			c.JSON(http.StatusOK, gin.H{"success": false, "message": msg})
+			return
+		}
+		// 2026-08-04 安全修复: 更新面额同样校验正数与上限
+		if redemption.Quota <= 0 || redemption.Quota > 10_000_000_000_000 {
+			c.JSON(http.StatusOK, gin.H{"success": false, "message": "兑换码面额无效（须为 1 ~ 10000000000000）"})
 			return
 		}
 		// If you add more fields, please also update redemption.Update()

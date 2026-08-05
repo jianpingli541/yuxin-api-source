@@ -160,7 +160,7 @@ func StripeWebhook(c *gin.Context) {
 	}
 
 	signature := c.GetHeader("Stripe-Signature")
-	logger.LogInfo(ctx, fmt.Sprintf("Stripe webhook 收到请求 path=%q client_ip=%s signature=%q body=%q", c.Request.RequestURI, c.ClientIP(), signature, string(payload)))
+	logger.LogInfo(ctx, fmt.Sprintf("Stripe webhook 收到请求 path=%q client_ip=%s signature=%q body_len=%d", c.Request.RequestURI, c.ClientIP(), signature, len(payload)))
 	event, err := webhook.ConstructEventWithOptions(payload, signature, setting.StripeWebhookSecret, webhook.ConstructEventOptions{
 		IgnoreAPIVersionMismatch: true,
 	})
@@ -264,6 +264,16 @@ func fulfillOrder(ctx context.Context, event stripe.Event, referenceId string, c
 
 	LockOrder(referenceId)
 	defer UnlockOrder(referenceId)
+	// 2026-08-04 安全修复: 校验回调实付金额与订单金额一致(容差0.01元), 防止少付多充
+	// (订单金额由服务端下单时锁定; amount_total 单位为分)
+	if topUp := model.GetTopUpByTradeNo(referenceId); topUp != nil {
+		total, parseErr := strconv.ParseFloat(event.GetObjectValue("amount_total"), 64)
+		paid := total / 100
+		if parseErr != nil || paid-topUp.Money > 0.01 || topUp.Money-paid > 0.01 {
+			logger.LogWarn(ctx, fmt.Sprintf("Stripe 回调金额与订单不一致, 拒绝入账 trade_no=%s paid=%.2f order=%.2f client_ip=%s", referenceId, paid, topUp.Money, callerIp))
+			return
+		}
+	}
 	payload := map[string]any{
 		"customer":     customerId,
 		"amount_total": event.GetObjectValue("amount_total"),

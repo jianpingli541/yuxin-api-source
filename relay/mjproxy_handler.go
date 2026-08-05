@@ -28,7 +28,10 @@ import (
 
 func RelayMidjourneyImage(c *gin.Context) {
 	taskId := c.Param("id")
-	midjourneyTask := model.GetByOnlyMJId(taskId)
+	// 2026-08-04 安全修复: 由 GetByOnlyMJId(全局) 改为 GetByMJId(userId, mjId)
+	// 归属校验, 防止越权读取其他用户的任务图片(IDOR)。
+	userId := c.GetInt("id")
+	midjourneyTask := model.GetByMJId(userId, taskId)
 	if midjourneyTask == nil {
 		c.JSON(400, gin.H{
 			"error": "midjourney_task_not_found",
