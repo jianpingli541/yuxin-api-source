@@ -78,6 +78,9 @@ func SetApiRouter(router *gin.Engine) {
 	apiRouter.POST("/wechat/notify", anonymousRequestBodyLimit, controller.WechatNotify)
 	apiRouter.POST("/wechat/refund-notify", anonymousRequestBodyLimit, controller.WechatRefundNotify)
 	apiRouter.POST("/alipay/notify", anonymousRequestBodyLimit, controller.AlipayNotify)
+	// 聚合通道通知别名：微信/支付宝后台可任选原 URL 或聚合 URL 配置回调
+	apiRouter.POST("/user/epay/notify/wxpay", anonymousRequestBodyLimit, controller.WechatNotify)
+	apiRouter.POST("/user/epay/notify/alipay", anonymousRequestBodyLimit, controller.AlipayNotify)
 		// :env separates test vs prod URLs so the operator can register each
 		// in Pancake's matching webhook slot; handler enforces env match.
 		apiRouter.POST("/waffo-pancake/webhook/:env", anonymousRequestBodyLimit, controller.WaffoPancakeWebhook)

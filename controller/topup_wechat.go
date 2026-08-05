@@ -70,20 +70,26 @@ func RequestWechatAmount(c *gin.Context) {
 		c.JSON(http.StatusOK, gin.H{"message": "success", "data": strconv.FormatFloat(payMoney, 'f', 2, 64)})
 }
 
-// RequestWechatPay 创建微信 Native 支付订单，返回 code_url（二维码内容）
+// RequestWechatPay 兼容入口：原 /api/user/self/wechat/pay 路由保留，
+// 实际逻辑下沉到 requestWechatPayCore 供 RequestEpay 聚合通道复用。
 func RequestWechatPay(c *gin.Context) {
 	if !isWechatTopUpEnabled() {
 		c.JSON(http.StatusOK, gin.H{"message": "error", "data": "微信支付未启用"})
 		return
 	}
-
 	var req WechatPayRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusOK, gin.H{"message": "error", "data": "参数错误"})
 		return
 	}
+	requestWechatPayCore(c, req.Amount, req.PayMethodIndex)
+}
+
+// requestWechatPayCore 创建微信 Native 支付订单的原子能力。
+// 聚合通道 RequestEpay 与独立入口 RequestWechatPay 共用此函数。
+func requestWechatPayCore(c *gin.Context, amount int64, payMethodIndex *int) {
 	wechatMin := int64(setting.WechatMinTopUp)
-	if req.Amount < wechatMin {
+	if amount < wechatMin {
 		c.JSON(http.StatusOK, gin.H{"message": "error", "data": fmt.Sprintf("充值数量不能小于 %d", wechatMin)})
 		return
 	}
@@ -95,12 +101,12 @@ func RequestWechatPay(c *gin.Context) {
 		return
 	}
 
-	if req.PayMethodIndex == nil {
+	if payMethodIndex == nil {
 		c.JSON(http.StatusOK, gin.H{"message": "error", "data": "请选择支付方式"})
 		return
 	}
 	methods := setting.GetWechatPayMethods()
-	idx := *req.PayMethodIndex
+	idx := *payMethodIndex
 	if idx < 0 || idx >= len(methods) {
 		c.JSON(http.StatusOK, gin.H{"message": "error", "data": "不支持的支付方式"})
 		return
@@ -111,7 +117,7 @@ func RequestWechatPay(c *gin.Context) {
 	}
 
 	group, _ := model.GetUserGroup(id, true)
-	payMoney := getWechatPayMoney(float64(req.Amount), group)
+	payMoney := getWechatPayMoney(float64(amount), group)
 	if payMoney < 0.01 {
 		c.JSON(http.StatusOK, gin.H{"message": "error", "data": "充值金额过低"})
 		return
@@ -120,9 +126,9 @@ func RequestWechatPay(c *gin.Context) {
 	outTradeNo := fmt.Sprintf("WECHAT-%d-%d-%s", id, time.Now().UnixMilli(), randstr.String(6))
 
 	// Token 模式下归一化 Amount，避免 RechargeWechat 双重放大
-	amount := req.Amount
+	// amount 已由参数传入, Token 模式下做归一化
 	if operation_setting.GetQuotaDisplayType() == operation_setting.QuotaDisplayTypeTokens {
-		amount = int64(float64(req.Amount) / common.QuotaPerUnit)
+		amount = int64(float64(amount) / common.QuotaPerUnit)
 		if amount < 1 {
 			amount = 1
 		}
@@ -139,7 +145,7 @@ func RequestWechatPay(c *gin.Context) {
 		Status:          common.TopUpStatusPending,
 	}
 	if err := topUp.Insert(); err != nil {
-		logger.LogError(c.Request.Context(), fmt.Sprintf("微信支付 创建充值订单失败 user_id=%d trade_no=%s amount=%d error=%q", id, outTradeNo, req.Amount, err.Error()))
+		logger.LogError(c.Request.Context(), fmt.Sprintf("微信支付 创建充值订单失败 user_id=%d trade_no=%s amount=%d error=%q", id, outTradeNo, amount, err.Error()))
 		c.JSON(http.StatusOK, gin.H{"message": "error", "data": "创建订单失败"})
 		return
 	}
@@ -199,7 +205,7 @@ func RequestWechatPay(c *gin.Context) {
 		return
 	}
 
-	logger.LogInfo(c.Request.Context(), fmt.Sprintf("微信支付 充值订单创建成功 user_id=%d trade_no=%s amount=%d money=%.2f", id, outTradeNo, req.Amount, payMoney))
+	logger.LogInfo(c.Request.Context(), fmt.Sprintf("微信支付 充值订单创建成功 user_id=%d trade_no=%s amount=%d money=%.2f", id, outTradeNo, amount, payMoney))
 
 	c.JSON(http.StatusOK, gin.H{
 		"message": "success",

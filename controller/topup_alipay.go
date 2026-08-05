@@ -67,20 +67,26 @@ func RequestAlipayAmount(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"message": "success", "data": strconv.FormatFloat(payMoney, 'f', 2, 64)})
 }
 
-// RequestAlipayPay 创建支付宝当面付 precreate 订单，返回 qr_code（二维码内容）
+// RequestAlipayPay 兼容入口：原 /api/user/self/alipay/pay 路由保留，
+// 实际逻辑下沉到 requestAlipayPayCore 供 RequestEpay 聚合通道复用。
 func RequestAlipayPay(c *gin.Context) {
 	if !isAlipayTopUpEnabled() {
 		c.JSON(http.StatusOK, gin.H{"message": "error", "data": "支付宝未启用"})
 		return
 	}
-
 	var req AlipayPayRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusOK, gin.H{"message": "error", "data": "参数错误"})
 		return
 	}
+	requestAlipayPayCore(c, req.Amount, req.PayMethodIndex)
+}
+
+// requestAlipayPayCore 创建支付宝当面付 precreate 订单的原子能力。
+// 聚合通道 RequestEpay 与独立入口 RequestAlipayPay 共用此函数。
+func requestAlipayPayCore(c *gin.Context, amount int64, payMethodIndex *int) {
 	alipayMin := int64(setting.AlipayMinTopUp)
-	if req.Amount < alipayMin {
+	if amount < alipayMin {
 		c.JSON(http.StatusOK, gin.H{"message": "error", "data": fmt.Sprintf("充值数量不能小于 %d", alipayMin)})
 		return
 	}
@@ -92,12 +98,12 @@ func RequestAlipayPay(c *gin.Context) {
 		return
 	}
 
-	if req.PayMethodIndex == nil {
+	if payMethodIndex == nil {
 		c.JSON(http.StatusOK, gin.H{"message": "error", "data": "请选择支付方式"})
 		return
 	}
 	methods := setting.GetAlipayPayMethods()
-	idx := *req.PayMethodIndex
+	idx := *payMethodIndex
 	if idx < 0 || idx >= len(methods) {
 		c.JSON(http.StatusOK, gin.H{"message": "error", "data": "不支持的支付方式"})
 		return
@@ -108,7 +114,7 @@ func RequestAlipayPay(c *gin.Context) {
 	}
 
 	group, _ := model.GetUserGroup(id, true)
-	payMoney := getAlipayPayMoney(float64(req.Amount), group)
+	payMoney := getAlipayPayMoney(float64(amount), group)
 	if payMoney < 0.01 {
 		c.JSON(http.StatusOK, gin.H{"message": "error", "data": "充值金额过低"})
 		return
@@ -118,9 +124,9 @@ func RequestAlipayPay(c *gin.Context) {
 	outTradeNo := fmt.Sprintf("ALIPAY-%d-%d-%s", id, time.Now().UnixMilli(), randstr.String(6))
 
 	// Token 模式下归一化 Amount，避免入账双重放大
-	amount := req.Amount
+	// amount 已由参数传入, Token 模式下做归一化
 	if operation_setting.GetQuotaDisplayType() == operation_setting.QuotaDisplayTypeTokens {
-		amount = int64(float64(req.Amount) / common.QuotaPerUnit)
+		amount = int64(float64(amount) / common.QuotaPerUnit)
 		if amount < 1 {
 			amount = 1
 		}
@@ -138,7 +144,7 @@ func RequestAlipayPay(c *gin.Context) {
 		Status:          common.TopUpStatusPending,
 	}
 	if err := topUp.Insert(); err != nil {
-		logger.LogError(c.Request.Context(), fmt.Sprintf("支付宝 创建充值订单失败 user_id=%d trade_no=%s amount=%d error=%q", id, outTradeNo, req.Amount, err.Error()))
+		logger.LogError(c.Request.Context(), fmt.Sprintf("支付宝 创建充值订单失败 user_id=%d trade_no=%s amount=%d error=%q", id, outTradeNo, amount, err.Error()))
 		c.JSON(http.StatusOK, gin.H{"message": "error", "data": "创建订单失败"})
 		return
 	}
@@ -196,7 +202,7 @@ func RequestAlipayPay(c *gin.Context) {
 		return
 	}
 
-	logger.LogInfo(ctx, fmt.Sprintf("支付宝 充值订单创建成功 user_id=%d trade_no=%s amount=%d money=%.2f", id, outTradeNo, req.Amount, payMoney))
+	logger.LogInfo(ctx, fmt.Sprintf("支付宝 充值订单创建成功 user_id=%d trade_no=%s amount=%d money=%.2f", id, outTradeNo, amount, payMoney))
 
 	expireAt := time.Now().Add(15 * time.Minute).Unix() // 支付宝默认 15 分钟订单有效期
 	c.JSON(http.StatusOK, gin.H{
