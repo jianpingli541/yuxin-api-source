@@ -1,0 +1,80 @@
+.idea
+.vscode
+.zed
+.history
+upload
+*.exe
+*.db
+build
+*.db-journal
+logs
+web/dist
+web/node_modules
+.env
+one-api
+new-api
+/__debug_bin*
+.DS_Store
+tiktoken_cache
+.eslintcache
+.gocache
+.gomodcache/
+.cache
+plans
+.claude
+.cursor
+
+electron/node_modules
+electron/dist
+/data/
+.gomodcache/
+.gocache-temp
+.gopath
+.test
+token_estimator_test.go
+skills-lock.json
+.playwright-mcp
+
+# Local-only live probes and scratch test workspaces.
+.local-tests/
+service/relayconvert/chat_responses_live_local_test.go
+service/openaicompat/chat_responses_live_local_test.go
+
+# 豫鑫 API 自定义 — 不提交编译产物
+new-api-custom
+*.bak
+router/api-router.go.bak
+web/dist/status.html
+web/dist/pricing.html
+.omc/
+.agents/
+Acceptance-PRD.md
+
+# 豫鑫商用化 — 交付前补漏（防敏感备份入 git）
+*.bak.*
+*.m0
+backups/
+docs-backup-*/
+
+# ===== 卫生清理增补（2026-08-03）=====
+# 说明：*.bak、*.bak.*、*.m0、backups/、docs-backup-*/ 已在上方覆盖，本块只补未覆盖项。
+
+# 运行时日志（兜底——nginx volume logs/ 应已挂出，但保险起见）
+nginx/logs/*.log
+
+# 编辑器/补丁临时文件
+*.swp
+*.swo
+*.tmp
+*.orig
+*.rej
+Thumbs.db
+
+# 交付前自检修复 2026-08-04：凭据边界红线（B2）
+nginx/ssl/*.key
+nginx/ssl/*.crt
+nginx/ssl/*.pem
+nginx/letsencrypt/
+acceptance/node_modules/
+new-api-custom.*-pre-build
+new-api-custom.*.bak

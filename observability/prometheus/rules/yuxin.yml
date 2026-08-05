@@ -1,0 +1,31 @@
+groups:
+- name: yuxin-alerts
+  interval: 30s
+  rules:
+  - alert: NewAPIDown
+    expr: up{job="yuxin-api"} == 0
+    for: 1m
+    labels: { severity: critical }
+    annotations:
+      summary: "new-api 容器不可用 ({{ $labels.instance }})"
+      description: "核心网关进程失联 >1 分钟，用户无法调用 API"
+  - alert: APIHighLatency
+    expr: histogram_quantile(0.99, rate(yuxin_api_request_duration_seconds_bucket[5m])) > 5
+    for: 5m
+    labels: { severity: warning }
+    annotations:
+      summary: "API P99 延迟超 5s"
+      description: "商用 SLA 基线告警"
+  - alert: APIErrorRateHigh
+    expr: sum(rate(yuxin_api_requests_total{type="failed"}[5m])) / clamp_min(sum(rate(yuxin_api_requests_total[5m])), 1) > 0.1
+    for: 5m
+    labels: { severity: warning }
+    annotations:
+      summary: "API 错误率超 10%"
+  - alert: DiskUsageHigh
+    expr: (1 - (node_filesystem_avail_bytes{mountpoint="/"} / clamp_min(node_filesystem_size_bytes{mountpoint="/"}, 1))) > 0.85
+    for: 10m
+    labels: { severity: warning }
+    annotations:
+      summary: "磁盘占用超 85%"
+      description: "(需 node_exporter 采集主机指标)"

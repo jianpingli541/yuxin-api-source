@@ -1,0 +1,24 @@
+# Grafana ClickHouse 数据源 (运营看板用)
+# 依赖插件: grafana-clickhouse-datasource (需在 grafana 容器装, 见本目录 README.md)
+# 走 HTTP 8123 接口, 走 docker 网络别名 gateway-clickhouse (同 api-gateway_gateway-net)
+apiVersion: 1
+
+datasources:
+  - name: ClickHouse-Logs
+    uid: yuxin-clickhouse
+    # 插件提供的数据源类型名 (非 ClickHouse 官方内置, 必须先装插件)
+    type: grafana-clickhouse-datasource
+    access: proxy
+    isDefault: false
+    editable: true
+    jsonData:
+      host: gateway-clickhouse
+      port: 8123
+      # 调用日志所在库
+      defaultDatabase: new_api_logs
+      # 只读账号建议 (见 README, 默认用 default 需容器内无密码或配 password)
+      username: default
+      tlsSkipVerify: true
+    secureJsonData:
+      # 若 ClickHouse 启用了密码, 在此填; 当前内网容器无密码可留空
+      password: ""

@@ -1,0 +1,100 @@
+{
+  "dashboard": {
+    "id": null,
+    "uid": "api-gateway-metrics",
+    "title": "API Gateway 监控",
+    "tags": ["api", "gateway", "metrics"],
+    "timezone": "browser",
+    "schemaVersion": 16,
+    "version": 0,
+    "refresh": "10s",
+    "panels": [
+      {
+        "id": 1,
+        "gridPos": {"h": 8, "w": 12, "x": 0, "y": 0},
+        "type": "graph",
+        "title": "总请求数（5分钟速率）",
+        "targets": [
+          {"expr": "rate(yuxin_api_requests_total[5m])", "legendFormat": "请求速率"}
+        ],
+        "yaxes": [{"format": "reqps"}, {"format": "short"}]
+      },
+      {
+        "id": 2,
+        "gridPos": {"h": 8, "w": 12, "x": 12, "y": 0},
+        "type": "graph",
+        "title": "错误率（5分钟）",
+        "targets": [
+          {"expr": "sum(rate(yuxin_api_requests_total{type=\"failed\"}[5m])) / sum(rate(yuxin_api_requests_total[5m])) * 100", "legendFormat": "错误率 %"}
+        ],
+        "yaxes": [{"format": "percent"}, {"format": "short"}]
+      },
+      {
+        "id": 3,
+        "gridPos": {"h": 8, "w": 12, "x": 0, "y": 8},
+        "type": "graph",
+        "title": "延迟分布（P50, P95, P99）",
+        "targets": [
+          {"expr": "histogram_quantile(0.50, sum(rate(yuxin_api_request_duration_seconds_bucket[5m])) by (le))", "legendFormat": "P50"},
+          {"expr": "histogram_quantile(0.95, sum(rate(yuxin_api_request_duration_seconds_bucket[5m])) by (le))", "legendFormat": "P95"},
+          {"expr": "histogram_quantile(0.99, sum(rate(yuxin_api_request_duration_seconds_bucket[5m])) by (le))", "legendFormat": "P99"}
+        ],
+        "yaxes": [{"format": "s"}, {"format": "short"}]
+      },
+      {
+        "id": 4,
+        "gridPos": {"h": 8, "w": 12, "x": 12, "y": 8},
+        "type": "graph",
+        "title": "Token 使用量（按模型）",
+        "targets": [
+          {"expr": "sum(rate(yuxin_api_tokens_total[5m])) by (model)", "legendFormat": "{{model}}"}
+        ],
+        "yaxes": [{"format": "short"}, {"format": "short"}]
+      },
+      {
+        "id": 5,
+        "gridPos": {"h": 8, "w": 12, "x": 0, "y": 16},
+        "type": "graph",
+        "title": "成本统计（美元/小时）",
+        "targets": [
+          {"expr": "sum(rate(yuxin_api_cost_usd_total[1h]))", "legendFormat": "每小时成本"}
+        ],
+        "yaxes": [{"format": "currencyUSD"}, {"format": "short"}]
+      },
+      {
+        "id": 6,
+        "gridPos": {"h": 8, "w": 12, "x": 12, "y": 16},
+        "type": "graph",
+        "title": "渠道请求数（按渠道）",
+        "targets": [
+          {"expr": "sum(rate(yuxin_api_channel_requests_total[5m])) by (channel)", "legendFormat": "渠道 {{channel}}"}
+        ],
+        "yaxes": [{"format": "reqps"}, {"format": "short"}]
+      },
+      {
+        "id": 7,
+        "gridPos": {"h": 8, "w": 12, "x": 0, "y": 24},
+        "type": "graph",
+        "title": "缓存命中率",
+        "targets": [
+          {"expr": "sum(rate(yuxin_api_cache_hits_total[5m])) / (sum(rate(yuxin_api_cache_hits_total[5m])) + sum(rate(yuxin_api_cache_misses_total[5m]))) * 100", "legendFormat": "命中率 %"}
+        ],
+        "yaxes": [{"format": "percent"}, {"format": "short"}]
+      },
+      {
+        "id": 8,
+        "gridPos": {"h": 8, "w": 12, "x": 12, "y": 24},
+        "type": "table",
+        "title": "渠道健康状态",
+        "targets": [
+          {"expr": "yuxin_api_channel_healthy", "legendFormat": "", "format": "table", "instant": true}
+        ],
+        "styles": [
+          {"pattern": "channel", "type": "string"},
+          {"pattern": "Value", "type": "string", "colors": ["red", "yellow", "green"], "thresholds": [0.5, 0.9]}
+        ]
+      }
+    ]
+  },
+  "overwrite": true
+}

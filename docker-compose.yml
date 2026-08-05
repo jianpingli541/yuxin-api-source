@@ -1,0 +1,157 @@
+# ============================================================
+# API Gateway - Production Docker Compose (Full Stack)
+# ============================================================
+
+services:
+  # ----------------------------------------------------------
+  # Nginx 反向代理 (对外暴露 80 端口)
+  # ----------------------------------------------------------
+  nginx:
+    image: nginx:alpine
+    container_name: gateway-nginx
+    restart: always
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx/conf.d:/etc/nginx/conf.d:ro
+      - ./nginx/logs:/var/log/nginx
+      - ./nginx/ssl:/etc/nginx/ssl:ro
+      - ./nginx/certbot:/var/www/certbot
+      - ./nginx/letsencrypt:/etc/letsencrypt:ro
+    depends_on:
+      - new-api
+    networks:
+      - gateway-net
+
+  # ----------------------------------------------------------
+  # new-api 核心服务 (Go 网关 + React 前端)
+  # ----------------------------------------------------------
+  new-api:
+    image: yuxin-api:v1.2.4-simpleauth
+    container_name: gateway-new-api
+    restart: always
+    command: --log-dir /app/logs
+    volumes:
+      - ./data:/data
+      - ./logs:/app/logs
+    env_file:
+      - .env
+    expose:
+      - "3000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_started
+    networks:
+      - gateway-net
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q -O - http://localhost:3000/api/status | grep success || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  # ----------------------------------------------------------
+  # PostgreSQL 数据库
+  # ----------------------------------------------------------
+  postgres:
+    image: postgres:16-alpine
+    container_name: gateway-postgres
+    restart: always
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+      TZ: Asia/Shanghai
+    volumes:
+      - pg_data:/var/lib/postgresql/data
+    expose:
+      - "5432"
+    networks:
+      - gateway-net
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+
+  # ----------------------------------------------------------
+  # Redis 缓存
+  # ----------------------------------------------------------
+  redis:
+    image: redis:7-alpine
+    container_name: gateway-redis
+    restart: always
+    command: ["redis-server", "--requirepass", "${REDIS_PASSWORD}", "--maxmemory", "1gb", "--maxmemory-policy", "allkeys-lru"]
+    expose:
+      - "6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - gateway-net
+
+  # ----------------------------------------------------------
+  # ClickHouse (日志分析)
+  # ----------------------------------------------------------
+  clickhouse:
+    image: clickhouse/clickhouse-server:24.8-alpine
+    container_name: gateway-clickhouse
+    restart: always
+    environment:
+      CLICKHOUSE_DB: new_api_logs
+      CLICKHOUSE_USER: default
+      CLICKHOUSE_PASSWORD: ${CH_PASS}
+      CLICKHOUSE_DEFAULT_ACCESS_MANAGEMENT: 1
+    volumes:
+      - clickhouse_data:/var/lib/clickhouse
+    expose:
+      - "9000"
+      - "8123"
+    networks:
+      - gateway-net
+    healthcheck:
+      test: ["CMD-SHELL", "clickhouse-client --query \"SELECT 1\" >/dev/null 2>&1 || exit 1"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+
+  # ----------------------------------------------------------
+  # wechat-server 微信公众号网关（登录验证码校验，songquanpeng/wechat-server）
+  # ----------------------------------------------------------
+  wechat-server:
+    image: justsong/wechat-server
+    container_name: gateway-wechat-server
+    restart: always
+    environment:
+      - SESSION_SECRET=${WECHAT_SESSION_SECRET}
+      - TZ=Asia/Shanghai
+    dns:
+      - 119.29.29.29
+      - 223.5.5.5
+    volumes:
+      - wechat_server_data:/data
+      - ./wechat-server-resolv.conf:/etc/resolv.conf:ro
+    ports:
+      - "127.0.0.1:3002:3000" # 管理控制台仅本机可访问（默认 root/123456，首次登录后立即改密）
+    expose:
+      - "3000"
+    networks:
+      - gateway-net
+
+volumes:
+  pg_data:
+    driver: local
+  redis_data:
+    driver: local
+  clickhouse_data:
+    driver: local
+  wechat_server_data:
+    driver: local
+
+networks:
+  gateway-net:
+    driver: bridge
