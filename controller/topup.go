@@ -101,7 +101,7 @@ func GetTopUpInfo(c *gin.Context) {
 	// 避免前端同时显示两条微信按钮。
 	enableWechat := isWechatTopUpEnabled()
 	if enableWechat {
-		filtered := payMethods[:0]
+		filtered := make([]map[string]string, 0, len(payMethods))
 		for _, method := range payMethods {
 			if method["type"] == "wxpay" {
 				continue
@@ -132,7 +132,7 @@ func GetTopUpInfo(c *gin.Context) {
 	// 默认 PayMethods 中的 type=alipay 是历史聚合通道的占位条目，启用支付宝原生支付后用新条目替换。
 	enableAlipay := isAlipayTopUpEnabled()
 	if enableAlipay {
-		filtered := payMethods[:0]
+		filtered := make([]map[string]string, 0, len(payMethods))
 		for _, method := range payMethods {
 			if method["type"] == "alipay" {
 				continue
