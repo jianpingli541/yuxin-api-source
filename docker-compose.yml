@@ -28,7 +28,7 @@ services:
   # new-api 核心服务 (Go 网关 + React 前端)
   # ----------------------------------------------------------
   new-api:
-    image: yuxin-api:v1.2.1-yuxin
+    image: yuxin-api:v1.2.4-simpleauth
     container_name: gateway-new-api
     restart: always
     command: --log-dir /app/logs
@@ -119,12 +119,37 @@ services:
       retries: 5
       start_period: 10s
 
+  # ----------------------------------------------------------
+  # wechat-server 微信公众号网关（登录验证码校验，songquanpeng/wechat-server）
+  # ----------------------------------------------------------
+  wechat-server:
+    image: justsong/wechat-server
+    container_name: gateway-wechat-server
+    restart: always
+    environment:
+      - SESSION_SECRET=${WECHAT_SESSION_SECRET}
+      - TZ=Asia/Shanghai
+    dns:
+      - 119.29.29.29
+      - 223.5.5.5
+    volumes:
+      - wechat_server_data:/data
+      - ./wechat-server-resolv.conf:/etc/resolv.conf:ro
+    ports:
+      - "127.0.0.1:3002:3000" # 管理控制台仅本机可访问（默认 root/123456，首次登录后立即改密）
+    expose:
+      - "3000"
+    networks:
+      - gateway-net
+
 volumes:
   pg_data:
     driver: local
   redis_data:
     driver: local
   clickhouse_data:
+    driver: local
+  wechat_server_data:
     driver: local
 
 networks:
