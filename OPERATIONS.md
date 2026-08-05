@@ -258,3 +258,32 @@ docker exec gateway-postgres psql -U postgres -d new-api -c \
 
 ---
 
+
+## 八、发布流水线（2026-08-05 新增）
+
+一条命令完成：前端构建 → Go 编译 → 打镜像 → **AGPL 源码披露推送** → 部署 → 健康检查。
+
+```bash
+bash scripts/release.sh <镜像标签>          # 例: v1.2.5-yuxin
+bash scripts/release.sh <镜像标签> --skip-web  # 前端无改动时跳过 web 构建
+```
+
+关键设计：
+
+1. **AGPL 合规门禁**：源码披露快照推送失败时发布中止，旧版本继续运行——
+   保证任何时刻线上代码都有对应的公开源码（AGPL-3.0 第 13 条义务）。
+2. **披露仓库**：https://github.com/jianpingli541/yuxin-api-source
+   快照为脱敏后的干净单 commit：不含 git 历史、不含凭据/内部文档、
+   真实 IP 替换为文档保留段（脚本 `scripts/snapshot-source.sh`）。
+3. **推送凭据**：`/root/.config/yuxin-release/github-token`（600 权限）。
+   令牌失效时重新生成 GitHub PAT 写入该文件即可。
+4. 每次发布自动备份 compose 文件（`docker-compose.yml.bak.<时间戳>`）。
+
+单独重新生成/推送源码快照（不发布）：
+
+```bash
+bash scripts/snapshot-source.sh          # 仅生成到 /root/yuxin-api-source-snapshot
+bash scripts/snapshot-source.sh --push   # 生成并推送
+```
+
+⚠️ 不要绕过本脚本手工改镜像发布——会导致运行版本与披露源码不一致。

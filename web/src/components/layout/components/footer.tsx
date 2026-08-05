@@ -19,6 +19,7 @@ For commercial licensing, please contact support@quantumnous.com
 import { Link } from '@tanstack/react-router'
 import { Fragment, useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
+import DOMPurify from 'dompurify'
 
 import { useStatus } from '@/hooks/use-status'
 import { useSystemConfig } from '@/hooks/use-system-config'
@@ -136,7 +137,17 @@ function ProjectAttribution(props: { currentYear: number; inline?: boolean }) {
       >
         {t('New API')}
       </a>
-      . {t(NEW_API_FOOTER_ATTRIBUTION_KEY)}
+      . {t(NEW_API_FOOTER_ATTRIBUTION_KEY)}{' '}
+      {/* AGPL-3.0 Section 13: modified version source disclosure */}
+      ·{' '}
+      <a
+        href='https://github.com/jianpingli541/yuxin-api-source'
+        target='_blank'
+        rel='noopener noreferrer'
+        className='text-foreground/70 hover:text-foreground font-medium transition-colors'
+      >
+        Source Code
+      </a>
     </span>
   )
   if (props.inline) {
@@ -162,6 +173,9 @@ export function Footer(props: FooterProps) {
   const displayName = systemName || props.name || 'New API'
   const isDemoSiteMode = Boolean(demoSiteEnabled)
   const currentYear = new Date().getFullYear()
+  // 2026-08-04 安全修复: footer_html 来自系统设置(root 可写), 渲染前强制 DOMPurify
+  // 消毒, 防止存储型 XSS 对全站访问者生效(含未登录用户)。
+  const sanitizedFooterHtml = useMemo(() => (footerHtml ? DOMPurify.sanitize(footerHtml) : ''), [footerHtml])
 
   const fallbackColumns = useMemo<FooterColumnProps[]>(
     () => [
@@ -234,7 +248,7 @@ export function Footer(props: FooterProps) {
           <div className='bg-muted/20 border-border/50 flex flex-col items-center justify-between gap-4 rounded-2xl border px-4 py-4 backdrop-blur-sm sm:flex-row sm:px-5'>
             <div
               className='custom-footer text-muted-foreground min-w-0 text-center text-sm sm:text-left'
-              dangerouslySetInnerHTML={{ __html: footerHtml }}
+              dangerouslySetInnerHTML={{ __html: sanitizedFooterHtml }}
             />
             <div className='border-border/60 text-muted-foreground/45 flex w-full flex-wrap items-center justify-center gap-x-3 gap-y-1 border-t pt-4 text-xs sm:w-auto sm:justify-end sm:border-t-0 sm:border-l sm:pt-0 sm:pl-5'>
               <LegalLinks />

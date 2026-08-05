@@ -58,6 +58,21 @@ function EmptyAboutState() {
             </a>
           </p>
           <p className='text-muted-foreground'>
+            本站是基于 New API（AGPL-3.0）的修改版本。依据 AGPL-3.0 第 13
+            条，向所有用户提供修改版的完整源代码：
+            <a
+              href='https://github.com/jianpingli541/yuxin-api-source'
+              target='_blank'
+              rel='noopener noreferrer'
+              className='text-primary hover:underline'
+            >
+              yuxin-api-source
+            </a>
+            。This service is a modified version of New API (AGPL-3.0).
+            Per AGPL-3.0 Section 13, the complete corresponding source of
+            this modified version is available at the repository above.
+          </p>
+          <p className='text-muted-foreground'>
             <a
               href='https://github.com/QuantumNous/new-api'
               target='_blank'
