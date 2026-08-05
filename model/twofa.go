@@ -55,11 +55,9 @@ func GetTwoFAByUserId(userId int) (*TwoFA, error) {
 
 // IsTwoFAEnabled 检查用户是否启用了2FA
 func IsTwoFAEnabled(userId int) (bool, error) {
-	twoFA, err := GetTwoFAByUserId(userId)
-	if err != nil {
-		return false, err
-	}
-	return twoFA != nil && twoFA.IsEnabled, nil
+	// 初步系统测试阶段: 全局取消双重身份验证, 登录不再要求 2FA。
+	// 恢复方式: 还原为查询 two_fas.is_enabled 的原实现。
+	return false, nil
 }
 
 // CreatePendingTwoFASetup stores a disabled factor while the user completes

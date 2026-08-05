@@ -79,7 +79,7 @@ func resolveUserSortOptions(sortOptions []UserSortOptions) UserSortOptions {
 type User struct {
 	Id               int                        `json:"id"`
 	Username         string                     `json:"username" gorm:"unique;index" validate:"max=20"`
-	Password         string                     `json:"password" gorm:"not null;" validate:"min=8,max=20"`
+	Password         string                     `json:"password" gorm:"not null;" validate:"min=6,max=20"`
 	OriginalPassword string                     `json:"original_password" gorm:"-:all"` // this field is only for Password change verification, don't save it to database!
 	DisplayName      string                     `json:"display_name" gorm:"index" validate:"max=20"`
 	Role             int                        `json:"role" gorm:"type:int;default:1"`   // admin, common
@@ -595,7 +595,7 @@ func (user *User) Insert(inviterId int) error {
 				return err
 			}
 			user.Quota = common.QuotaForNewUser
-			user.AffCode = common.GetRandomString(4)
+			user.AffCode = common.GenerateAffCode()
 
 			// 初始化用户设置，包括默认的边栏配置
 			if user.Setting == "" {
@@ -659,7 +659,7 @@ func (user *User) InsertWithTx(tx *gorm.DB, inviterId int) error {
 			return err
 		}
 		user.Quota = common.QuotaForNewUser
-		user.AffCode = common.GetRandomString(4)
+		user.AffCode = common.GenerateAffCode()
 
 		// 初始化用户设置
 		if user.Setting == "" {

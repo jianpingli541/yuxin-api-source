@@ -1,6 +1,7 @@
 package common
 
 import (
+	"crypto/rand"
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
@@ -13,6 +14,54 @@ import (
 )
 
 const LocalLogContentLimit = 2048
+
+// affCodeCharset 邀请码字符集(排除易混淆字符 0O1lI)
+const affCodeCharset = "abcdefghijkmnpqrstuvwxyzABCDEFGHJKLMNPQRSTUVWXYZ23456789"
+
+// GenerateAffCode 生成邀请码: crypto/rand 随机 6 位(2026-08-04 安全修复,
+// 替代 GetRandomString(4) 的 math/rand 弱随机与短长度, 降低碰撞与可预测性)。
+func GenerateAffCode() string {
+	chars := []byte(affCodeCharset)
+	n := len(chars)
+	buf := make([]byte, 6)
+	if _, err := rand.Read(buf); err != nil {
+		// crypto/rand 失败时回退到带随机种子的旧实现, 保证功能可用
+		return GetRandomString(6)
+	}
+	for i := range buf {
+		// 256 % 56 的微小偏斜可忽略(非密钥用途)
+		buf[i] = chars[int(buf[i])%n]
+	}
+	return string(buf)
+}
+
+// ValidatePasswordStrength 密码强度: >=6 位。
+// 初步系统测试阶段简化策略: 不要求字母+数字组合。
+// 测试完成后应恢复为 >=8 位且同时包含字母与数字 (2026-08-04 安全修复原策略)。
+func ValidatePasswordStrength(password string) bool {
+	return len(password) >= 6
+}
+
+// IsSafeBillingExpr 校验计费表达式是否含危险模式(2026-08-04 安全修复)。
+// 表达式在前端经 new Function 执行, 服务端必须过滤任何可逃逸到任意 JS
+// 的构造: 语句分隔、函数构造、全局对象访问、模板字面量、箭头函数等。
+func IsSafeBillingExpr(expr string) bool {
+	if strings.TrimSpace(expr) == "" {
+		return false
+	}
+	dangerous := []string{
+		";", "`", "$", "=>", "fetch(", "import(", "eval(", "Function",
+		"XMLHttpRequest", "document.", "window.", "globalThis", "constructor",
+		"require(", "process.", "navigator", "location.", "top.", "self.",
+		"this.", "new ", "return ", "throw ",
+	}
+	for _, d := range dangerous {
+		if strings.Contains(expr, d) {
+			return false
+		}
+	}
+	return true
+}
 
 // LocalLogPreview limits log-only content unless debug logging is enabled.
 func LocalLogPreview(content string) string {

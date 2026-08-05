@@ -35,6 +35,7 @@ type LoginRequest struct {
 var (
 	errUserPasswordUnset    = errors.New("user password is not set")
 	errOriginalPasswordFail = errors.New("original password is incorrect")
+	errPasswordWeak         = errors.New("password is too weak")
 )
 
 func Login(c *gin.Context) {
@@ -226,6 +227,11 @@ func Register(c *gin.Context) {
 	}
 	if err := common.Validate.Struct(&user); err != nil {
 		common.ApiErrorI18n(c, i18n.MsgUserInputInvalid, map[string]any{"Error": err.Error()})
+		return
+	}
+	// 密码强度校验(测试期策略: >=6位; 原策略 >=8位且含字母数字, 见 common.ValidatePasswordStrength)
+	if !common.ValidatePasswordStrength(user.Password) {
+		common.ApiErrorI18n(c, i18n.MsgInvalidParams)
 		return
 	}
 	if common.EmailVerificationEnabled {
@@ -886,6 +892,10 @@ func UpdateSelf(c *gin.Context) {
 			common.ApiErrorI18n(c, i18n.MsgUserOriginalPasswordError)
 			return
 		}
+		if errors.Is(err, errPasswordWeak) {
+			common.ApiErrorI18n(c, i18n.MsgPasswordTooWeak)
+			return
+		}
 		common.ApiError(c, err)
 		return
 	}
@@ -933,6 +943,11 @@ func UpdateSelf(c *gin.Context) {
 
 func checkUpdatePassword(originalPassword string, newPassword string, userId int) (updatePassword bool, err error) {
 	if newPassword == "" {
+		return
+	}
+	// 新密码强度校验(测试期策略同上)
+	if !common.ValidatePasswordStrength(newPassword) {
+		err = errPasswordWeak
 		return
 	}
 	var currentUser *model.User
@@ -1322,7 +1337,9 @@ var topUpLocks sync.Map
 var topUpCreateLock sync.Mutex
 
 type topUpTryLock struct {
-	ch chan struct{}
+	ch       chan struct{}
+	mu       sync.Mutex
+	refCount int
 }
 
 func newTopUpTryLock() *topUpTryLock {
@@ -1345,16 +1362,40 @@ func (l *topUpTryLock) Unlock() {
 	}
 }
 
+// acquire 引用计数 +1(调用方持有)
+func (l *topUpTryLock) acquire() {
+	l.mu.Lock()
+	l.refCount++
+	l.mu.Unlock()
+}
+
+// releaseTopUpLock 引用计数 -1, 归零时从 map 删除条目,
+// 防止长期运行 topUpLocks 内存线性增长(2026-08-04 安全修复)。
+func releaseTopUpLock(userID int, l *topUpTryLock) {
+	l.mu.Lock()
+	l.refCount--
+	zero := l.refCount == 0
+	l.mu.Unlock()
+	if zero {
+		topUpLocks.Delete(userID)
+	}
+}
+
 func getTopUpLock(userID int) *topUpTryLock {
 	if v, ok := topUpLocks.Load(userID); ok {
-		return v.(*topUpTryLock)
+		l := v.(*topUpTryLock)
+		l.acquire()
+		return l
 	}
 	topUpCreateLock.Lock()
 	defer topUpCreateLock.Unlock()
 	if v, ok := topUpLocks.Load(userID); ok {
-		return v.(*topUpTryLock)
+		l := v.(*topUpTryLock)
+		l.acquire()
+		return l
 	}
 	l := newTopUpTryLock()
+	l.refCount = 1
 	topUpLocks.Store(userID, l)
 	return l
 }
@@ -1367,6 +1408,7 @@ func TopUp(c *gin.Context) {
 
 	id := c.GetInt("id")
 	lock := getTopUpLock(id)
+	defer releaseTopUpLock(id, lock)
 	if !lock.TryLock() {
 		common.ApiErrorI18n(c, i18n.MsgUserTopUpProcessing)
 		return

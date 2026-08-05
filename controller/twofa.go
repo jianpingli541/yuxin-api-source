@@ -37,6 +37,12 @@ type Setup2FAResponse struct {
 
 // Setup2FA 初始化2FA设置
 func Setup2FA(c *gin.Context) {
+	// 初步系统测试阶段: 2FA 功能取消, 禁止新设置。
+	c.JSON(http.StatusOK, gin.H{
+		"success": false,
+		"message": "测试阶段已取消双重身份验证",
+	})
+	return
 	userId := c.GetInt("id")
 
 	// 检查用户是否已经启用2FA
@@ -132,6 +138,12 @@ func Setup2FA(c *gin.Context) {
 
 // Enable2FA 启用2FA
 func Enable2FA(c *gin.Context) {
+	// 初步系统测试阶段: 2FA 功能取消, 禁止启用。
+	c.JSON(http.StatusOK, gin.H{
+		"success": false,
+		"message": "测试阶段已取消双重身份验证",
+	})
+	return
 	var req Setup2FARequest
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusOK, gin.H{
