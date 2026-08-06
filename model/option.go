@@ -131,6 +131,10 @@ func InitOptionMap() {
 	common.OptionMap["AlipayAppId"] = setting.AlipayAppId
 	common.OptionMap["AlipayPrivateKey"] = setting.AlipayPrivateKey
 	common.OptionMap["AlipayPublicKey"] = setting.AlipayPublicKey
+	common.OptionMap["AlipayUseCertMode"] = strconv.FormatBool(setting.AlipayUseCertMode)
+	common.OptionMap["AlipayAppCertPublicKey"] = setting.AlipayAppCertPublicKey
+	common.OptionMap["AlipayPublicCert"] = setting.AlipayPublicCert
+	common.OptionMap["AlipayRootCert"] = setting.AlipayRootCert
 	common.OptionMap["AlipaySandbox"] = strconv.FormatBool(setting.AlipaySandbox)
 	common.OptionMap["AlipayNotifyUrl"] = setting.AlipayNotifyUrl
 	common.OptionMap["AlipayReturnUrl"] = setting.AlipayReturnUrl
@@ -546,6 +550,14 @@ func updateOptionMap(key string, value string) (err error) {
 		setting.AlipayPrivateKey = value
 	case "AlipayPublicKey":
 		setting.AlipayPublicKey = value
+	case "AlipayUseCertMode":
+		setting.AlipayUseCertMode = value == "true"
+	case "AlipayAppCertPublicKey":
+		setting.AlipayAppCertPublicKey = value
+	case "AlipayPublicCert":
+		setting.AlipayPublicCert = value
+	case "AlipayRootCert":
+		setting.AlipayRootCert = value
 	case "AlipaySandbox":
 		setting.AlipaySandbox = value == "true"
 	case "AlipayNotifyUrl":

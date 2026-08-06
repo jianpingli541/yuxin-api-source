@@ -30,6 +30,10 @@ func alipayCredHash() string {
 		setting.AlipayAppId + "|" +
 			setting.AlipayPrivateKey + "|" +
 			setting.AlipayPublicKey + "|" +
+			setting.AlipayAppCertPublicKey + "|" +
+			setting.AlipayPublicCert + "|" +
+			setting.AlipayRootCert + "|" +
+			fmt.Sprintf("%v", setting.AlipayUseCertMode) + "|" +
 			fmt.Sprintf("%v", setting.AlipaySandbox),
 	))
 	return hex.EncodeToString(h[:])
@@ -46,8 +50,14 @@ func GetAlipayClient(ctx context.Context) (*alipay.Client, error) {
 		return alipayBundle.client, nil
 	}
 
-	if setting.AlipayPrivateKey == "" || setting.AlipayPublicKey == "" {
-		return nil, fmt.Errorf("支付宝凭据未配置（缺少应用私钥或支付宝公钥）")
+	if setting.AlipayUseCertMode {
+		if setting.AlipayAppCertPublicKey == "" || setting.AlipayPublicCert == "" || setting.AlipayRootCert == "" {
+			return nil, fmt.Errorf("支付宝证书模式凭据未配置（缺少应用公钥证书 / 支付宝公钥证书 / 根证书）")
+		}
+	} else {
+		if setting.AlipayPrivateKey == "" || setting.AlipayPublicKey == "" {
+			return nil, fmt.Errorf("支付宝凭据未配置（缺少应用私钥或支付宝公钥）")
+		}
 	}
 
 	client, err := alipay.New(setting.AlipayAppId, setting.AlipayPrivateKey, !setting.AlipaySandbox)
@@ -55,8 +65,20 @@ func GetAlipayClient(ctx context.Context) (*alipay.Client, error) {
 		return nil, fmt.Errorf("初始化支付宝客户端失败: %v", err)
 	}
 
-	if err := client.LoadAliPayPublicKey(setting.AlipayPublicKey); err != nil {
-		return nil, fmt.Errorf("加载支付宝公钥失败: %v", err)
+	if setting.AlipayUseCertMode {
+		if err := client.LoadAppCertPublicKey(setting.AlipayAppCertPublicKey); err != nil {
+			return nil, fmt.Errorf("加载应用公钥证书失败: %v", err)
+		}
+		if err := client.LoadAlipayCertPublicKey(setting.AlipayPublicCert); err != nil {
+			return nil, fmt.Errorf("加载支付宝公钥证书失败: %v", err)
+		}
+		if err := client.LoadAliPayRootCert(setting.AlipayRootCert); err != nil {
+			return nil, fmt.Errorf("加载支付宝根证书失败: %v", err)
+		}
+	} else {
+		if err := client.LoadAliPayPublicKey(setting.AlipayPublicKey); err != nil {
+			return nil, fmt.Errorf("加载支付宝公钥失败: %v", err)
+		}
 	}
 
 	alipayBundle = &alipayClientBundle{

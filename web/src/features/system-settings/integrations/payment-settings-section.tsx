@@ -192,6 +192,10 @@ const paymentSchema = z.object({
   AlipayAppId: z.string(),
   AlipayPrivateKey: z.string(),
   AlipayPublicKey: z.string(),
+  AlipayUseCertMode: z.boolean(),
+  AlipayAppCertPublicKey: z.string(),
+  AlipayPublicCert: z.string(),
+  AlipayRootCert: z.string(),
   AlipaySandbox: z.boolean(),
   AlipayNotifyUrl: z.string(),
   AlipayReturnUrl: z.string(),
@@ -527,6 +531,10 @@ export function PaymentSettingsSection({
       AlipayAppId: values.AlipayAppId.trim(),
       AlipayPrivateKey: values.AlipayPrivateKey.trim(),
       AlipayPublicKey: values.AlipayPublicKey.trim(),
+      AlipayUseCertMode: values.AlipayUseCertMode,
+      AlipayAppCertPublicKey: values.AlipayAppCertPublicKey.trim(),
+      AlipayPublicCert: values.AlipayPublicCert.trim(),
+      AlipayRootCert: values.AlipayRootCert.trim(),
       AlipaySandbox: values.AlipaySandbox,
       AlipayNotifyUrl: values.AlipayNotifyUrl.trim(),
       AlipayReturnUrl: values.AlipayReturnUrl.trim(),
@@ -593,6 +601,10 @@ export function PaymentSettingsSection({
       AlipayAppId: initialRef.current.AlipayAppId.trim(),
       AlipayPrivateKey: initialRef.current.AlipayPrivateKey.trim(),
       AlipayPublicKey: initialRef.current.AlipayPublicKey.trim(),
+      AlipayUseCertMode: initialRef.current.AlipayUseCertMode,
+      AlipayAppCertPublicKey: initialRef.current.AlipayAppCertPublicKey.trim(),
+      AlipayPublicCert: initialRef.current.AlipayPublicCert.trim(),
+      AlipayRootCert: initialRef.current.AlipayRootCert.trim(),
       AlipaySandbox: initialRef.current.AlipaySandbox,
       AlipayNotifyUrl: initialRef.current.AlipayNotifyUrl.trim(),
       AlipayReturnUrl: initialRef.current.AlipayReturnUrl.trim(),
@@ -836,6 +848,18 @@ export function PaymentSettingsSection({
     }
     if (sanitized.AlipayPublicKey !== initial.AlipayPublicKey) {
       updates.push({ key: 'AlipayPublicKey', value: sanitized.AlipayPublicKey })
+    }
+    if (sanitized.AlipayUseCertMode !== initial.AlipayUseCertMode) {
+      updates.push({ key: 'AlipayUseCertMode', value: sanitized.AlipayUseCertMode })
+    }
+    if (sanitized.AlipayAppCertPublicKey !== initial.AlipayAppCertPublicKey) {
+      updates.push({ key: 'AlipayAppCertPublicKey', value: sanitized.AlipayAppCertPublicKey })
+    }
+    if (sanitized.AlipayPublicCert !== initial.AlipayPublicCert) {
+      updates.push({ key: 'AlipayPublicCert', value: sanitized.AlipayPublicCert })
+    }
+    if (sanitized.AlipayRootCert !== initial.AlipayRootCert) {
+      updates.push({ key: 'AlipayRootCert', value: sanitized.AlipayRootCert })
     }
     if (sanitized.AlipaySandbox !== initial.AlipaySandbox) {
       updates.push({ key: 'AlipaySandbox', value: sanitized.AlipaySandbox })

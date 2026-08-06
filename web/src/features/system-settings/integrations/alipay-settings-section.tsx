@@ -30,6 +30,10 @@ export interface AlipaySettingsValues {
   AlipayAppId: string
   AlipayPrivateKey: string
   AlipayPublicKey: string
+  AlipayUseCertMode: boolean
+  AlipayAppCertPublicKey: string
+  AlipayPublicCert: string
+  AlipayRootCert: string
   AlipaySandbox: boolean
   AlipayNotifyUrl: string
   AlipayReturnUrl: string
@@ -62,9 +66,13 @@ export function AlipaySettingsSection({ values, onValueChange }: Props) {
       </div>
       <Alert>
         <AlertDescription className='text-xs'>
-          {t(
-            'Obtain the AppID, the application private key (generated with the Alipay key generator), and the Alipay public key (for async notification signature verification) from the Alipay Open Platform.'
-          )}
+          {values.AlipayUseCertMode
+            ? t(
+                'Certificate mode: upload the application public key cert, Alipay public key cert, and Alipay root cert (all PEM). Recommended for production.'
+              )
+            : t(
+                'Public key mode: enter the Alipay public key (for async notification signature verification). Simpler setup.'
+              )}
         </AlertDescription>
       </Alert>
 
@@ -93,42 +101,98 @@ export function AlipaySettingsSection({ values, onValueChange }: Props) {
         />
       </div>
 
-      <div className='grid grid-cols-2 gap-4'>
-        <div className='grid gap-1.5'>
-          <Label>{t('Application Private Key (PEM)')}</Label>
-          <Textarea
-            rows={6}
-            value={values.AlipayPrivateKey}
-            onChange={(event) =>
-              onValueChange('AlipayPrivateKey', event.target.value)
-            }
-            className='font-mono text-xs'
-            placeholder='-----BEGIN RSA PRIVATE KEY-----'
-          />
-          <p className='text-muted-foreground text-xs'>
-            {t(
-              'RSA2 private key from the Alipay key generator — used to sign API requests.'
-            )}
-          </p>
+      <SettingsSwitchField
+        checked={values.AlipayUseCertMode}
+        onCheckedChange={(v) => onValueChange('AlipayUseCertMode', v)}
+        label={t('Certificate mode (production-recommended; uses 3 PEM certs instead of public key)')}
+      />
+
+      {values.AlipayUseCertMode ? (
+        <div className='space-y-4'>
+          <div className='grid gap-1.5'>
+            <Label>{t('Application Public Key Cert (PEM)')}</Label>
+            <Textarea
+              rows={6}
+              value={values.AlipayAppCertPublicKey}
+              onChange={(event) =>
+                onValueChange('AlipayAppCertPublicKey', event.target.value)
+              }
+              className='font-mono text-xs'
+              placeholder='-----BEGIN CERTIFICATE-----'
+            />
+            <p className='text-muted-foreground text-xs'>
+              {t('应用公钥证书 — 从开放平台上传应用公钥后下载。')}
+            </p>
+          </div>
+          <div className='grid gap-1.5'>
+            <Label>{t('Alipay Public Key Cert (PEM)')}</Label>
+            <Textarea
+              rows={6}
+              value={values.AlipayPublicCert}
+              onChange={(event) =>
+                onValueChange('AlipayPublicCert', event.target.value)
+              }
+              className='font-mono text-xs'
+              placeholder='-----BEGIN CERTIFICATE-----'
+            />
+            <p className='text-muted-foreground text-xs'>
+              {t('支付宝公钥证书 — 用于验签异步通知。')}
+            </p>
+          </div>
+          <div className='grid gap-1.5'>
+            <Label>{t('Alipay Root Cert (PEM)')}</Label>
+            <Textarea
+              rows={6}
+              value={values.AlipayRootCert}
+              onChange={(event) =>
+                onValueChange('AlipayRootCert', event.target.value)
+              }
+              className='font-mono text-xs'
+              placeholder='-----BEGIN CERTIFICATE-----'
+            />
+            <p className='text-muted-foreground text-xs'>
+              {t('支付宝根证书 — 完整信任链。')}
+            </p>
+          </div>
         </div>
-        <div className='grid gap-1.5'>
-          <Label>{t('Alipay Public Key (PEM)')}</Label>
-          <Textarea
-            rows={6}
-            value={values.AlipayPublicKey}
-            onChange={(event) =>
-              onValueChange('AlipayPublicKey', event.target.value)
-            }
-            className='font-mono text-xs'
-            placeholder='-----BEGIN PUBLIC KEY-----'
-          />
-          <p className='text-muted-foreground text-xs'>
-            {t(
-              'Alipay public key (not application public key) — used to verify async notification signatures.'
-            )}
-          </p>
+      ) : (
+        <div className='grid grid-cols-2 gap-4'>
+          <div className='grid gap-1.5'>
+            <Label>{t('Application Private Key (PEM)')}</Label>
+            <Textarea
+              rows={6}
+              value={values.AlipayPrivateKey}
+              onChange={(event) =>
+                onValueChange('AlipayPrivateKey', event.target.value)
+              }
+              className='font-mono text-xs'
+              placeholder='-----BEGIN RSA PRIVATE KEY-----'
+            />
+            <p className='text-muted-foreground text-xs'>
+              {t(
+                'RSA2 private key from the Alipay key generator — used to sign API requests.'
+              )}
+            </p>
+          </div>
+          <div className='grid gap-1.5'>
+            <Label>{t('Alipay Public Key (PEM)')}</Label>
+            <Textarea
+              rows={6}
+              value={values.AlipayPublicKey}
+              onChange={(event) =>
+                onValueChange('AlipayPublicKey', event.target.value)
+              }
+              className='font-mono text-xs'
+              placeholder='-----BEGIN PUBLIC KEY-----'
+            />
+            <p className='text-muted-foreground text-xs'>
+              {t(
+                'Alipay public key (not application public key) — used to verify async notification signatures.'
+              )}
+            </p>
+          </div>
         </div>
-      </div>
+      )}
 
       <div className='grid grid-cols-3 gap-4'>
         <div className='grid gap-1.5'>
@@ -170,7 +234,7 @@ export function AlipaySettingsSection({ values, onValueChange }: Props) {
         <div className='grid gap-1.5'>
           <Label>{t('Callback notification URL')}</Label>
           <Input
-            placeholder='https://example.com/api/alipay/notify'
+            placeholder='https://ai.yuxin.yun/api/alipay/notify'
             value={values.AlipayNotifyUrl}
             onChange={(event) =>
               onValueChange('AlipayNotifyUrl', event.target.value)
@@ -180,7 +244,7 @@ export function AlipaySettingsSection({ values, onValueChange }: Props) {
         <div className='grid gap-1.5'>
           <Label>{t('Payment return URL')}</Label>
           <Input
-            placeholder='https://example.com/wallet'
+            placeholder='https://ai.yuxin.yun/wallet'
             value={values.AlipayReturnUrl}
             onChange={(event) =>
               onValueChange('AlipayReturnUrl', event.target.value)

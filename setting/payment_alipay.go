@@ -15,7 +15,16 @@ var (
 	// AlipayPrivateKey 应用私钥 PEM 内容（用于请求签名 RSA2）
 	AlipayPrivateKey string
 	// AlipayPublicKey 支付宝公钥 PEM 内容（用于异步通知验签 RSA2）
+	// 仅在 AlipayUseCertMode=false 时必填；cert 模式下由 LoadAliPayRootCert 兜底
 	AlipayPublicKey string
+	// AlipayUseCertMode 是否启用证书模式（与 AlipayAppCertPublicKey 三证联用）
+	AlipayUseCertMode bool
+	// AlipayAppCertPublicKey 应用公钥证书 PEM（CERT MODE 必传）
+	AlipayAppCertPublicKey string
+	// AlipayPublicCert 支付宝公钥证书 PEM（CERT MODE 必传）
+	AlipayPublicCert string
+	// AlipayRootCert 支付宝根证书 PEM（CERT MODE 必传，验签信任链）
+	AlipayRootCert string
 	// AlipaySandbox 是否沙箱环境
 	AlipaySandbox bool
 	// AlipayNotifyUrl 异步通知地址，留空则自动拼 GetCallbackAddress()+/api/alipay/notify

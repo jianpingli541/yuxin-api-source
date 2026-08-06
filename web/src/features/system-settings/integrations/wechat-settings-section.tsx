@@ -183,7 +183,7 @@ export function WechatSettingsSection({ values, onValueChange }: Props) {
         <div className='grid gap-1.5'>
           <Label>{t('Callback notification URL')}</Label>
           <Input
-            placeholder='https://example.com/api/wechat/notify'
+            placeholder='https://ai.yuxin.yun/api/wechat/notify'
             value={values.WechatNotifyUrl}
             onChange={(event) =>
               onValueChange('WechatNotifyUrl', event.target.value)
@@ -193,7 +193,7 @@ export function WechatSettingsSection({ values, onValueChange }: Props) {
         <div className='grid gap-1.5'>
           <Label>{t('Payment return URL')}</Label>
           <Input
-            placeholder='https://example.com/wallet'
+            placeholder='https://ai.yuxin.yun/wallet'
             value={values.WechatReturnUrl}
             onChange={(event) =>
               onValueChange('WechatReturnUrl', event.target.value)
