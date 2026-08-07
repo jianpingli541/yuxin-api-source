@@ -963,11 +963,21 @@ export function PaymentSettingsSection({
     WechatMinTopUp: values.WechatMinTopUp,
   }
 
+  // 对 4 个新证书字段做精确订阅，确保 setValue 触发条件渲染重计算
+  const alipayUseCertMode = form.watch('AlipayUseCertMode')
+  const alipayAppCertPublicKey = form.watch('AlipayAppCertPublicKey')
+  const alipayPublicCert = form.watch('AlipayPublicCert')
+  const alipayRootCert = form.watch('AlipayRootCert')
+
   const alipayValues: AlipaySettingsValues = {
     AlipayEnabled: values.AlipayEnabled,
     AlipayAppId: values.AlipayAppId,
     AlipayPrivateKey: values.AlipayPrivateKey,
     AlipayPublicKey: values.AlipayPublicKey,
+    AlipayUseCertMode: alipayUseCertMode,
+    AlipayAppCertPublicKey: alipayAppCertPublicKey,
+    AlipayPublicCert: alipayPublicCert,
+    AlipayRootCert: alipayRootCert,
     AlipaySandbox: values.AlipaySandbox,
     AlipayNotifyUrl: values.AlipayNotifyUrl,
     AlipayReturnUrl: values.AlipayReturnUrl,
