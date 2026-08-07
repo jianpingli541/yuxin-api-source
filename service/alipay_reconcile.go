@@ -33,7 +33,7 @@ func StartAlipayReconciliation(ctx context.Context) {
 }
 
 func reconcilePendingAlipayOrders() {
-	cutoff := time.Now().Add(-5 * time.Minute).Unix()
+	cutoff := time.Now().Add(-1 * time.Minute).Unix()
 	pending, err := model.ListPendingTopUpsByProvider(model.PaymentProviderAlipay, cutoff, 50)
 	if err != nil {
 		log.Printf("[alipay-reconcile] list pending failed: %v", err)

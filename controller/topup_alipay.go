@@ -279,3 +279,50 @@ func AlipayNotify(c *gin.Context) {
 		_, _ = c.Writer.Write([]byte("success"))
 	}
 }
+
+
+// AlipayNativeQuery 前端轮询入口：主动查询支付宝订单状态并在已支付时入账。
+// 作用：与微信路径完全对称——回调可能因平台公钥/网络抖动失败，
+// 本接口用 SDK 主动查单作为入账兜底。幂等：RechargeAlipay 内部对已成功直接返回。
+func AlipayNativeQuery(c *gin.Context) {
+	if !isAlipayTopUpEnabled() {
+		c.JSON(http.StatusOK, gin.H{"message": "error", "data": "支付宝原生通道未启用"})
+		return
+	}
+	tradeNo := c.Query("trade_no")
+	if tradeNo == "" {
+		c.JSON(http.StatusOK, gin.H{"message": "error", "data": "缺少 trade_no"})
+		return
+	}
+	userId := c.GetInt("id")
+	topUp := model.GetTopUpByTradeNo(tradeNo)
+	if topUp == nil || topUp.UserId != userId {
+		c.JSON(http.StatusOK, gin.H{"message": "error", "data": "订单不存在"})
+		return
+	}
+	if topUp.Status == common.TopUpStatusSuccess {
+		c.JSON(http.StatusOK, gin.H{"message": "success", "data": gin.H{"status": "paid"}})
+		return
+	}
+	client, err := service.GetAlipayClient(c.Request.Context())
+	if err != nil {
+		c.JSON(http.StatusOK, gin.H{"message": "success", "data": gin.H{"status": "pending"}})
+		return
+	}
+	rsp, err := client.TradeQuery(c.Request.Context(), alipay.TradeQuery{OutTradeNo: tradeNo})
+	if err != nil || rsp == nil {
+		c.JSON(http.StatusOK, gin.H{"message": "success", "data": gin.H{"status": "pending"}})
+		return
+	}
+	if rsp.TradeStatus != alipay.TradeStatusSuccess && rsp.TradeStatus != alipay.TradeStatusFinished {
+		c.JSON(http.StatusOK, gin.H{"message": "success", "data": gin.H{"status": "pending"}})
+		return
+	}
+	LockOrder(tradeNo)
+	defer UnlockOrder(tradeNo)
+	if err := model.RechargeAlipay(tradeNo, c.ClientIP()); err != nil {
+		c.JSON(http.StatusOK, gin.H{"message": "error", "data": "入账失败"})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{"message": "success", "data": gin.H{"status": "paid"}})
+}

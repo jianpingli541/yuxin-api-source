@@ -35,7 +35,7 @@ func StartWechatReconciliation(ctx context.Context) {
 }
 
 func reconcilePendingWechatOrders() {
-	cutoff := time.Now().Add(-5 * time.Minute).Unix()
+	cutoff := time.Now().Add(-1 * time.Minute).Unix()
 	pending, err := model.ListPendingTopUpsByProvider(model.PaymentProviderWechat, cutoff, 50)
 	if err != nil {
 		log.Printf("[wechat-reconcile] list pending failed: %v", err)

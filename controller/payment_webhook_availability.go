@@ -120,11 +120,15 @@ func isWechatTopUpEnabled() bool {
 }
 
 func isWechatWebhookConfigured() bool {
-	return strings.TrimSpace(setting.WechatMerchantId) != "" &&
-		strings.TrimSpace(setting.WechatAppId) != "" &&
-		strings.TrimSpace(setting.WechatApiV3Key) != "" &&
-		strings.TrimSpace(setting.WechatPrivateKey) != "" &&
-		strings.TrimSpace(setting.WechatCertSerialNo) != ""
+	if strings.TrimSpace(setting.WechatMerchantId) == "" ||
+		strings.TrimSpace(setting.WechatAppId) == "" ||
+		strings.TrimSpace(setting.WechatApiV3Key) == "" ||
+		strings.TrimSpace(setting.WechatPrivateKey) == "" {
+		return false
+	}
+	// 序列号可由 WechatCertPublicKey 自动提取；二者至少其一非空
+	return strings.TrimSpace(setting.WechatCertSerialNo) != "" ||
+		strings.TrimSpace(setting.WechatCertPublicKey) != ""
 }
 
 func isWechatWebhookEnabled() bool {

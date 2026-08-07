@@ -87,6 +87,11 @@ export function Wallet(props: WalletProps) {
   const [showSubscriptionPanel, setShowSubscriptionPanel] = useState(true)
   const [wechatQrOpen, setWechatQrOpen] = useState(false)
   const [wechatQrAmount, setWechatQrAmount] = useState(0)
+  const [genericQr, setGenericQr] = useState<{
+    orderId: string
+    codeUrl: string
+    expiresAt: number
+  } | null>(null)
   const [alipayQrOpen, setAlipayQrOpen] = useState(false)
   const [alipayQrAmount, setAlipayQrAmount] = useState(0)
 
@@ -106,6 +111,8 @@ export function Wallet(props: WalletProps) {
     processing,
     calculatePaymentAmount,
     processPayment,
+    qrPayload,
+    clearQrPayload,
   } = usePayment()
   const {
     affiliateLink,
@@ -204,6 +211,17 @@ export function Wallet(props: WalletProps) {
         return
       }
 
+      // 微信/支付宝 Native：直接下单弹二维码，不走确认弹窗（通用流程只认 epay url）
+      if (method.type === PAYMENT_TYPES.WECHAT || method.type === PAYMENT_TYPES.ALIPAY) {
+        setPaymentLoading(null)
+        const result = await processWechatPayment(topupAmount, 0)
+        if (result) {
+          setWechatQrAmount(topupAmount)
+          setWechatQrOpen(true)
+        }
+        return
+      }
+
       // Calculate payment amount and show confirmation dialog
       await calculatePaymentAmount(topupAmount, method.type)
       setConfirmDialogOpen(true)
@@ -229,6 +247,21 @@ export function Wallet(props: WalletProps) {
 
     if (success) {
       setConfirmDialogOpen(false)
+      if (qrPayload) {
+        setGenericQr(qrPayload)
+        clearQrPayload()
+        if (
+          selectedPaymentMethod.type === 'wechat' ||
+          selectedPaymentMethod.type === 'wxpay'
+        ) {
+          setWechatQrAmount(topupAmount)
+          setWechatQrOpen(true)
+        } else {
+          setAlipayQrAmount(topupAmount)
+          setAlipayQrOpen(true)
+        }
+        return
+      }
       await fetchUser()
     }
   }
@@ -450,11 +483,14 @@ export function Wallet(props: WalletProps) {
         open={wechatQrOpen}
         onOpenChange={(open) => {
           setWechatQrOpen(open)
-          if (!open) resetWechatPayment()
+          if (!open) {
+            resetWechatPayment()
+            setGenericQr(null)
+          }
         }}
-        codeUrl={wechatQrUrl}
-        orderId={wechatOrderId}
-        expireAt={wechatExpireAt}
+        codeUrl={wechatQrUrl ?? genericQr?.codeUrl ?? null}
+        orderId={wechatOrderId ?? genericQr?.orderId ?? null}
+        expireAt={wechatExpireAt || genericQr?.expiresAt || 0}
         topupAmount={wechatQrAmount}
         onSuccess={() => {
           setWechatQrOpen(false)
@@ -467,11 +503,14 @@ export function Wallet(props: WalletProps) {
         open={alipayQrOpen}
         onOpenChange={(open) => {
           setAlipayQrOpen(open)
-          if (!open) resetAlipayPayment()
+          if (!open) {
+            resetAlipayPayment()
+            setGenericQr(null)
+          }
         }}
-        qrCode={alipayQrUrl}
-        orderId={alipayOrderId}
-        expireAt={alipayExpireAt}
+        qrCode={alipayQrUrl ?? genericQr?.codeUrl ?? null}
+        orderId={alipayOrderId ?? genericQr?.orderId ?? null}
+        expireAt={alipayExpireAt || genericQr?.expiresAt || 0}
         topupAmount={alipayQrAmount}
         onSuccess={() => {
           setAlipayQrOpen(false)

@@ -161,12 +161,44 @@ export async function requestWaffoPayment(
   return res.data
 }
 
+export interface WechatNativeQueryResponse {
+  success: boolean
+  message: string
+  data?: { status?: string }
+}
+
+export async function queryWechatNativeOrder(
+  tradeNo: string
+): Promise<WechatNativeQueryResponse> {
+  const res = await api.get(
+    `/api/user/wechat/query?trade_no=${encodeURIComponent(tradeNo)}`,
+    { skipBusinessError: true } as Record<string, unknown>
+  )
+  return res.data
+}
+
 export async function requestWechatPayment(
   request: WechatPaymentRequest
 ): Promise<WechatPaymentResponse> {
   const res = await api.post('/api/user/wechat/pay', request, {
     skipBusinessError: true,
   } as Record<string, unknown>)
+  return res.data
+}
+
+export interface AlipayNativeQueryResponse {
+  success: boolean
+  message: string
+  data?: { status?: string }
+}
+
+export async function queryAlipayNativeOrder(
+  tradeNo: string
+): Promise<AlipayNativeQueryResponse> {
+  const res = await api.get(
+    `/api/user/alipay/query?trade_no=${encodeURIComponent(tradeNo)}`,
+    { skipBusinessError: true } as Record<string, unknown>
+  )
   return res.data
 }
 

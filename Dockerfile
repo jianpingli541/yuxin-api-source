@@ -1,11 +1,9 @@
 FROM oven/bun:1@sha256:0733e50325078969732ebe3b15ce4c4be5082f18c4ac1a0f0ca4839c2e4e42a7 AS builder
 
 WORKDIR /build/web
-COPY web/package.json web/bun.lock ./
-RUN bun install --frozen-lockfile
 COPY ./web ./
 COPY ./VERSION /build/VERSION
-RUN DISABLE_ESLINT_PLUGIN='true' VITE_REACT_APP_VERSION=$(cat /build/VERSION) bun run build
+# 直接用 host 已构建的 dist（跳过 builder 内 bun build，避免缓存旧 bundle）
 
 FROM golang:1.25.12-alpine@sha256:56961d79ea8129efddcc0b8643fd8a5416b4e6228cfd477e3fd61deb2672c587 AS builder2
 ENV GO111MODULE=on CGO_ENABLED=0 GOWORK=off
@@ -18,8 +16,6 @@ ENV GOEXPERIMENT=greenteagc
 WORKDIR /build
 
 ADD go.mod go.sum ./
-# relaykit is a local submodule referenced via replace; its go.mod must be
-# present for go mod download to resolve the main module graph.
 ADD relaykit/go.mod ./relaykit/go.mod
 RUN go mod download
 
@@ -41,7 +37,6 @@ COPY LICENSE NOTICE THIRD-PARTY-LICENSES.md /licenses/
 EXPOSE 3000
 WORKDIR /data
 
-# 创建非 root 用户 (uid/gid 65532), 降低容器逃逸风险 (B5)
 RUN groupadd -g 65532 newapi \
     && useradd -r -u 65532 -g newapi -d /data -s /usr/sbin/nologin newapi \
     && chown -R newapi:newapi /data

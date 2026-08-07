@@ -29,7 +29,7 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
-import { getUserBillingHistory } from '../../api'
+import { queryAlipayNativeOrder } from '../../api'
 
 interface AlipayQrDialogProps {
   open: boolean
@@ -54,7 +54,7 @@ export function AlipayQrDialog({
   onSuccess,
 }: AlipayQrDialogProps) {
   const { t } = useTranslation()
-  const [status, setStatus] = useState<'pending' | 'success' | 'expired'>(
+  const [status, setStatus] = useState<'pending' | 'success' | 'expired' | 'failed'>(
     'pending'
   )
   const attemptsRef = useRef(0)
@@ -73,23 +73,22 @@ export function AlipayQrDialog({
       while (!cancelled && attemptsRef.current < POLL_MAX_ATTEMPTS) {
         attemptsRef.current += 1
         try {
-          const res = await getUserBillingHistory(1, 5)
-          const record = res?.data?.items?.find(
-            (r: { trade_no: string; status: string }) =>
-              r.trade_no === orderId
-          )
-          if (record) {
-            if (record.status === 'success') {
-              if (!cancelled) setStatus('success')
-              setTimeout(() => {
-                if (!cancelled) onSuccessRef.current()
-              }, 1500)
-              return
-            }
-            if (record.status === 'expired') {
-              if (!cancelled) setStatus('expired')
-              return
-            }
+          const res = await queryAlipayNativeOrder(orderId)
+          const status = res?.data?.status
+          if (status === 'paid') {
+            if (!cancelled) setStatus('success')
+            setTimeout(() => {
+              if (!cancelled) onSuccessRef.current()
+            }, 1500)
+            return
+          }
+          if (status === 'expired') {
+            if (!cancelled) setStatus('expired')
+            return
+          }
+          if (status === 'failed') {
+            if (!cancelled) setStatus('failed')
+            return
           }
         } catch {
           // 单次查询失败不中断轮询

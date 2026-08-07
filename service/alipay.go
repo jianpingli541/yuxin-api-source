@@ -54,6 +54,9 @@ func GetAlipayClient(ctx context.Context) (*alipay.Client, error) {
 		if setting.AlipayAppCertPublicKey == "" || setting.AlipayPublicCert == "" || setting.AlipayRootCert == "" {
 			return nil, fmt.Errorf("支付宝证书模式凭据未配置（缺少应用公钥证书 / 支付宝公钥证书 / 根证书）")
 		}
+		if setting.AlipayPrivateKey == "" {
+			return nil, fmt.Errorf("支付宝凭据未配置（缺少应用私钥）")
+		}
 	} else {
 		if setting.AlipayPrivateKey == "" || setting.AlipayPublicKey == "" {
 			return nil, fmt.Errorf("支付宝凭据未配置（缺少应用私钥或支付宝公钥）")

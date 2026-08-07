@@ -5247,6 +5247,14 @@
     "微信支付证书（apiclient_cert.pem）": "微信支付证书（apiclient_cert.pem）",
     "Merchant certificate (apiclient_cert.pem) — serial number is auto-extracted; alternatively fill the certificate serial number field manually.": "商户证书（apiclient_cert.pem）— 上传后自动提取证书序列号；亦可手动填证书序列号字段。",
     "微信支付证书密钥（apiclient_key.pem）": "微信支付证书密钥（apiclient_key.pem）",
-    "WeChat Pay certificate key (apiclient_key.pem) — used to sign requests.": "微信支付证书密钥（apiclient_key.pem），用于签名请求。"
+    "WeChat Pay certificate key (apiclient_key.pem) — used to sign requests.": "微信支付证书密钥（apiclient_key.pem），用于签名请求。",
+    "Payment Successful": "支付成功",
+    "Please close and try again.": "请关闭后重试。",
+    "QR Code Expired": "二维码已过期",
+    "Refreshing balance...": "正在刷新余额...",
+    "Scan the QR code with Alipay to pay": "使用支付宝扫一扫以完成支付",
+    "Scan the QR code with WeChat to pay": "使用微信扫一扫以完成支付",
+    "Waiting for payment...": "等待支付中...",
+    "Payment failed": "支付失败"
   }
 }
