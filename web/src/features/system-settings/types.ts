@@ -325,6 +325,7 @@ export type BillingSettings = {
   WechatApiV3Key: string
   WechatPrivateKey: string
   WechatCertSerialNo: string
+  WechatCertPublicKey: string
   WechatNotifyUrl: string
   WechatReturnUrl: string
   WechatUnitPrice: number
@@ -333,6 +334,10 @@ export type BillingSettings = {
   AlipayAppId: string
   AlipayPrivateKey: string
   AlipayPublicKey: string
+  AlipayUseCertMode: boolean
+  AlipayAppCertPublicKey: string
+  AlipayPublicCert: string
+  AlipayRootCert: string
   AlipaySandbox: boolean
   AlipayNotifyUrl: string
   AlipayReturnUrl: string

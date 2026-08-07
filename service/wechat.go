@@ -3,8 +3,11 @@ package service
 import (
 	"context"
 	"crypto/sha256"
+	"crypto/x509"
 	"encoding/hex"
+	"encoding/pem"
 	"fmt"
+	"strings"
 	"sync"
 
 	"github.com/QuantumNous/new-api/setting"
@@ -37,10 +40,39 @@ func wechatCredHash() string {
 		setting.WechatMerchantId + "|" +
 			setting.WechatAppId + "|" +
 			setting.WechatCertSerialNo + "|" +
+			setting.WechatCertPublicKey + "|" +
 			setting.WechatPrivateKey + "|" +
 			setting.WechatApiV3Key,
 	))
 	return hex.EncodeToString(h[:])
+}
+
+// extractCertSerialNumber 从 apiclient_cert.pem 的 PEM 内容提取证书序列号。
+// 序列号即 X.509 证书自身的 serialNumber 字段（微信商户平台展示的值），
+// 以大写 hex 表示。注意与「证书指纹」（DER 的 SHA-1）是两个不同概念。
+func extractCertSerialNumber(certPEM string) (string, error) {
+	block, _ := pem.Decode([]byte(certPEM))
+	if block == nil {
+		return "", fmt.Errorf("无效的商户证书 PEM")
+	}
+	cert, err := x509.ParseCertificate(block.Bytes)
+	if err != nil {
+		return "", fmt.Errorf("解析商户证书失败: %v", err)
+	}
+	return strings.ToUpper(cert.SerialNumber.Text(16)), nil
+}
+
+// resolveWechatCertSerial 优先从 WechatCertPublicKey 解析序列号；
+// 解析失败或字段为空时回退到手工填写的 WechatCertSerialNo。
+func resolveWechatCertSerial() (string, error) {
+	if setting.WechatCertPublicKey != "" {
+		sn, err := extractCertSerialNumber(setting.WechatCertPublicKey)
+		if err != nil {
+			return "", fmt.Errorf("从 apiclient_cert.pem 提取证书序列号失败: %v", err)
+		}
+		return sn, nil
+	}
+	return setting.WechatCertSerialNo, nil
 }
 
 // GetWechatClient 返回微信支付 core.Client（带自动签名与平台证书定时下载）。
@@ -54,8 +86,17 @@ func GetWechatClient(ctx context.Context) (*core.Client, *notify.Handler, error)
 		return wechatBundle.client, wechatBundle.handler, nil
 	}
 
-	if setting.WechatPrivateKey == "" || setting.WechatCertSerialNo == "" {
-		return nil, nil, fmt.Errorf("微信支付凭据未配置（缺少私钥或证书序列号）")
+	if setting.WechatPrivateKey == "" {
+		return nil, nil, fmt.Errorf("微信支付凭据未配置（缺少商户私钥 apiclient_key.pem）")
+	}
+	// 序列号二选一：证书本体优先，否则手工序列号
+	if setting.WechatCertPublicKey == "" && setting.WechatCertSerialNo == "" {
+		return nil, nil, fmt.Errorf("微信支付凭据未配置（缺少证书序列号或 apiclient_cert.pem）")
+	}
+
+	serialNo, err := resolveWechatCertSerial()
+	if err != nil {
+		return nil, nil, err
 	}
 
 	mchPrivateKey, err := utils.LoadPrivateKey(setting.WechatPrivateKey)
@@ -67,7 +108,7 @@ func GetWechatClient(ctx context.Context) (*core.Client, *notify.Handler, error)
 	client, err := core.NewClient(ctx,
 		option.WithWechatPayAutoAuthCipher(
 			setting.WechatMerchantId,
-			setting.WechatCertSerialNo,
+			serialNo,
 			mchPrivateKey,
 			setting.WechatApiV3Key,
 		),

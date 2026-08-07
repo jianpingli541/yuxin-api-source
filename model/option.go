@@ -122,6 +122,7 @@ func InitOptionMap() {
 	common.OptionMap["WechatApiV3Key"] = setting.WechatApiV3Key
 	common.OptionMap["WechatPrivateKey"] = setting.WechatPrivateKey
 	common.OptionMap["WechatCertSerialNo"] = setting.WechatCertSerialNo
+	common.OptionMap["WechatCertPublicKey"] = setting.WechatCertPublicKey
 	common.OptionMap["WechatNotifyUrl"] = setting.WechatNotifyUrl
 	common.OptionMap["WechatReturnUrl"] = setting.WechatReturnUrl
 	common.OptionMap["WechatUnitPrice"] = strconv.FormatFloat(setting.WechatUnitPrice, 'f', -1, 64)
@@ -532,6 +533,8 @@ func updateOptionMap(key string, value string) (err error) {
 		setting.WechatPrivateKey = value
 	case "WechatCertSerialNo":
 		setting.WechatCertSerialNo = value
+	case "WechatCertPublicKey":
+		setting.WechatCertPublicKey = value
 	case "WechatNotifyUrl":
 		setting.WechatNotifyUrl = value
 	case "WechatReturnUrl":

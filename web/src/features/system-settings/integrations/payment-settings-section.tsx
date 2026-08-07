@@ -184,6 +184,7 @@ const paymentSchema = z.object({
   WechatApiV3Key: z.string(),
   WechatPrivateKey: z.string(),
   WechatCertSerialNo: z.string(),
+  WechatCertPublicKey: z.string(),
   WechatNotifyUrl: z.string(),
   WechatReturnUrl: z.string(),
   WechatUnitPrice: z.coerce.number().min(0),
@@ -523,6 +524,7 @@ export function PaymentSettingsSection({
       WechatApiV3Key: values.WechatApiV3Key.trim(),
       WechatPrivateKey: values.WechatPrivateKey.trim(),
       WechatCertSerialNo: values.WechatCertSerialNo.trim(),
+      WechatCertPublicKey: values.WechatCertPublicKey.trim(),
       WechatNotifyUrl: values.WechatNotifyUrl.trim(),
       WechatReturnUrl: values.WechatReturnUrl.trim(),
       WechatUnitPrice: values.WechatUnitPrice,
@@ -593,6 +595,7 @@ export function PaymentSettingsSection({
       WechatApiV3Key: initialRef.current.WechatApiV3Key.trim(),
       WechatPrivateKey: initialRef.current.WechatPrivateKey.trim(),
       WechatCertSerialNo: initialRef.current.WechatCertSerialNo.trim(),
+      WechatCertPublicKey: initialRef.current.WechatCertPublicKey.trim(),
       WechatNotifyUrl: initialRef.current.WechatNotifyUrl.trim(),
       WechatReturnUrl: initialRef.current.WechatReturnUrl.trim(),
       WechatUnitPrice: initialRef.current.WechatUnitPrice,
@@ -825,6 +828,9 @@ export function PaymentSettingsSection({
     if (sanitized.WechatCertSerialNo !== initial.WechatCertSerialNo) {
       updates.push({ key: 'WechatCertSerialNo', value: sanitized.WechatCertSerialNo })
     }
+    if (sanitized.WechatCertPublicKey && sanitized.WechatCertPublicKey !== initial.WechatCertPublicKey) {
+      updates.push({ key: 'WechatCertPublicKey', value: sanitized.WechatCertPublicKey })
+    }
     if (sanitized.WechatNotifyUrl !== initial.WechatNotifyUrl) {
       updates.push({ key: 'WechatNotifyUrl', value: sanitized.WechatNotifyUrl })
     }
@@ -957,6 +963,7 @@ export function PaymentSettingsSection({
     WechatApiV3Key: values.WechatApiV3Key,
     WechatPrivateKey: values.WechatPrivateKey,
     WechatCertSerialNo: values.WechatCertSerialNo,
+    WechatCertPublicKey: values.WechatCertPublicKey,
     WechatNotifyUrl: values.WechatNotifyUrl,
     WechatReturnUrl: values.WechatReturnUrl,
     WechatUnitPrice: values.WechatUnitPrice,
@@ -1089,7 +1096,7 @@ export function PaymentSettingsSection({
           />
           <Tabs defaultValue='general' className='min-w-0'>
             <div className='overflow-x-auto pb-1'>
-              <TabsList className='grid min-w-[44rem] grid-cols-6'>
+              <TabsList className='grid min-w-[44rem] grid-cols-8'>
                 <TabsTrigger value='general'>{t('General')}</TabsTrigger>
                 <TabsTrigger value='epay'>Epay</TabsTrigger>
                 <TabsTrigger value='stripe'>{t('Stripe')}</TabsTrigger>

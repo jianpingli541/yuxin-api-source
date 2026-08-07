@@ -32,6 +32,9 @@ export interface WechatSettingsValues {
   WechatApiV3Key: string
   WechatPrivateKey: string
   WechatCertSerialNo: string
+  // 商户 API 证书 apiclient_cert.pem 的 PEM 内容（可选）。
+  // 上传后服务端自动从证书中提取序列号；为空时回退手工序列号。
+  WechatCertPublicKey: string
   WechatNotifyUrl: string
   WechatReturnUrl: string
   WechatUnitPrice: number
@@ -141,6 +144,24 @@ export function WechatSettingsSection({ values, onValueChange }: Props) {
             {t('Certificate serial number from the WeChat Pay merchant platform.')}
           </p>
         </div>
+      </div>
+
+      <div className='grid gap-1.5'>
+        <Label>{t('微信支付证书（apiclient_cert.pem）')}</Label>
+        <Textarea
+          rows={6}
+          value={values.WechatCertPublicKey}
+          onChange={(event) =>
+            onValueChange('WechatCertPublicKey', event.target.value)
+          }
+          className='font-mono text-xs'
+          placeholder='-----BEGIN CERTIFICATE-----'
+        />
+        <p className='text-muted-foreground text-xs'>
+          {t(
+            'Merchant certificate (apiclient_cert.pem) — serial number is auto-extracted; alternatively fill the certificate serial number field manually.'
+          )}
+        </p>
       </div>
 
       <div className='grid grid-cols-3 gap-4'>

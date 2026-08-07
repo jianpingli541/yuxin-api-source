@@ -292,3 +292,51 @@ func ptrString(s *string) string {
 
 // stringPtr SDK 模型字段为指针类型，统一构造助手
 func stringPtr(s string) *string { return &s }
+
+// WechatNativeQuery 前端轮询入口：主动查询微信订单状态并在已支付时入账。
+// 作用：微信回调可能因平台公钥迁移/网络抖动验签失败，本接口用
+// SDK 主动查单（QueryOrderByOutTradeNo）作为入账兜底，保证真实付款
+// 一定入账。幂等：RechargeWechat 内部对已成功订单直接返回。
+func WechatNativeQuery(c *gin.Context) {
+	tradeNo := c.Query("trade_no")
+	if tradeNo == "" {
+		c.JSON(http.StatusOK, gin.H{"message": "error", "data": "缺少 trade_no"})
+		return
+	}
+	// 安全：只允许订单所属用户查询
+	userId := c.GetInt("id")
+	topUp := model.GetTopUpByTradeNo(tradeNo)
+	if topUp == nil || topUp.UserId != userId {
+		c.JSON(http.StatusOK, gin.H{"message": "error", "data": "订单不存在"})
+		return
+	}
+	if topUp.Status == common.TopUpStatusSuccess {
+		c.JSON(http.StatusOK, gin.H{"message": "success", "data": gin.H{"status": "paid"}})
+		return
+	}
+
+	client, _, err := service.GetWechatClient(c.Request.Context())
+	if err != nil {
+		c.JSON(http.StatusOK, gin.H{"message": "success", "data": gin.H{"status": "pending"}})
+		return
+	}
+	svc := native.NativeApiService{Client: client}
+	rsp, _, err := svc.QueryOrderByOutTradeNo(c.Request.Context(), native.QueryOrderByOutTradeNoRequest{
+		Mchid:      stringPtr(setting.WechatMerchantId),
+		OutTradeNo: stringPtr(tradeNo),
+	})
+	if err != nil || rsp == nil || rsp.TradeState == nil || *rsp.TradeState != "SUCCESS" {
+		c.JSON(http.StatusOK, gin.H{"message": "success", "data": gin.H{"status": "pending"}})
+		return
+	}
+
+	LockOrder(tradeNo)
+	defer UnlockOrder(tradeNo)
+	if err := model.RechargeWechat(tradeNo, c.ClientIP()); err != nil {
+		logger.LogError(c.Request.Context(), fmt.Sprintf("微信支付 主动查单入账失败 trade_no=%s error=%q", tradeNo, err.Error()))
+		c.JSON(http.StatusOK, gin.H{"message": "success", "data": gin.H{"status": "pending"}})
+		return
+	}
+	logger.LogInfo(c.Request.Context(), fmt.Sprintf("微信支付 主动查单入账成功 trade_no=%s user_id=%d", tradeNo, userId))
+	c.JSON(http.StatusOK, gin.H{"message": "success", "data": gin.H{"status": "paid"}})
+}

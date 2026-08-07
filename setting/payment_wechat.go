@@ -19,7 +19,12 @@ var (
 	// WechatPrivateKey 商户私钥 PEM 内容（apiclient_key.pem），用于请求签名
 	WechatPrivateKey string
 	// WechatCertSerialNo 商户证书序列号，用于请求头 WECHATPAY2-SHA256-RSA2048 的 serial_no
+	// 若 WechatCertPublicKey 非空，service.GetWechatClient 会从证书本体解析 SN 覆盖此值
 	WechatCertSerialNo string
+	// WechatCertPublicKey 商户 API 证书 apiclient_cert.pem 的 PEM 内容（可选）。
+	// 上传后自动从证书中提取序列号；为空时回退使用 WechatCertSerialNo。
+	// 不参与签名/验签——v3 SDK 签名只需私钥+序列号，验签用平台证书（SDK 自动下载）。
+	WechatCertPublicKey string
 	// WechatNotifyUrl 支付/退款回调地址，留空则自动拼 GetCallbackAddress()+/api/wechat/webhook
 	WechatNotifyUrl string
 	// WechatReturnUrl 支付完成跳转地址，留空默认回到钱包页

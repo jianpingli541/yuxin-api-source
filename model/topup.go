@@ -587,3 +587,14 @@ func RechargeWaffoPancake(tradeNo string) (err error) {
 
 	return nil
 }
+
+// ListPendingTopUpsByProvider 列出指定 provider 的 pending 订单（按 create_time 倒序），
+// 限制 returned 数量；用于后台对账任务主动查单并入账。
+func ListPendingTopUpsByProvider(provider string, beforeUnix int64, limit int) (topups []*TopUp, err error) {
+	if limit <= 0 {
+		limit = 50
+	}
+	err = DB.Where("payment_provider = ? AND status = ? AND create_time < ?", provider, common.TopUpStatusPending, beforeUnix).
+		Order("id DESC").Limit(limit).Find(&topups).Error
+	return
+}

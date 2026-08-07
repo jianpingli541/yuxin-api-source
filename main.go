@@ -361,5 +361,10 @@ func InitResources() error {
 
 	service.StartAuthArtifactCleanup()
 
+	// 启动微信支付后台对账任务：每 30s 轮询 pending 订单，
+	// 主动 SDK 查单（QueryOrderByOutTradeNo）入账，绕开回调脆弱性。
+	service.StartWechatReconciliation(context.Background())
+	service.StartAlipayReconciliation(context.Background())
+
 	return nil
 }

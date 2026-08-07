@@ -182,6 +182,7 @@ const BILLING_SECTIONS = [
           WechatApiV3Key: settings.WechatApiV3Key ?? '',
           WechatPrivateKey: settings.WechatPrivateKey ?? '',
           WechatCertSerialNo: settings.WechatCertSerialNo ?? '',
+          WechatCertPublicKey: settings.WechatCertPublicKey ?? '',
           WechatNotifyUrl: settings.WechatNotifyUrl ?? '',
           WechatReturnUrl: settings.WechatReturnUrl ?? '',
           WechatUnitPrice: settings.WechatUnitPrice ?? 1,
