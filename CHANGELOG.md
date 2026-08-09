@@ -2,6 +2,47 @@
 
 ---
 
+## v1.2.8-yuxin (2026-08-09) · 卫生清理与可用性验收版
+
+### 背景
+
+v1.2.7-yuxin 收款闭环加固后的交付后运维整理——全面侦查 + 卫生清理 + 真实浏览器可用性验收 + 版本封箱。
+
+### 卫生清理（回收 26GB）
+
+- /tmp 清理：删除 1.0GB 临时调试产物（17 个重复二进制 *.bin 共 ~1.9GB、80+ 个一次性脚本已归档、调试前端产物、小标记文件）
+- 项目 .bak 清理：9 个 docker-compose bak、1 个 Dockerfile bak、3 个 new-api-custom 二进制 bak（378MB）、7 个 nginx config bak——全部 git 有历史
+- 2 个野容器移除：tender_jemison / distracted_meninsky（yuxin-rebuild-20260807 / yuxin-paytweak-20260807，43h 未挂端口、未挂卷、不在 compose）
+- 37 个历史 docker 镜像清理：v1.2.1~v1.2.6 系列、c1-fix-v4~v9、audit-fixes、reconcile、real、wallet-fix、clean、fix-types、freshdist、rebuild、wechat-cert、paytweak、merge 系列、rollback 系列、pre- 回滚、test、latest
+- 保留：v1.2.7-yuxin（生产）+ v1.2.6-yuxin（回滚兜底）
+- Docker build cache prune：回收 19.6GB（docker builder prune -f）
+- 敏感文件 shred：.env.bak.20260803212653 + .env.bak.20260803213317（含密钥前驱值）、/tmp/pub_in.pem + /tmp/paytest-cookies.txt
+
+### 可用性验收（Playwright + Chrome DevTools）
+
+- 域名 https://ai.yuxin.yun 外网可达，TLS 链验证成功（ssl_verify_result=20）
+- /api/status 200 OK，返回完整 HeaderNav/Sidebar/announcements/api_info/chats 数据
+- 首页 200 OK：Home/Model Square/Rankings + Cherry Studio/CC Switch 入口 + PlayGround（Chat/Responses/Claude/Gemini） + 200 ok 实时状态
+- Dashboard 已登录会话渲染：Overview 卡片 + Get started 引导 + Usage/Last 24h/Historical/Request Count + Credit remaining + API Info + Announcements + FAQ
+- API Keys 页面：表格/筛选/Status/View/Create 按钮齐备
+- Wallet 页面：Current Balance/Total Usage/API Requests + 充值套餐（10/20/50/100/200/500）+ 微信支付 + 支付宝 + 自定义金额 + 兑换码 + 基础套餐 $99 + 推荐计划
+- Pricing：10 个模型（deepseek-v4-flash/pro、glm-5.1/5.2、MiniMax-M2.5、qwen3.5-plus/3.6-flash/3.6-plus 等）+ 完整筛选（group/vendor/tag/pricing type/endpoint type）
+- 数据库真实存在：1 channel、11 users、24 tokens
+
+### 安全观察（非阻断）
+
+- Console error（1 条）：ccswitch.io/favicon.png ERR_BLOCKED_BY_RESPONSE（第三方 favicon 跨域策略，与业务无关）
+- 工作区状态：git status 干净，无未提交改动
+- 受保护镜像（v1.2.7/v1.2.6）生产容器仍 (healthy) Up 21h
+
+### 归档与回滚
+
+- 所有清理项已归档至 /root/backups/cleanup-20260809/（tmp-scripts/75 个脚本 + tmp-logs/72 个日志 + project-bak/10 个配置 bak + nginx-bak/）+ VERSION.pre-v1.2.8
+- Docker 镜像回滚：yuxin-api:v1.2.6-yuxin 保留
+
+---
+
+
 ## v1.2.1-yuxin (2026-08-04) · 交付前自检封箱版
 
 ### 背景
