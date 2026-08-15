@@ -13,7 +13,7 @@ echo "  PG: $(du -h "$DEST/pg_$TS.sql.gz" | cut -f1)"
 docker compose exec -T redis redis-cli -a "$REDIS_PASSWORD" BGSAVE 2>/dev/null >/dev/null || true
 sleep 3
 docker cp gateway-redis:/data/dump.rdb "$DEST/redis_$TS.rdb" 2>/dev/null && echo "  Redis: $(du -h "$DEST/redis_$TS.rdb" | cut -f1)" || echo "  Redis: 跳过"
-docker compose exec -T clickhouse clickhouse-client --password "$CH_PASS" --query "BACKUP DATABASE new_api_logs TO Disk('backups','ch_$TS.zip')" 2>/dev/null && echo "  ClickHouse: 完成" || echo "  ClickHouse: 跳过"
+docker compose exec -T clickhouse clickhouse-client --user default --password "$CH_PASS" --query "BACKUP DATABASE new_api_logs TO Disk('backups','ch_$TS.zip')" 2>"/tmp/ch_backup_err_$TS.log" && echo "  ClickHouse: 完成" || { echo "  ClickHouse: 失败! 详见 /tmp/ch_backup_err_$TS.log"; cat "/tmp/ch_backup_err_$TS.log"; }
 tar czf "$DEST/config_$TS.tar.gz" .env docker-compose.yml docker-compose.observability.yml nginx/ 2>/dev/null
 echo "  Config: $(du -h "$DEST/config_$TS.tar.gz" | cut -f1)"
 python3 - "$DEST" <<'PY'

@@ -107,6 +107,7 @@ services:
       CLICKHOUSE_DEFAULT_ACCESS_MANAGEMENT: 1
     volumes:
       - clickhouse_data:/var/lib/clickhouse
+      - ./observability/clickhouse/backup-disk.xml:/etc/clickhouse-server/config.d/backup-disk.xml:ro
     expose:
       - "9000"
       - "8123"
@@ -123,7 +124,7 @@ services:
   # wechat-server 微信公众号网关（登录验证码校验，songquanpeng/wechat-server）
   # ----------------------------------------------------------
   wechat-server:
-    image: justsong/wechat-server
+    image: justsong/wechat-server@sha256:a198a4d2307bf68aa7618e875b3a5a5f9506244b8f3e153e5bf8831896b944c0
     container_name: gateway-wechat-server
     restart: always
     environment:
@@ -139,6 +140,46 @@ services:
       - "127.0.0.1:3002:3000" # 管理控制台仅本机可访问（默认 root/123456，首次登录后立即改密）
     expose:
       - "3000"
+    networks:
+      - gateway-net
+
+  postgres-exporter:
+    image: prometheuscommunity/postgres-exporter:latest
+    container_name: gateway-postgres-exporter
+    restart: unless-stopped
+    environment:
+      DATA_SOURCE_NAME: "postgresql://gateway:${POSTGRES_PASSWORD}@postgres:5432/new-api?sslmode=disable"
+    networks:
+      - gateway-net
+
+  redis-exporter:
+    image: oliver006/redis_exporter:latest
+    container_name: gateway-redis-exporter
+    restart: unless-stopped
+    environment:
+      REDIS_ADDR: "redis://redis:6379"
+      REDIS_PASSWORD: ${REDIS_PASSWORD}
+    networks:
+      - gateway-net
+
+  node-exporter:
+    image: prom/node-exporter:latest
+    container_name: gateway-node-exporter
+    restart: unless-stopped
+    pid: host
+    volumes:
+      - /:/host:ro,rslave
+    command:
+      - '--path.rootfs=/host'
+    networks:
+      - gateway-net
+
+  nginx-exporter:
+    image: nginx/nginx-prometheus-exporter:latest
+    container_name: gateway-nginx-exporter
+    restart: unless-stopped
+    command:
+      - '-nginx.scrape-uri=http://nginx:8081/stub_status'
     networks:
       - gateway-net
 

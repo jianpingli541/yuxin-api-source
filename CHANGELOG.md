@@ -1,3 +1,34 @@
+# Changelog
+
+## v1.2.9-yuxin (2026-08-15)
+
+市场上线就绪审计 + 修复版。
+
+### 合规
+- AGPL §13: 公开源码仓同步至 v1.2.9 快照 (GitHub yuxin-api-source, c5a75685)
+- AGPL §7(b): 7 locale attribution 补英文原串 "Frontend design and development by New API contributors."
+- 新增隐私政策与用户协议内容 (legal.privacy_policy / legal.user_agreement)
+
+### 功能修复
+- /docs 路由修复: docs/index.tsx 缺 createFileRoute 导出导致路由从未注册(404)；示例域名 your-domain.com → ai.yuxin.yun
+- Pricing/模型广场/排行榜对未登录访客开放 (HeaderNavModules requireAuth=false)
+- 清除测试公告 "111111"
+
+### 安全/运维
+- /api/status 版本指纹脱敏 sub_filter 同步 (v1.2.7 → 1.2.9-yuxin)
+- ClickHouse 备份双根因修复: 脚本密码变量 CH_PASS 修正 + backups 磁盘配置持久化(observability/clickhouse/backup-disk.xml)
+- 监控覆盖 1/9 → 5/9 组件 (postgres/redis/node/nginx exporter + prometheus 抓取)
+- 告警规则 4 → 10 条 (新增 infra.yml: 各组件 down + 内存 + 磁盘预测)
+- wechat-server 镜像 pin digest
+- 归档 nginx/ssl 6 个自签 .bak
+- docker prune 回收 4.46GB
+
+### 待办 (需外部输入)
+- 告警真实接收渠道 (alertmanager webhook 仍指 127.0.0.1:5001)
+- 备份异地副本 (rclone/OSS 端点待提供)
+- DB options 支付密钥应用层加密
+- 注册开放策略决策 (Turnstile/邮箱验证)
+
 # 豫鑫 API 中转站 — 变更日志
 
 ---

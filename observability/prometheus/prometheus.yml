@@ -18,3 +18,23 @@ scrape_configs:
         labels:
           service: 'api-gateway'
           env: 'production'
+
+  - job_name: 'postgres-exporter'
+    static_configs:
+      - targets: ['postgres-exporter:9187']
+        labels: {service: 'postgres', env: 'production'}
+
+  - job_name: 'redis-exporter'
+    static_configs:
+      - targets: ['redis-exporter:9121']
+        labels: {service: 'redis', env: 'production'}
+
+  - job_name: 'node-exporter'
+    static_configs:
+      - targets: ['node-exporter:9100']
+        labels: {service: 'host', env: 'production'}
+
+  - job_name: 'nginx-exporter'
+    static_configs:
+      - targets: ['nginx-exporter:9113']
+        labels: {service: 'nginx', env: 'production'}

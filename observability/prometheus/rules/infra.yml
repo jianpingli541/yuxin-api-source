@@ -1,0 +1,44 @@
+groups:
+  - name: infrastructure
+    rules:
+      - alert: PostgresDown
+        expr: up{job="postgres-exporter"} == 0
+        for: 2m
+        labels: {severity: critical}
+        annotations:
+          summary: 'PostgreSQL 实例不可达 ({{ $labels.instance }})'
+
+      - alert: RedisDown
+        expr: up{job="redis-exporter"} == 0
+        for: 2m
+        labels: {severity: critical}
+        annotations:
+          summary: 'Redis 不可达 ({{ $labels.instance }})'
+
+      - alert: NginxDown
+        expr: up{job="nginx-exporter"} == 0
+        for: 2m
+        labels: {severity: critical}
+        annotations:
+          summary: 'Nginx 不可达 ({{ $labels.instance }})'
+
+      - alert: HostDown
+        expr: up{job="node-exporter"} == 0
+        for: 2m
+        labels: {severity: critical}
+        annotations:
+          summary: '宿主机 node-exporter 不可达'
+
+      - alert: HostMemoryHigh
+        expr: (1 - (node_memory_MemAvailable_bytes / node_memory_MemTotal_bytes)) > 0.9
+        for: 10m
+        labels: {severity: warning}
+        annotations:
+          summary: '宿主机内存使用率 >90% (当前 {{ $value | humanizePercentage }})'
+
+      - alert: HostDiskWillFill
+        expr: predict_linear(node_filesystem_avail_bytes{mountpoint="/"}[1h], 24*3600) < 0
+        for: 30m
+        labels: {severity: warning}
+        annotations:
+          summary: '按当前增速 根分区 24h 内将写满'
