@@ -1,3 +1,4 @@
+import { createFileRoute } from '@tanstack/react-router'
 import { useState } from 'react'
 import { PublicLayout } from '@/components/layout'
 import { PageTransition } from '@/components/page-transition'
@@ -72,6 +73,10 @@ export function DocsPage() {
     </PageTransition></PublicLayout>
   )
 }
+export const Route = createFileRoute('/docs/')({
+  component: DocsPage,
+})
+
 export const Component = DocsPage
 export const action = async () => {}
 // Attach displayName for React DevTools (TanStack Router route component)
