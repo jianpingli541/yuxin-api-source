@@ -55,6 +55,10 @@ func Login(c *gin.Context) {
 		common.ApiErrorI18n(c, i18n.MsgInvalidParams)
 		return
 	}
+	if isLoginLocked(c, username) {
+		common.ApiError(c, fmt.Errorf("too many failed login attempts, please try again in 15 minutes"))
+		return
+	}
 	user := model.User{
 		Username: username,
 		Password: password,
@@ -68,10 +72,13 @@ func Login(c *gin.Context) {
 		case errors.Is(err, model.ErrUserEmptyCredentials):
 			common.ApiErrorI18n(c, i18n.MsgInvalidParams)
 		default:
+			recordLoginFailure(c, username)
 			common.ApiErrorI18n(c, i18n.MsgUserUsernameOrPasswordError)
 		}
 		return
 	}
+
+	clearLoginFailures(c, username)
 
 	// 检查是否启用2FA
 	twoFAEnabled, err := model.IsTwoFAEnabled(user.Id)

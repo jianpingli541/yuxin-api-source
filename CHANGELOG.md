@@ -1,5 +1,30 @@
 # Changelog
 
+## v1.2.11-yuxin (2026-08-15)
+
+严苛市场运营终审 (R3, 9 团队) 修复版。
+
+### 安全
+- SSRF 防护: 渠道 base_url 校验（拒绝 localhost/内网/链路本地/云元数据，DNS 解析后二次校验），挂钩 TestChannel；单测覆盖
+- 登录锁定: 密码阶段按 用户名+客户端IP 计数，5 次失败锁 15 分钟（redis），实测第 6 次拒绝
+- nginx Cloudflare realip（22 段）：限流/日志/X-Real-IP 按真实客户端 IP；实测限流键为真实 IP
+- 源站锁定: 80/443 仅 Cloudflare 官方段可入（DOCKER-USER + systemd 持久化），实测直连被拒、CF 路径正常
+- /login → /sign-in 301（USER-GUIDE 兼容）
+
+### 运维
+- PG 连接池对齐: SQL_MAX_OPEN_CONNS 1000→90（PG max_connections=100），+SQL_MAX_LIFETIME=600
+- postgres 容器 LogConfig 50m×3 轮转
+- gofmt 全量格式化 18 文件
+- alertmanager 注释、README 版本头修正
+
+### 前端/合规
+- docs quickstart 示例模型 gpt-4o → deepseek-v4-flash（目录内真实模型）
+- nextchat.dev 死链 → GitHub NextChat
+- 隐私政策：日志保留期 90→30 天（对齐 CH TTL）、运营主体具名惠州市豫鑫网络科技有限公司、凭据存储表述精确化、删除手机号声明
+- About 页写入 AGPL §13 披露声明
+- 披露仓全树对齐补遗（usage-logs schema.ts）
+
+
 ## v1.2.10-yuxin (2026-08-15)
 
 安全加固版: 支付密钥静态加密 + 工具链 CVE 修复 + 监控/健康检查补齐。

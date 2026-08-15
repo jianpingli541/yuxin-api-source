@@ -110,7 +110,7 @@ const APP_TEMPLATES: Array<
     name: 'NextChat',
     description: 'Cross-platform private ChatGPT client',
     category: 'Chat',
-    url: 'https://nextchat.dev',
+    url: 'https://github.com/ChatGPTNextWeb/NextChat',
   },
   {
     name: 'Continue',

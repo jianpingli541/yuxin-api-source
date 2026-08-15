@@ -213,7 +213,7 @@ func TestCheckAllText_DisabledPII_NoPIICheck(t *testing.T) {
 		Enabled: true, PromptInjectionMode: "medium",
 		PIIDetection: false, ContentModeration: true,
 		BlockedCategories: []string{"violence"},
-		RateLimitPerUser: 60, RateLimitPerIP: 100,
+		RateLimitPerUser:  60, RateLimitPerIP: 100,
 	})
 	results := CheckAllText("email me at user@example.com")
 	for _, r := range results {
@@ -230,7 +230,7 @@ func TestCheckAllText_UnblockedCategory_NoBlock(t *testing.T) {
 		Enabled: true, PromptInjectionMode: "medium",
 		PIIDetection: true, ContentModeration: true,
 		BlockedCategories: []string{"violence"},
-		RateLimitPerUser: 60, RateLimitPerIP: 100,
+		RateLimitPerUser:  60, RateLimitPerIP: 100,
 	})
 	// self_harm not in blocked list -> should pass content moderation
 	results := CheckAllText("I want to kill myself and end my life")
@@ -251,7 +251,7 @@ func TestCheckAllText_UnknownCategory_NoBlock(t *testing.T) {
 		Enabled: true, PromptInjectionMode: "medium",
 		PIIDetection: false, ContentModeration: true,
 		BlockedCategories: []string{"unknown_category"},
-		RateLimitPerUser: 60, RateLimitPerIP: 100,
+		RateLimitPerUser:  60, RateLimitPerIP: 100,
 	})
 	results := CheckAllText("just a normal sentence")
 	for _, r := range results {
@@ -430,7 +430,7 @@ func TestComplianceMiddleware_PassOnCleanBody(t *testing.T) {
 		Enabled: true, PromptInjectionMode: "medium",
 		PIIDetection: true, ContentModeration: true,
 		BlockedCategories: []string{"violence"},
-		RateLimitPerUser: 60, RateLimitPerIP: 100,
+		RateLimitPerUser:  60, RateLimitPerIP: 100,
 	})
 	mw := ComplianceMiddleware()
 	req, _ := http.NewRequest("POST", "/", strings.NewReader(`{"messages":[{"role":"user","content":"hi"}]}`))

@@ -844,6 +844,13 @@ func TestChannel(c *gin.Context) {
 	//		go func() { _ = channel.SaveChannelInfo() }()
 	//	}
 	//}()
+	if baseURL := channel.GetBaseURL(); baseURL != "" {
+		if err := validateOutboundBaseURL(baseURL); err != nil {
+			common.SysError("channel test blocked by SSRF guard: " + err.Error())
+			c.JSON(http.StatusOK, gin.H{"success": false, "message": "channel base url rejected by security policy"})
+			return
+		}
+	}
 	testModel := c.Query("model")
 	endpointType := c.Query("endpoint_type")
 	isStream, _ := strconv.ParseBool(c.Query("stream"))

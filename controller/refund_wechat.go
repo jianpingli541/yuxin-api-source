@@ -99,8 +99,8 @@ func AdminWechatRefund(c *gin.Context) {
 	}
 	logger.LogInfo(ctx, fmt.Sprintf("微信退款请求已提交 trade_no=%s refund_no=%s state=%s admin=%s", topUp.TradeNo, outRefundNo, state, c.ClientIP()))
 	common.ApiSuccess(c, gin.H{
-		"refund_no":   outRefundNo,
-		"trade_no":    topUp.TradeNo,
+		"refund_no":    outRefundNo,
+		"trade_no":     topUp.TradeNo,
 		"refund_state": state,
 	})
 }

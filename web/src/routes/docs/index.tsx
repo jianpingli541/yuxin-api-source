@@ -17,19 +17,19 @@ const CODE_EXAMPLES: Record<string, string> = {
   curl: `curl -X POST https://ai.yuxin.yun/v1/chat/completions \\
   -H "Content-Type: application/json" \\
   -H "Authorization: Bearer sk-your-api-key" \\
-  -d '{"model":"gpt-4o","messages":[{"role":"user","content":"Hello!"}]}'`,
+  -d '{"model":"deepseek-v4-flash","messages":[{"role":"user","content":"Hello!"}]}'`,
   python: `from openai import OpenAI
 
 client = OpenAI(api_key="sk-your-key", base_url="https://ai.yuxin.yun/v1")
 resp = client.chat.completions.create(
-    model="gpt-4o",
+    model="deepseek-v4-flash",
     messages=[{"role":"user","content":"Hello!"}],
 )
 print(resp.choices[0].message.content)`,
   node: `import OpenAI from "openai";
 const client = new OpenAI({ apiKey:"sk-your-key", baseURL:"https://ai.yuxin.yun/v1" });
 const resp = await client.chat.completions.create({
-  model: "gpt-4o",
+  model: "deepseek-v4-flash",
   messages: [{ role:"user", content:"Hello!" }],
 });
 console.log(resp.choices[0].message.content);`,

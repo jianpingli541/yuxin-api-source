@@ -13,8 +13,8 @@ import (
 	"github.com/QuantumNous/new-api/setting"
 	"github.com/QuantumNous/new-api/setting/operation_setting"
 	"github.com/gin-gonic/gin"
-	"github.com/thanhpk/randstr"
 	"github.com/smartwalle/alipay/v3"
+	"github.com/thanhpk/randstr"
 )
 
 // AlipayPayRequest 前端发起支付宝充值时提交的请求体
@@ -279,7 +279,6 @@ func AlipayNotify(c *gin.Context) {
 		_, _ = c.Writer.Write([]byte("success"))
 	}
 }
-
 
 // AlipayNativeQuery 前端轮询入口：主动查询支付宝订单状态并在已支付时入账。
 // 作用：与微信路径完全对称——回调可能因平台公钥/网络抖动失败，

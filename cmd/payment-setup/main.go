@@ -51,19 +51,19 @@ type wechatConfig struct {
 }
 
 type alipayConfig struct {
-	Enabled        bool    `json:"AlipayEnabled"`
-	AppId          string  `json:"AlipayAppId"`
-	PrivateKey     string  `json:"AlipayPrivateKey"`
-	PublicKey      string  `json:"AlipayPublicKey"`
-	UseCertMode    bool    `json:"AlipayUseCertMode"`
-	AppCertPubKey  string  `json:"AlipayAppCertPublicKey"`
-	PublicCert     string  `json:"AlipayPublicCert"`
-	RootCert       string  `json:"AlipayRootCert"`
-	Sandbox        bool    `json:"AlipaySandbox"`
-	NotifyUrl      string  `json:"AlipayNotifyUrl"`
-	ReturnUrl      string  `json:"AlipayReturnUrl"`
-	UnitPrice      float64 `json:"AlipayUnitPrice"`
-	MinTopUp       int     `json:"AlipayMinTopUp"`
+	Enabled       bool    `json:"AlipayEnabled"`
+	AppId         string  `json:"AlipayAppId"`
+	PrivateKey    string  `json:"AlipayPrivateKey"`
+	PublicKey     string  `json:"AlipayPublicKey"`
+	UseCertMode   bool    `json:"AlipayUseCertMode"`
+	AppCertPubKey string  `json:"AlipayAppCertPublicKey"`
+	PublicCert    string  `json:"AlipayPublicCert"`
+	RootCert      string  `json:"AlipayRootCert"`
+	Sandbox       bool    `json:"AlipaySandbox"`
+	NotifyUrl     string  `json:"AlipayNotifyUrl"`
+	ReturnUrl     string  `json:"AlipayReturnUrl"`
+	UnitPrice     float64 `json:"AlipayUnitPrice"`
+	MinTopUp      int     `json:"AlipayMinTopUp"`
 }
 
 type paymentConfig struct {
@@ -166,16 +166,16 @@ func runWrite(path string) {
 	fixPEMLiterals(&cfg)
 
 	values := map[string]string{
-		"WechatEnabled":      boolStr(cfg.Wechat.Enabled),
-		"WechatMerchantId":   cfg.Wechat.MerchantId,
-		"WechatAppId":        cfg.Wechat.AppId,
-		"WechatApiV3Key":     cfg.Wechat.ApiV3Key,
-		"WechatPrivateKey":   cfg.Wechat.PrivateKey,
-		"WechatCertSerialNo": cfg.Wechat.CertSerialNo,
-		"WechatNotifyUrl":    cfg.Wechat.NotifyUrl,
-		"WechatReturnUrl":    cfg.Wechat.ReturnUrl,
-		"WechatUnitPrice":    fmt.Sprintf("%v", cfg.Wechat.UnitPrice),
-		"WechatMinTopUp":     fmt.Sprintf("%d", cfg.Wechat.MinTopUp),
+		"WechatEnabled":          boolStr(cfg.Wechat.Enabled),
+		"WechatMerchantId":       cfg.Wechat.MerchantId,
+		"WechatAppId":            cfg.Wechat.AppId,
+		"WechatApiV3Key":         cfg.Wechat.ApiV3Key,
+		"WechatPrivateKey":       cfg.Wechat.PrivateKey,
+		"WechatCertSerialNo":     cfg.Wechat.CertSerialNo,
+		"WechatNotifyUrl":        cfg.Wechat.NotifyUrl,
+		"WechatReturnUrl":        cfg.Wechat.ReturnUrl,
+		"WechatUnitPrice":        fmt.Sprintf("%v", cfg.Wechat.UnitPrice),
+		"WechatMinTopUp":         fmt.Sprintf("%d", cfg.Wechat.MinTopUp),
 		"AlipayEnabled":          boolStr(cfg.Alipay.Enabled),
 		"AlipayAppId":            cfg.Alipay.AppId,
 		"AlipayPrivateKey":       cfg.Alipay.PrivateKey,

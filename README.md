@@ -1,4 +1,4 @@
-> **豫鑫商用 API 网关** | v1.2.1-yuxin | 2026-08-04 | fork of new-api
+> **豫鑫商用 API 网关** | v1.2.10-yuxin | 2026-08-15 | fork of new-api
 
 <div align="center">
 

@@ -10,6 +10,5 @@ receivers:
   webhook_configs:
   - url: 'http://alert-forwarder:5001/'
     send_resolved: true
-  # TODO: 接入真实通知渠道——钉钉/飞书/企业微信 webhook 或 SMTP
-  # 替换上面的 url 为你的 webhook 地址,或加 email_configs
+  # 告警已接入 alert-forwarder (gateway-net); 外部渠道在 observability/alert-forwarder/config/webhooks.list 配置
 inhibit_rules: []

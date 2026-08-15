@@ -95,7 +95,6 @@ func GetTopUpInfo(c *gin.Context) {
 		}
 	}
 
-
 	// 如果启用了微信支付，添加到支付方法列表
 	// 默认 PayMethods 中的 type=wxpay 是历史聚合通道的占位条目，启用微信原生支付后用新条目替换，
 	// 避免前端同时显示两条微信按钮。
@@ -126,7 +125,6 @@ func GetTopUpInfo(c *gin.Context) {
 			})
 		}
 	}
-
 
 	// 如果启用了支付宝，添加到支付方法列表
 	// 默认 PayMethods 中的 type=alipay 是历史聚合通道的占位条目，启用支付宝原生支付后用新条目替换。
@@ -164,7 +162,7 @@ func GetTopUpInfo(c *gin.Context) {
 		"enable_creem_topup":               isCreemTopUpEnabled(),
 		"enable_waffo_topup":               enableWaffo,
 		"enable_wechat_topup":              enableWechat,
-		"enable_alipay_topup":             enableAlipay,
+		"enable_alipay_topup":              enableAlipay,
 		"enable_waffo_pancake_topup":       enableWaffoPancake,
 		"enable_redemption":                complianceConfirmed,
 		"payment_compliance_confirmed":     complianceConfirmed,
@@ -175,7 +173,7 @@ func GetTopUpInfo(c *gin.Context) {
 			}
 			return nil
 		}(),
-		"creem_products":          setting.CreemProducts,
+		"creem_products": setting.CreemProducts,
 		"wechat_pay_methods": func() interface{} {
 			if enableWechat {
 				return setting.GetWechatPayMethods()
@@ -193,7 +191,7 @@ func GetTopUpInfo(c *gin.Context) {
 		"stripe_min_topup":        setting.StripeMinTopUp,
 		"waffo_min_topup":         setting.WaffoMinTopUp,
 		"wechat_min_topup":        setting.WechatMinTopUp,
-		"alipay_min_topup":       setting.AlipayMinTopUp,
+		"alipay_min_topup":        setting.AlipayMinTopUp,
 		"waffo_pancake_min_topup": setting.WaffoPancakeMinTopUp,
 		"amount_options":          operation_setting.GetPaymentSetting().AmountOptions,
 		"discount":                operation_setting.GetPaymentSetting().AmountDiscount,
