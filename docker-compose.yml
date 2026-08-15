@@ -21,6 +21,12 @@ services:
       - ./nginx/letsencrypt:/etc/letsencrypt:ro
     depends_on:
       - new-api
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q --no-check-certificate -O /dev/null --timeout=8 https://localhost/api/status || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 15s
     networks:
       - gateway-net
 
@@ -28,7 +34,7 @@ services:
   # new-api 核心服务 (Go 网关 + React 前端)
   # ----------------------------------------------------------
   new-api:
-    image: yuxin-api:v1.2.9-yuxin
+    image: yuxin-api:v1.2.10-yuxin
     container_name: gateway-new-api
     restart: always
     command: --log-dir /app/logs
@@ -92,6 +98,12 @@ services:
       - redis_data:/data
     networks:
       - gateway-net
+    healthcheck:
+      test: ["CMD-SHELL", "redis-cli -a '${REDIS_PASSWORD}' --no-auth-warning ping | grep -q PONG || exit 1"]
+      interval: 15s
+      timeout: 10s
+      retries: 3
+      start_period: 5s
 
   # ----------------------------------------------------------
   # ClickHouse (日志分析)
@@ -108,6 +120,7 @@ services:
     volumes:
       - clickhouse_data:/var/lib/clickhouse
       - ./observability/clickhouse/backup-disk.xml:/etc/clickhouse-server/config.d/backup-disk.xml:ro
+      - ./observability/clickhouse/prometheus.xml:/etc/clickhouse-server/config.d/prometheus.xml:ro
     expose:
       - "9000"
       - "8123"
@@ -142,6 +155,12 @@ services:
       - "3000"
     networks:
       - gateway-net
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q -O /dev/null --timeout=5 http://localhost:3000/ || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 20s
 
   postgres-exporter:
     image: prometheuscommunity/postgres-exporter:latest

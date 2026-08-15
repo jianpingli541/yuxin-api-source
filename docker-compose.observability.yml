@@ -2,6 +2,12 @@ services:
   alertmanager:
     image: prom/alertmanager:latest
     container_name: gateway-alertmanager
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q -O /dev/null --timeout=5 http://localhost:9093/-/healthy || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
     restart: unless-stopped
     ports:
       - "127.0.0.1:9093:9093"
@@ -14,6 +20,12 @@ services:
   prometheus:
     image: prom/prometheus:latest
     container_name: gateway-prometheus
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q -O /dev/null --timeout=5 http://localhost:9090/-/healthy || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
     restart: unless-stopped
     ports:
       - "127.0.0.1:9090:9090"
@@ -33,6 +45,12 @@ services:
   grafana:
     image: grafana/grafana:latest
     container_name: gateway-grafana
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q -O /dev/null --timeout=5 http://localhost:3000/api/health || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 20s
     restart: unless-stopped
     ports:
       - "127.0.0.1:3001:3000"
@@ -48,6 +66,16 @@ services:
       - grafana_data:/var/lib/grafana
     depends_on:
       - prometheus
+    networks:
+      - api-gateway_gateway-net
+
+  alert-forwarder:
+    build: ./observability/alert-forwarder
+    container_name: gateway-alert-forwarder
+    restart: unless-stopped
+    volumes:
+      - ./backups/alerts:/var/log/alert-forwarder
+      - ./observability/alert-forwarder/config:/etc/alert-forwarder
     networks:
       - api-gateway_gateway-net
 

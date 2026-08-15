@@ -216,7 +216,7 @@ func InitOptionMap() {
 func loadOptionsFromDatabase() {
 	options, _ := AllOption()
 	for _, option := range options {
-		err := updateOptionMap(option.Key, option.Value)
+		err := updateOptionMap(option.Key, DecryptOptionValue(option.Value))
 		if err != nil {
 			common.SysLog("failed to update option map: " + err.Error())
 		}
@@ -251,7 +251,7 @@ func UpdateOption(key string, value string) error {
 	}
 	// https://gorm.io/docs/update.html#Save-All-Fields
 	DB.FirstOrCreate(&option, Option{Key: key})
-	option.Value = value
+	option.Value = EncryptSensitiveOptionValue(key, value)
 	// Save is a combination function.
 	// If save value does not contain primary key, it will execute Create,
 	// otherwise it will execute Update (with all fields).
@@ -280,7 +280,7 @@ func UpdateOptionsBulk(values map[string]string) error {
 			if err := tx.FirstOrCreate(&option, Option{Key: k}).Error; err != nil {
 				return err
 			}
-			option.Value = v
+			option.Value = EncryptSensitiveOptionValue(k, v)
 			if err := tx.Save(&option).Error; err != nil {
 				return err
 			}

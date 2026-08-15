@@ -5,7 +5,7 @@ COPY ./web ./
 COPY ./VERSION /build/VERSION
 # 直接用 host 已构建的 dist（跳过 builder 内 bun build，避免缓存旧 bundle）
 
-FROM golang:1.25.12-alpine@sha256:56961d79ea8129efddcc0b8643fd8a5416b4e6228cfd477e3fd61deb2672c587 AS builder2
+FROM golang:1.26.6-alpine@sha256:af8d6740070b8906d12eae1c3e3ea0957fb63f492051ea05e354c38ef9fe88df AS builder2
 ENV GO111MODULE=on CGO_ENABLED=0 GOWORK=off
 
 ARG TARGETOS

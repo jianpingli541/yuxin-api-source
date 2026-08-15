@@ -8,7 +8,7 @@ route:
 receivers:
 - name: 'default'
   webhook_configs:
-  - url: 'http://127.0.0.1:5001/'
+  - url: 'http://alert-forwarder:5001/'
     send_resolved: true
   # TODO: 接入真实通知渠道——钉钉/飞书/企业微信 webhook 或 SMTP
   # 替换上面的 url 为你的 webhook 地址,或加 email_configs

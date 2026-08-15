@@ -1,5 +1,40 @@
 # Changelog
 
+## v1.2.10-yuxin (2026-08-15)
+
+安全加固版: 支付密钥静态加密 + 工具链 CVE 修复 + 监控/健康检查补齐。
+
+### 安全
+- DB options 支付密钥静态加密: AlipayPrivateKey / WechatPrivateKey / WechatApiV3Key
+  采用与 channels.key 一致的 AES-256-GCM 方案 (CRYPTO_SECRET 派生, enc1: 前缀)。
+  启动迁移 MigrateSensitiveOptionsToEncrypted 幂等执行; 读路径统一解密,
+  写路径统一加密; 内存 OptionMap 保持明文, 管理面板行为不变。
+  新增单元测试 3 项 (round-trip / 幂等 / 明文透传)。
+- Go 工具链 1.25.12 -> 1.26.6-alpine (digest pin), 修复 govulncheck 命中的
+  7 项可达标准库漏洞 (net/url, crypto/tls, net/http, encoding/xml, encoding/asn1, idna)
+- golang.org/x/image 升级, 修复 webp 解码漏洞 (GO-2026 系列)
+
+### 运维
+- 告警真实落地: alert-forwarder 容器化 (gateway-net), alertmanager webhook
+  指向 alert-forwarder:5001; 告警 JSONL 持久化至 backups/alerts/ 并随每日
+  异地备份拉取; 支持钉钉/企微/飞书 webhook 扇出 (webhooks.list 配置即生效)
+- 监控覆盖 5/9 -> 9/9: 新增 prometheus/alertmanager/grafana 自监控 +
+  ClickHouse 内置 Prometheus 指标 (:9363, config.d/prometheus.xml)
+- 健康检查补齐: nginx/redis/wechat-server/prometheus/grafana/alertmanager
+- 异地备份: Kali 接收端 systemd timer 每日 04:10 拉取 backups/ + 配置快照
+- 恢复演练通过: pg dump 还原 35 表 (users 11/tokens 24/channels 1/abilities 10),
+  ClickHouse BACKUP/RESTORE 全链路 (logs 591 行)
+- admin access_token 生成 (id=1, API 验证 200), 凭据存 /root/.config/.secrets/
+
+### 指纹
+- nginx sub_filter 版本脱敏同步 1.2.10-yuxin
+
+### 待办 (需外部输入)
+- 告警外部接收地址 (钉钉/企微 webhook 或外部邮箱, 配置即生效)
+- 注册开放策略决策 (Turnstile/邮箱验证, 需 Cloudflare/SMTP 凭据)
+- HA 与 AGPL 商业授权谈判 (v1.3.0 backlog)
+
+
 ## v1.2.9-yuxin (2026-08-15)
 
 市场上线就绪审计 + 修复版。
