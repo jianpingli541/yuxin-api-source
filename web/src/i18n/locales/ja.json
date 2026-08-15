@@ -5214,6 +5214,23 @@
     "Zero retention": "データ保持なし",
     "Zhipu": "Zhipu",
     "Zhipu V4": "Zhipu V 4",
-    "Zoom": "ズーム"
+    "Zoom": "ズーム",
+    "Custom API base URL. For official channels, YUXIN API has built-in addresses. Only fill this for third-party proxy sites or special endpoints. Do not add /v1 or trailing slash.": "カスタム API ベース URL。公式チャネルでは YUXIN API にアドレスが内蔵されています。サードパーティのプロキシや特殊なエンドポイントの場合のみ入力してください。/v1 や末尾のスラッシュは追加しないでください。",
+    "e.g. YUXIN API Console": "例：YUXIN API コンソール",
+    "Format: AccessKey|SecretKey (or just ApiKey if upstream is YUXIN API)": "形式：AccessKey|SecretKey（アップストリームが YUXIN API の場合は ApiKey のみ）",
+    "If connecting to upstream One API or YUXIN API relay projects, use OpenAI type instead unless you know what you are doing": "アップストリームの One API や YUXIN API リレープロジェクトに接続する場合は、内容を理解している場合を除き、OpenAI タイプを使用してください",
+    "YUXIN API": "YUXIN API",
+    "YUXIN API &lt;noreply@example.com&gt;": "YUXIN API &lt;noreply@example.com&gt;",
+    "YUXIN API Project Repository:": "YUXIN API プロジェクトリポジトリ：",
+    "Warning: Base URL should not end with /v1. YUXIN API will handle it automatically. This may cause request failures.": "警告：ベース URL の末尾に /v1 を付けないでください。YUXIN API が自動で処理します。付けるとリクエストが失敗する場合があります。",
+    "Welcome to our YUXIN API...": "YUXIN API へようこそ…",
+    "Payment Successful": "支払い成功",
+    "Please close and try again.": "閉じてもう一度お試しください。",
+    "QR Code Expired": "QRコードの有効期限が切れました",
+    "Refreshing balance...": "残高を更新しています…",
+    "Scan the QR code with Alipay to pay": "AlipayでQRコードをスキャンして支払う",
+    "Scan the QR code with WeChat to pay": "WeChatでQRコードをスキャンして支払う",
+    "Waiting for payment...": "支払い待ち…",
+    "Payment failed": "支払いに失敗しました"
   }
 }

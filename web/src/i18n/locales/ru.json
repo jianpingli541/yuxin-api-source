@@ -5214,6 +5214,23 @@
     "Zero retention": "Без хранения данных",
     "Zhipu": "Zhipu",
     "Zhipu V4": "Zhipu V4",
-    "Zoom": "Zoom"
+    "Zoom": "Zoom",
+    "Custom API base URL. For official channels, YUXIN API has built-in addresses. Only fill this for third-party proxy sites or special endpoints. Do not add /v1 or trailing slash.": "Пользовательский базовый URL API. Для официальных каналов адреса встроены в YUXIN API. Заполняйте только для сторонних прокси или особых конечных точек. Не добавляйте /v1 или завершающий слэш.",
+    "e.g. YUXIN API Console": "например, консоль YUXIN API",
+    "Format: AccessKey|SecretKey (or just ApiKey if upstream is YUXIN API)": "Формат: AccessKey|SecretKey (или только ApiKey, если апстрим — YUXIN API)",
+    "If connecting to upstream One API or YUXIN API relay projects, use OpenAI type instead unless you know what you are doing": "При подключении к апстриму One API или ретрансляторам YUXIN API используйте тип OpenAI, если не уверены в своих действиях",
+    "YUXIN API": "YUXIN API",
+    "YUXIN API &lt;noreply@example.com&gt;": "YUXIN API &lt;noreply@example.com&gt;",
+    "YUXIN API Project Repository:": "Репозиторий проекта YUXIN API:",
+    "Warning: Base URL should not end with /v1. YUXIN API will handle it automatically. This may cause request failures.": "Внимание: базовый URL не должен заканчиваться на /v1. YUXIN API обработает это автоматически, иначе запросы могут завершаться ошибкой.",
+    "Welcome to our YUXIN API...": "Добро пожаловать в YUXIN API...",
+    "Payment Successful": "Оплата прошла успешно",
+    "Please close and try again.": "Пожалуйста, закройте и попробуйте снова.",
+    "QR Code Expired": "Срок действия QR-кода истёк",
+    "Refreshing balance...": "Обновление баланса...",
+    "Scan the QR code with Alipay to pay": "Отсканируйте QR-код в Alipay для оплаты",
+    "Scan the QR code with WeChat to pay": "Отсканируйте QR-код в WeChat для оплаты",
+    "Waiting for payment...": "Ожидание оплаты...",
+    "Payment failed": "Оплата не удалась"
   }
 }

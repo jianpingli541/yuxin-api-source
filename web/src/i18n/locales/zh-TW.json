@@ -5214,6 +5214,23 @@
     "Zero retention": "零數據保留",
     "Zhipu": "智譜",
     "Zhipu V4": "智譜 V4",
-    "Zoom": "縮放"
+    "Zoom": "縮放",
+    "Custom API base URL. For official channels, YUXIN API has built-in addresses. Only fill this for third-party proxy sites or special endpoints. Do not add /v1 or trailing slash.": "自訂 API base URL。官方渠道豫鑫 API 已內建地址，僅在第三方代理站或特殊端點時填寫。請勿加上 /v1 或結尾斜線。",
+    "e.g. YUXIN API Console": "例如：豫鑫 API 控制台",
+    "Format: AccessKey|SecretKey (or just ApiKey if upstream is YUXIN API)": "格式：AccessKey|SecretKey（若上游為豫鑫 API 則僅填 ApiKey）",
+    "If connecting to upstream One API or YUXIN API relay projects, use OpenAI type instead unless you know what you are doing": "若連接上游 One API 或豫鑫 API 中繼專案，除非你清楚自己在做什麼，否則請改用 OpenAI 類型",
+    "YUXIN API": "豫鑫 API",
+    "YUXIN API &lt;noreply@example.com&gt;": "豫鑫 API &lt;noreply@example.com&gt;",
+    "YUXIN API Project Repository:": "豫鑫 API 專案倉庫：",
+    "Warning: Base URL should not end with /v1. YUXIN API will handle it automatically. This may cause request failures.": "警告：Base URL 不應以 /v1 結尾，豫鑫 API 會自動處理，否則可能導致請求失敗。",
+    "Welcome to our YUXIN API...": "歡迎使用豫鑫 API…",
+    "Payment Successful": "支付成功",
+    "Please close and try again.": "請關閉後重試。",
+    "QR Code Expired": "QR Code 已過期",
+    "Refreshing balance...": "正在重新整理餘額…",
+    "Scan the QR code with Alipay to pay": "請使用支付寶掃描 QR Code 付款",
+    "Scan the QR code with WeChat to pay": "請使用微信掃描 QR Code 付款",
+    "Waiting for payment...": "等待支付中…",
+    "Payment failed": "支付失敗"
   }
 }

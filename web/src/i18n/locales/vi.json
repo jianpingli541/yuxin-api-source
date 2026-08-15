@@ -5214,6 +5214,23 @@
     "Zero retention": "Không lưu dữ liệu",
     "Zhipu": "Zhipu",
     "Zhipu V4": "Zhipu V4",
-    "Zoom": "Zoom"
+    "Zoom": "Zoom",
+    "Custom API base URL. For official channels, YUXIN API has built-in addresses. Only fill this for third-party proxy sites or special endpoints. Do not add /v1 or trailing slash.": "URL gốc API tùy chỉnh. Với các kênh chính thức, YUXIN API đã tích hợp sẵn địa chỉ. Chỉ điền khi dùng proxy bên thứ ba hoặc endpoint đặc biệt. Không thêm /v1 hoặc dấu gạch chéo cuối.",
+    "e.g. YUXIN API Console": "ví dụ: Bảng điều khiển YUXIN API",
+    "Format: AccessKey|SecretKey (or just ApiKey if upstream is YUXIN API)": "Định dạng: AccessKey|SecretKey (hoặc chỉ ApiKey nếu upstream là YUXIN API)",
+    "If connecting to upstream One API or YUXIN API relay projects, use OpenAI type instead unless you know what you are doing": "Nếu kết nối tới upstream One API hoặc dự án relay YUXIN API, hãy dùng loại OpenAI trừ khi bạn biết rõ mình đang làm gì",
+    "YUXIN API": "YUXIN API",
+    "YUXIN API &lt;noreply@example.com&gt;": "YUXIN API &lt;noreply@example.com&gt;",
+    "YUXIN API Project Repository:": "Kho mã nguồn dự án YUXIN API:",
+    "Warning: Base URL should not end with /v1. YUXIN API will handle it automatically. This may cause request failures.": "Cảnh báo: Base URL không nên kết thúc bằng /v1. YUXIN API sẽ tự xử lý, nếu không yêu cầu có thể thất bại.",
+    "Welcome to our YUXIN API...": "Chào mừng đến với YUXIN API...",
+    "Payment Successful": "Thanh toán thành công",
+    "Please close and try again.": "Vui lòng đóng và thử lại.",
+    "QR Code Expired": "Mã QR đã hết hạn",
+    "Refreshing balance...": "Đang làm mới số dư...",
+    "Scan the QR code with Alipay to pay": "Quét mã QR bằng Alipay để thanh toán",
+    "Scan the QR code with WeChat to pay": "Quét mã QR bằng WeChat để thanh toán",
+    "Waiting for payment...": "Đang chờ thanh toán...",
+    "Payment failed": "Thanh toán thất bại"
   }
 }

@@ -5214,6 +5214,23 @@
     "Zero retention": "Aucune rétention",
     "Zhipu": "Zhipu",
     "Zhipu V4": "Zhipu V4",
-    "Zoom": "Zoom"
+    "Zoom": "Zoom",
+    "Custom API base URL. For official channels, YUXIN API has built-in addresses. Only fill this for third-party proxy sites or special endpoints. Do not add /v1 or trailing slash.": "URL de base API personnalisée. Pour les canaux officiels, YUXIN API intègre les adresses. Ne remplissez ce champ que pour un proxy tiers ou un point de terminaison spécial. N'ajoutez pas /v1 ni de barre oblique finale.",
+    "e.g. YUXIN API Console": "ex. Console YUXIN API",
+    "Format: AccessKey|SecretKey (or just ApiKey if upstream is YUXIN API)": "Format : AccessKey|SecretKey (ou seulement ApiKey si l'amont est YUXIN API)",
+    "If connecting to upstream One API or YUXIN API relay projects, use OpenAI type instead unless you know what you are doing": "Si vous vous connectez à un relais One API ou YUXIN API en amont, utilisez plutôt le type OpenAI, sauf si vous savez ce que vous faites",
+    "YUXIN API": "YUXIN API",
+    "YUXIN API &lt;noreply@example.com&gt;": "YUXIN API &lt;noreply@example.com&gt;",
+    "YUXIN API Project Repository:": "Dépôt du projet YUXIN API :",
+    "Warning: Base URL should not end with /v1. YUXIN API will handle it automatically. This may cause request failures.": "Attention : l'URL de base ne doit pas se terminer par /v1. YUXIN API s'en charge automatiquement, sinon les requêtes peuvent échouer.",
+    "Welcome to our YUXIN API...": "Bienvenue sur YUXIN API...",
+    "Payment Successful": "Paiement réussi",
+    "Please close and try again.": "Veuillez fermer et réessayer.",
+    "QR Code Expired": "QR Code expiré",
+    "Refreshing balance...": "Actualisation du solde...",
+    "Scan the QR code with Alipay to pay": "Scannez le QR code avec Alipay pour payer",
+    "Scan the QR code with WeChat to pay": "Scannez le QR code avec WeChat pour payer",
+    "Waiting for payment...": "En attente du paiement...",
+    "Payment failed": "Paiement échoué"
   }
 }

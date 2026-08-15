@@ -5255,6 +5255,15 @@
     "Scan the QR code with Alipay to pay": "使用支付宝扫一扫以完成支付",
     "Scan the QR code with WeChat to pay": "使用微信扫一扫以完成支付",
     "Waiting for payment...": "等待支付中...",
-    "Payment failed": "支付失败"
+    "Payment failed": "支付失败",
+    "Custom API base URL. For official channels, YUXIN API has built-in addresses. Only fill this for third-party proxy sites or special endpoints. Do not add /v1 or trailing slash.": "自定义 API base URL。官方渠道豫鑫 API 已内置地址，仅在第三方代理站或特殊端点时填写。请勿添加 /v1 或结尾斜线。",
+    "Format: AccessKey|SecretKey (or just ApiKey if upstream is YUXIN API)": "格式：AccessKey|SecretKey（上游为豫鑫 API 时仅填 ApiKey）",
+    "If connecting to upstream One API or YUXIN API relay projects, use OpenAI type instead unless you know what you are doing": "若连接上游 One API 或豫鑫 API 中转项目，除非你清楚自己在做什么，否则请改用 OpenAI 类型",
+    "Warning: Base URL should not end with /v1. YUXIN API will handle it automatically. This may cause request failures.": "警告：Base URL 不应以 /v1 结尾，豫鑫 API 会自动处理，否则可能导致请求失败。",
+    "Welcome to our YUXIN API...": "欢迎使用豫鑫 API…",
+    "YUXIN API": "豫鑫 API",
+    "YUXIN API &lt;noreply@example.com&gt;": "豫鑫 API &lt;noreply@example.com&gt;",
+    "YUXIN API Project Repository:": "豫鑫 API 项目仓库：",
+    "e.g. YUXIN API Console": "例如：豫鑫 API 控制台"
   }
 }

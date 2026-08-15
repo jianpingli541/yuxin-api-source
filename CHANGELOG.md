@@ -1,5 +1,23 @@
 # Changelog
 
+## v1.2.12-yuxin (2026-08-16)
+
+R3 修复计划 P0/P2 执行版。
+
+### 前端/i18n
+- 5 locale（zh-TW/fr/ru/ja/vi）补齐 17 条缺失文案（支付流程 8 条 + 渠道配置提示），zh 补 9 条
+- i18n 懒加载：fr/ru/ja/vi locale 改动态 import，主 bundle 3.5MB → 1.83MB（-48%）
+
+### 工程
+- go vet 清零：topup_creem.go×2、topup_waffo_pancake.go 三处 %d/string 修复
+- nginx 静态缓存生效化：proxy_cache_path yuxin_static（20m/200MB/7d）+ X-Cache-Status 头
+- scripts/restore-drill.sh：pg+CH 月度恢复演练（每月 1 日 05:30 cron），首跑 PG_DRILL_PASS/CH_DRILL_PASS
+
+### 治理文档
+- admin-2fa-sop.md（管理员 2FA 强制策略）
+- registration-policy-decision.md（注册策略决策：维持开放+realip 限流纵深，Turnstile 待 key）
+
+
 ## v1.2.11-yuxin (2026-08-15)
 
 严苛市场运营终审 (R3, 9 团队) 修复版。

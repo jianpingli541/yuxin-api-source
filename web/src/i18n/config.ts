@@ -22,20 +22,33 @@ import { initReactI18next } from 'react-i18next'
 
 import { convertDetectedLanguage } from './languages'
 import en from './locales/en.json'
-import fr from './locales/fr.json'
-import ja from './locales/ja.json'
-import ru from './locales/ru.json'
-import vi from './locales/vi.json'
 import zhTW from './locales/zh-TW.json'
 import zhCN from './locales/zh.json'
+
+// R3 P2-1: fr/ru/ja/vi 按需懒加载，主 bundle 瘦身约 1.5MB raw
+const lazyLocales = {
+  fr: () => import('./locales/fr.json'),
+  ru: () => import('./locales/ru.json'),
+  ja: () => import('./locales/ja.json'),
+  vi: () => import('./locales/vi.json'),
+} as const
+
+type LazyLng = keyof typeof lazyLocales
+const loadedLazy = new Set<string>()
+
+async function ensureLocale(lng: string) {
+  const base = lng in lazyLocales ? (lng as LazyLng) : undefined
+  if (!base || loadedLazy.has(base)) return
+  const mod = await lazyLocales[base]()
+  const payload = (mod as { default: { translation: Record<string, unknown> } }).default
+  i18n.addResourceBundle(base, 'translation', payload.translation, true, true)
+  loadedLazy.add(base)
+  if (i18n.language === base) void i18n.changeLanguage(base)
+}
 
 export const resources = {
   en,
   zhCN,
-  fr,
-  ru,
-  ja,
-  vi,
   zhTW,
 } as const
 
@@ -60,5 +73,10 @@ i18n
       convertDetectedLanguage,
     },
   })
+
+i18n.on('languageChanged', (lng) => {
+  void ensureLocale(lng)
+})
+void ensureLocale(i18n.language)
 
 export default i18n
