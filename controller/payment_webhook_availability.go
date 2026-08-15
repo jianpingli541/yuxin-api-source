@@ -108,3 +108,49 @@ func isEpayWebhookConfigured() bool {
 func isEpayWebhookEnabled() bool {
 	return isEpayTopUpEnabled()
 }
+
+func isWechatTopUpEnabled() bool {
+	if !isPaymentComplianceConfirmed() {
+		return false
+	}
+	if !setting.WechatEnabled {
+		return false
+	}
+	return isWechatWebhookConfigured()
+}
+
+func isWechatWebhookConfigured() bool {
+	if strings.TrimSpace(setting.WechatMerchantId) == "" ||
+		strings.TrimSpace(setting.WechatAppId) == "" ||
+		strings.TrimSpace(setting.WechatApiV3Key) == "" ||
+		strings.TrimSpace(setting.WechatPrivateKey) == "" {
+		return false
+	}
+	// 序列号可由 WechatCertPublicKey 自动提取；二者至少其一非空
+	return strings.TrimSpace(setting.WechatCertSerialNo) != "" ||
+		strings.TrimSpace(setting.WechatCertPublicKey) != ""
+}
+
+func isWechatWebhookEnabled() bool {
+	return isWechatTopUpEnabled()
+}
+
+func isAlipayTopUpEnabled() bool {
+	if !isPaymentComplianceConfirmed() {
+		return false
+	}
+	if !setting.AlipayEnabled {
+		return false
+	}
+	return isAlipayWebhookConfigured()
+}
+
+func isAlipayWebhookConfigured() bool {
+	return strings.TrimSpace(setting.AlipayAppId) != "" &&
+		strings.TrimSpace(setting.AlipayPrivateKey) != "" &&
+		strings.TrimSpace(setting.AlipayPublicKey) != ""
+}
+
+func isAlipayWebhookEnabled() bool {
+	return isAlipayTopUpEnabled()
+}

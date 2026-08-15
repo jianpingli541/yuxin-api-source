@@ -1,0 +1,906 @@
+Results:
+
+
+[[97;41m/root/projects/active/uxin-api-gateway/common/audio.go:229[0m] - G115 (CWE-190): integer overflow conversion uint64 -> int64 (Confidence: MEDIUM, Severity: HIGH)
+    228: 		// 读取 granule position (字节 6-13, 小端序)
+  > 229: 		granulePos := int64(binary.LittleEndian.Uint64(buf[6:14]))
+    230: 		if granulePos > totalGranulePos {
+
+Autofix: 
+
+[[97;41m/root/projects/active/uxin-api-gateway/service/file_service.go:535[0m] - G115 (CWE-190): integer overflow conversion uint64 -> int (Confidence: MEDIUM, Severity: HIGH)
+    534: 			}
+  > 535: 			boxSize = int(binary.BigEndian.Uint64(data[offset+8 : offset+16]))
+    536: 			headerLen = 16
+
+Autofix: 
+
+[[97;41m/root/projects/active/uxin-api-gateway/common/system_monitor_unix.go:27[0m] - G115 (CWE-190): integer overflow conversion int64 -> uint64 (Confidence: MEDIUM, Severity: HIGH)
+    26: 	// 计算磁盘空间 (显式转换以兼容 FreeBSD，其字段类型为 int64)
+  > 27: 	bsize := uint64(stat.Bsize)
+    28: 	info.Total = uint64(stat.Blocks) * bsize
+
+Autofix: 
+
+[[97;41m/root/projects/active/uxin-api-gateway/service/authz/adapter.go:79[0m] - G115 (CWE-190): integer overflow conversion int -> rune (Confidence: MEDIUM, Severity: HIGH)
+    78: 		}
+  > 79: 		query = query.Where("v"+string(rune('0'+fieldIndex+i))+" = ?", value)
+    80: 	}
+
+Autofix: 
+
+[[97;41m/root/projects/active/uxin-api-gateway/model/checkin.go:73[0m] - G404 (CWE-338): Use of weak random number generator (math/rand or math/rand/v2 instead of crypto/rand) (Confidence: MEDIUM, Severity: HIGH)
+    72: 	if setting.MaxQuota > setting.MinQuota {
+  > 73: 		quotaAwarded = setting.MinQuota + rand.Intn(setting.MaxQuota-setting.MinQuota+1)
+    74: 	}
+
+Autofix: 
+
+[[97;41m/root/projects/active/uxin-api-gateway/model/channel_cache.go:198[0m] - G404 (CWE-338): Use of weak random number generator (math/rand or math/rand/v2 instead of crypto/rand) (Confidence: MEDIUM, Severity: HIGH)
+    197: 	// Generate a random value in the range [0, totalWeight)
+  > 198: 	randomWeight := rand.Intn(totalWeight)
+    199: 
+
+Autofix: 
+
+[[97;41m/root/projects/active/uxin-api-gateway/model/channel.go:245[0m] - G404 (CWE-338): Use of weak random number generator (math/rand or math/rand/v2 instead of crypto/rand) (Confidence: MEDIUM, Severity: HIGH)
+    244: 		// Randomly pick one enabled key
+  > 245: 		selectedIdx := enabledIdx[rand.Intn(len(enabledIdx))]
+    246: 		return keys[selectedIdx], selectedIdx, nil
+
+Autofix: 
+
+[[97;41m/root/projects/active/uxin-api-gateway/controller/model_sync.go:231[0m] - G404 (CWE-338): Use of weak random number generator (math/rand or math/rand/v2 instead of crypto/rand) (Confidence: MEDIUM, Severity: HIGH)
+    230: 		sleep := baseDelay * time.Duration(1<<attempt)
+  > 231: 		jitter := time.Duration(rand.Intn(150)) * time.Millisecond
+    232: 		time.Sleep(sleep + jitter)
+
+Autofix: 
+
+[[97;41m/root/projects/active/uxin-api-gateway/controller/model_sync.go:159[0m] - G404 (CWE-338): Use of weak random number generator (math/rand or math/rand/v2 instead of crypto/rand) (Confidence: MEDIUM, Severity: HIGH)
+    158: 			sleep := baseDelay * time.Duration(1<<attempt)
+  > 159: 			jitter := time.Duration(rand.Intn(150)) * time.Millisecond
+    160: 			time.Sleep(sleep + jitter)
+
+Autofix: 
+
+[[97;41m/root/projects/active/uxin-api-gateway/common/utils.go:299[0m] - G404 (CWE-338): Use of weak random number generator (math/rand or math/rand/v2 instead of crypto/rand) (Confidence: MEDIUM, Severity: HIGH)
+    298: 	// Sleep for 0-3000 ms
+  > 299: 	time.Sleep(time.Duration(rand.Intn(3000)) * time.Millisecond)
+    300: }
+
+Autofix: 
+
+[[97;41m/root/projects/active/uxin-api-gateway/common/utils.go:261[0m] - G404 (CWE-338): Use of weak random number generator (math/rand or math/rand/v2 instead of crypto/rand) (Confidence: MEDIUM, Severity: HIGH)
+    260: 	//rand.Seed(time.Now().UnixNano())
+  > 261: 	return rand.Intn(max)
+    262: }
+
+Autofix: 
+
+[[97;41m/root/projects/active/uxin-api-gateway/common/constants.go:96[0m] - G402 (CWE-295): TLS InsecureSkipVerify set to true. (Confidence: HIGH, Severity: HIGH)
+    95: var TLSInsecureSkipVerify bool
+  > 96: var InsecureTLSConfig = &tls.Config{InsecureSkipVerify: true}
+    97: 
+
+Autofix: 
+
+[[97;41m/root/projects/active/uxin-api-gateway/relay/channel/api_request.go:509[0m] - G704 (CWE-918): SSRF via taint analysis (Confidence: HIGH, Severity: HIGH)
+    508: 
+  > 509: 	resp, err := client.Do(req)
+    510: 	if err != nil {
+
+Autofix: 
+
+[[97;41m/root/projects/active/uxin-api-gateway/main.go:39[0m] - G108 (CWE-200): Profiling endpoint is automatically exposed on /debug/pprof (Confidence: HIGH, Severity: HIGH)
+    38: 
+  > 39: 	_ "net/http/pprof"
+    40: )
+
+Autofix: 
+
+[[97;41m/root/projects/active/uxin-api-gateway/types/error.go:87[0m] - G101 (CWE-798): Potential hardcoded credentials (Confidence: LOW, Severity: HIGH)
+    86: 	ErrorCodeInsufficientUserQuota      ErrorCode = "insufficient_user_quota"
+  > 87: 	ErrorCodePreConsumeTokenQuotaFailed ErrorCode = "pre_consume_token_quota_failed"
+    88: )
+
+Autofix: 
+
+[[97;41m/root/projects/active/uxin-api-gateway/service/codex_oauth.go:18[0m] - G101 (CWE-798): Potential hardcoded credentials (Confidence: LOW, Severity: HIGH)
+    17: 	codexOAuthClientID = "app_EMoamEEZ73f0CkXaXp7hrann"
+  > 18: 	codexOAuthTokenURL = "https://auth.openai.com/oauth/token"
+    19: 	codexJWTClaimPath  = "https://api.openai.com/auth"
+
+Autofix: 
+
+[[97;41m/root/projects/active/uxin-api-gateway/service/channel_affinity.go:68[0m] - G101 (CWE-798): Potential hardcoded credentials (Confidence: LOW, Severity: HIGH)
+    67: 	cacheTokenRateModeCachedOverPrompt           = "cached_over_prompt"
+  > 68: 	cacheTokenRateModeCachedOverPromptPlusCached = "cached_over_prompt_plus_cached"
+    69: 	cacheTokenRateModeMixed                      = "mixed"
+
+Autofix: 
+
+[[97;41m/root/projects/active/uxin-api-gateway/service/channel_affinity.go:67[0m] - G101 (CWE-798): Potential hardcoded credentials (Confidence: LOW, Severity: HIGH)
+    66: const (
+  > 67: 	cacheTokenRateModeCachedOverPrompt           = "cached_over_prompt"
+    68: 	cacheTokenRateModeCachedOverPromptPlusCached = "cached_over_prompt_plus_cached"
+
+Autofix: 
+
+[[97;41m/root/projects/active/uxin-api-gateway/service/auth_token.go:25[0m] - G101 (CWE-798): Potential hardcoded credentials (Confidence: LOW, Severity: HIGH)
+    24: 	authTokenIssuer       = "new-api"
+  > 25: 	authTokenAudience     = "new-api-dashboard"
+    26: )
+
+Autofix: 
+
+[[97;41m/root/projects/active/uxin-api-gateway/i18n/keys.go:296[0m] - G101 (CWE-798): Potential hardcoded credentials (Confidence: LOW, Severity: HIGH)
+    295: 	MsgOAuthConnectFailed   = "oauth.connect_failed"
+  > 296: 	MsgOAuthTokenFailed     = "oauth.token_failed"
+    297: 	MsgOAuthUserInfoEmpty   = "oauth.user_info_empty"
+
+Autofix: 
+
+[[97;41m/root/projects/active/uxin-api-gateway/i18n/keys.go:220[0m] - G101 (CWE-798): Potential hardcoded credentials (Confidence: LOW, Severity: HIGH)
+    219: 	MsgPasskeyCreateFailed  = "passkey.create_failed"
+  > 220: 	MsgPasskeyLoginAbnormal = "passkey.login_abnormal"
+    221: 	MsgPasskeyUpdateFailed  = "passkey.update_failed"
+
+Autofix: 
+
+[[97;41m/root/projects/active/uxin-api-gateway/i18n/keys.go:81[0m] - G101 (CWE-798): Potential hardcoded credentials (Confidence: LOW, Severity: HIGH)
+    80: 	MsgUserUsernameOrPasswordError   = "user.username_or_password_error"
+  > 81: 	MsgUserEmailOrPasswordEmpty      = "user.email_or_password_empty"
+    82: 	MsgUserExists                    = "user.exists"
+
+Autofix: 
+
+[[97;41m/root/projects/active/uxin-api-gateway/i18n/keys.go:57[0m] - G101 (CWE-798): Potential hardcoded credentials (Confidence: LOW, Severity: HIGH)
+    56: 	MsgTokenStatusUnavailable    = "token.status_unavailable"
+  > 57: 	MsgTokenDbError              = "token.db_error"
+    58: )
+
+Autofix: 
+
+[[97;41m/root/projects/active/uxin-api-gateway/i18n/keys.go:53[0m] - G101 (CWE-798): Potential hardcoded credentials (Confidence: LOW, Severity: HIGH)
+    52: 	MsgTokenInvalid              = "token.invalid"
+  > 53: 	MsgTokenNotProvided          = "token.not_provided"
+    54: 	MsgTokenExpired              = "token.expired"
+
+Autofix: 
+
+[[97;41m/root/projects/active/uxin-api-gateway/i18n/keys.go:49[0m] - G101 (CWE-798): Potential hardcoded credentials (Confidence: LOW, Severity: HIGH)
+    48: 	MsgTokenGenerateFailed       = "token.generate_failed"
+  > 49: 	MsgTokenGetInfoFailed        = "token.get_info_failed"
+    50: 	MsgTokenExpiredCannotEnable  = "token.expired_cannot_enable"
+
+Autofix: 
+
+[[97;41m/root/projects/active/uxin-api-gateway/i18n/keys.go:47[0m] - G101 (CWE-798): Potential hardcoded credentials (Confidence: LOW, Severity: HIGH)
+    46: 	MsgTokenQuotaNegative        = "token.quota_negative"
+  > 47: 	MsgTokenQuotaExceedMax       = "token.quota_exceed_max"
+    48: 	MsgTokenGenerateFailed       = "token.generate_failed"
+
+Autofix: 
+
+[[97;41m/root/projects/active/uxin-api-gateway/i18n/keys.go:46[0m] - G101 (CWE-798): Potential hardcoded credentials (Confidence: LOW, Severity: HIGH)
+    45: 	MsgTokenNameTooLong          = "token.name_too_long"
+  > 46: 	MsgTokenQuotaNegative        = "token.quota_negative"
+    47: 	MsgTokenQuotaExceedMax       = "token.quota_exceed_max"
+
+Autofix: 
+
+[[97;41m/root/projects/active/uxin-api-gateway/i18n/keys.go:34[0m] - G101 (CWE-798): Potential hardcoded credentials (Confidence: LOW, Severity: HIGH)
+    33: 	MsgAuthNotLoggedIn           = "auth.not_logged_in"
+  > 34: 	MsgAuthAccessTokenInvalid    = "auth.access_token_invalid"
+    35: 	MsgAuthUserInfoInvalid       = "auth.user_info_invalid"
+
+Autofix: 
+
+[[97;41m/root/projects/active/uxin-api-gateway/controller/channel-test.go:500-512[0m] - G101 (CWE-798): Potential hardcoded credentials (Confidence: LOW, Severity: HIGH)
+    499: 	other := buildTestLogOther(c, info, priceData, usage, tieredResult)
+  > 500: 	model.RecordConsumeLog(c, testUserID, model.RecordConsumeLogParams{
+  > 501: 		ChannelId:        channel.Id,
+  > 502: 		PromptTokens:     usage.PromptTokens,
+  > 503: 		CompletionTokens: usage.CompletionTokens,
+  > 504: 		ModelName:        info.OriginModelName,
+  > 505: 		TokenName:        "模型测试",
+  > 506: 		Quota:            quota,
+  > 507: 		Content:          "模型测试",
+  > 508: 		UseTimeSeconds:   int(consumedTime),
+  > 509: 		IsStream:         info.IsStream,
+  > 510: 		Group:            info.UsingGroup,
+  > 511: 		Other:            other,
+  > 512: 	})
+    513: 	common.SysLog(fmt.Sprintf("testing channel #%d, response: \n%s", channel.Id, string(respBody)))
+
+Autofix: 
+
+[[97;41m/root/projects/active/uxin-api-gateway/controller/audit.go:18-52[0m] - G101 (CWE-798): Potential hardcoded credentials (Confidence: LOW, Severity: HIGH)
+    17: // 英文基线——调用方因此无需在每个埋点处手写句子（避免与 params 重复书写同一份值）。
+  > 18: var auditContentTemplates = map[string]string{
+  > 19: 	"user.create":           "Created user ${username} (role ${role})",
+  > 20: 	"user.update":           "Updated user ${username} (ID: ${id})",
+  > 21: 	"user.delete":           "Deleted user ${username} (ID: ${id})",
+  > 22: 	"user.manage":           "Performed ${action} on user ${username} (ID: ${id})",
+  > 23: 	"user.quota_add":        "Increased user quota by ${quota}",
+  > 24: 	"user.quota_subtract":   "Decreased user quota by ${quota}",
+  > 25: 	"user.quota_override":   "Overrode user quota from ${from} to ${to}",
+  > 26: 	"user.binding_clear":    "Cleared ${bindingType} binding for user ${username}",
+  > 27: 	"user.2fa_disable":      "Force-disabled two-factor authentication for the user",
+  > 28: 	"user.passkey_register": "Registered a passkey",
+  > 29: 	"user.passkey_delete":   "Deleted a passkey",
+  > 30: 	"user.reset_passkey":    "Reset the user passkey",
+  > 31: 	"option.update":         "Updated system setting ${key}",
+  > 32: 
+  > 33: 	"channel.create":             "Created channel ${name} (type ${type}, count ${count})",
+  > 34: 	"channel.update":             "Updated channel ${name} (ID: ${id})",
+  > 35: 	"channel.delete":             "Deleted channel ${name} (ID: ${id})",
+  > 36: 	"channel.delete_batch":       "Batch deleted ${count} channels",
+  > 37: 	"channel.delete_disabled":    "Deleted all disabled channels (${count})",
+  > 38: 	"channel.key_view":           "Viewed channel key ${name} (ID: ${id})",
+  > 39: 	"channel.tag_disable":        "Disabled channels with tag ${tag}",
+  > 40: 	"channel.tag_enable":         "Enabled channels with tag ${tag}",
+  > 41: 	"channel.tag_edit":           "Edited channels with tag ${tag}",
+  > 42: 	"channel.tag_batch_set":      "Batch set tag for ${count} channels",
+  > 43: 	"channel.copy":               "Copied channel (source ID: ${sourceId}) to ${name} (new ID: ${id})",
+  > 44: 	"channel.multi_key_manage":   "Multi-key management ${action} on channel (ID: ${id})",
+  > 45: 	"channel.upstream_apply":     "Applied upstream model changes to channel (ID: ${id})",
+  > 46: 	"channel.upstream_apply_all": "Applied upstream model changes to ${count} channels",
+  > 47: 
+  > 48: 	"redemption.create": "Created ${count} redemption codes named ${name} (${quota} each)",
+  > 49: 
+  > 50: 	"subscription.plan_reset":      "Reset active subscriptions for plan ${plan_id}",
+  > 51: 	"subscription.user_plan_reset": "Reset active plan ${plan_id} subscriptions for user ${target_user_id}",
+  > 52: }
+    53: 
+
+Autofix: 
+
+[[97;41m/root/projects/active/uxin-api-gateway/constant/context_key.go:21[0m] - G101 (CWE-798): Potential hardcoded credentials (Confidence: LOW, Severity: HIGH)
+    20: 	ContextKeyTokenModelLimit        ContextKey = "token_model_limit"
+  > 21: 	ContextKeyTokenCrossGroupRetry   ContextKey = "token_cross_group_retry"
+    22: 
+
+Autofix: 
+
+[[30;43m/root/projects/active/uxin-api-gateway/service/auth_session.go:316[0m] - G124 (CWE-614): http.Cookie missing or has insecure Secure, HttpOnly, or SameSite attribute (Confidence: HIGH, Severity: MEDIUM)
+    315: func ClearRefreshCookie(c *gin.Context) {
+  > 316: 	http.SetCookie(c.Writer, &http.Cookie{
+    317: 		Name:     RefreshCookieName,
+
+Autofix: 
+
+[[30;43m/root/projects/active/uxin-api-gateway/service/auth_session.go:303[0m] - G124 (CWE-614): http.Cookie missing or has insecure Secure, HttpOnly, or SameSite attribute (Confidence: HIGH, Severity: MEDIUM)
+    302: 	}
+  > 303: 	http.SetCookie(c.Writer, &http.Cookie{
+    304: 		Name:     RefreshCookieName,
+
+Autofix: 
+
+[[30;43m/root/projects/active/uxin-api-gateway/common/hash.go:17[0m] - G401 (CWE-328): Use of weak cryptographic primitive (Confidence: HIGH, Severity: MEDIUM)
+    16: func Sha1Raw(data []byte) []byte {
+  > 17: 	h := sha1.New()
+    18: 	h.Write(data)
+
+Autofix: 
+
+[[30;43m/root/projects/active/uxin-api-gateway/main.go:159[0m] - G114 (CWE-676): Use of net/http serve function that has no support for setting timeouts (Confidence: HIGH, Severity: MEDIUM)
+    158: 		gopool.Go(func() {
+  > 159: 			log.Println(http.ListenAndServe("0.0.0.0:8005", nil))
+    160: 		})
+
+Autofix: 
+
+[[30;43m/root/projects/active/uxin-api-gateway/common/utils.go:212[0m] - G203 (CWE-79): The used method does not auto-escape HTML. This can potentially lead to 'Cross-site Scripting' vulnerabilities, in case the attacker controls the input. (Confidence: LOW, Severity: MEDIUM)
+    211: func UnescapeHTML(x string) interface{} {
+  > 212: 	return template.HTML(x)
+    213: }
+
+Autofix: 
+
+[[30;43m/root/projects/active/uxin-api-gateway/common/utils.go:38[0m] - G204 (CWE-78): Subprocess launched with variable (Confidence: HIGH, Severity: MEDIUM)
+    37: 	case "darwin":
+  > 38: 		err = exec.Command("open", url).Start()
+    39: 	}
+
+Autofix: 
+
+[[30;43m/root/projects/active/uxin-api-gateway/common/utils.go:36[0m] - G204 (CWE-78): Subprocess launched with variable (Confidence: HIGH, Severity: MEDIUM)
+    35: 	case "windows":
+  > 36: 		err = exec.Command("rundll32", "url.dll,FileProtocolHandler", url).Start()
+    37: 	case "darwin":
+
+Autofix: 
+
+[[30;43m/root/projects/active/uxin-api-gateway/common/utils.go:34[0m] - G204 (CWE-78): Subprocess launched with variable (Confidence: HIGH, Severity: MEDIUM)
+    33: 	case "linux":
+  > 34: 		err = exec.Command("xdg-open", url).Start()
+    35: 	case "windows":
+
+Autofix: 
+
+[[30;43m/root/projects/active/uxin-api-gateway/logger/logger.go:56[0m] - G304 (CWE-22): Potential file inclusion via variable (Confidence: HIGH, Severity: MEDIUM)
+    55: 		logPath := filepath.Join(*common.LogDir, fmt.Sprintf("oneapi-%s.log", time.Now().Format("20060102150405")))
+  > 56: 		fd, err := os.OpenFile(logPath, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+    57: 		if err != nil {
+
+Autofix: Consider using os.Root to scope file access under a fixed root (Go >=1.24). Prefer root.Open/root.Stat over os.Open/os.Stat to prevent directory traversal.
+
+[[30;43m/root/projects/active/uxin-api-gateway/common/disk_cache.go:94[0m] - G304 (CWE-22): Potential file inclusion via variable (Confidence: HIGH, Severity: MEDIUM)
+    93: func ReadDiskCacheFileString(filePath string) (string, error) {
+  > 94: 	data, err := os.ReadFile(filePath)
+    95: 	if err != nil {
+
+Autofix: Consider using os.Root to scope file access under a fixed root (Go >=1.24). Prefer root.Open/root.Stat over os.Open/os.Stat to prevent directory traversal.
+
+[[30;43m/root/projects/active/uxin-api-gateway/common/disk_cache.go:89[0m] - G304 (CWE-22): Potential file inclusion via variable (Confidence: HIGH, Severity: MEDIUM)
+    88: func ReadDiskCacheFile(filePath string) ([]byte, error) {
+  > 89: 	return os.ReadFile(filePath)
+    90: }
+
+Autofix: Consider using os.Root to scope file access under a fixed root (Go >=1.24). Prefer root.Open/root.Stat over os.Open/os.Stat to prevent directory traversal.
+
+[[30;43m/root/projects/active/uxin-api-gateway/common/disk_cache.go:51[0m] - G304 (CWE-22): Potential file inclusion via variable (Confidence: HIGH, Severity: MEDIUM)
+    50: 
+  > 51: 	file, err := os.OpenFile(filePath, os.O_CREATE|os.O_RDWR|os.O_EXCL, 0600)
+    52: 	if err != nil {
+
+Autofix: Consider using os.Root to scope file access under a fixed root (Go >=1.24). Prefer root.Open/root.Stat over os.Open/os.Stat to prevent directory traversal.
+
+[[30;43m/root/projects/active/uxin-api-gateway/main.go:204-207[0m] - G112 (CWE-400): Potential Slowloris Attack because ReadHeaderTimeout is not configured in the http.Server (Confidence: LOW, Severity: MEDIUM)
+    203: 
+  > 204: 	srv := &http.Server{
+  > 205: 		Addr:    ":" + port,
+  > 206: 		Handler: server,
+  > 207: 	}
+    208: 
+
+Autofix: 
+
+[[30;43m/root/projects/active/uxin-api-gateway/logger/logger.go:56[0m] - G302 (CWE-276): Expect file permissions to be 0600 or less (Confidence: HIGH, Severity: MEDIUM)
+    55: 		logPath := filepath.Join(*common.LogDir, fmt.Sprintf("oneapi-%s.log", time.Now().Format("20060102150405")))
+  > 56: 		fd, err := os.OpenFile(logPath, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+    57: 		if err != nil {
+
+Autofix: 
+
+[[30;43m/root/projects/active/uxin-api-gateway/common/pprof.go:23[0m] - G301 (CWE-276): Expect directory permissions to be 0750 or less (Confidence: HIGH, Severity: MEDIUM)
+    22: 			if _, err := os.Stat("./pprof"); os.IsNotExist(err) {
+  > 23: 				err := os.Mkdir("./pprof", os.ModePerm)
+    24: 				if err != nil {
+
+Autofix: 
+
+[[30;43m/root/projects/active/uxin-api-gateway/common/init.go:79[0m] - G301 (CWE-276): Expect directory permissions to be 0750 or less (Confidence: HIGH, Severity: MEDIUM)
+    78: 		if _, err := os.Stat(*LogDir); os.IsNotExist(err) {
+  > 79: 			err = os.Mkdir(*LogDir, 0777)
+    80: 			if err != nil {
+
+Autofix: 
+
+[[30;43m/root/projects/active/uxin-api-gateway/common/disk_cache.go:36[0m] - G301 (CWE-276): Expect directory permissions to be 0750 or less (Confidence: HIGH, Severity: MEDIUM)
+    35: 	dir := GetDiskCacheDir()
+  > 36: 	return os.MkdirAll(dir, 0755)
+    37: }
+
+Autofix: 
+
+[[30;43m/root/projects/active/uxin-api-gateway/common/hash.go:5[0m] - G505 (CWE-327): Blocklisted import crypto/sha1: weak cryptographic primitive (Confidence: HIGH, Severity: MEDIUM)
+    4: 	"crypto/hmac"
+  > 5: 	"crypto/sha1"
+    6: 	"crypto/sha256"
+
+Autofix: 
+
+[[37;40m/root/projects/active/uxin-api-gateway/common/str.go:105[0m] - G103 (CWE-242): Use of unsafe calls should be audited (Confidence: HIGH, Severity: LOW)
+    104: 	tmp2 := [3]uintptr{tmp1[0], tmp1[1], tmp1[1]}
+  > 105: 	return *(*[]byte)(unsafe.Pointer(&tmp2))
+    106: }
+
+Autofix: 
+
+[[37;40m/root/projects/active/uxin-api-gateway/common/str.go:103[0m] - G103 (CWE-242): Use of unsafe calls should be audited (Confidence: HIGH, Severity: LOW)
+    102: func StringToByteSlice(s string) []byte {
+  > 103: 	tmp1 := (*[2]uintptr)(unsafe.Pointer(&s))
+    104: 	tmp2 := [3]uintptr{tmp1[0], tmp1[1], tmp1[1]}
+
+Autofix: 
+
+[[37;40m/root/projects/active/uxin-api-gateway/types/file_source.go:52[0m] - G104 (CWE-703): Errors unhandled (Confidence: HIGH, Severity: LOW)
+    51: 	if b.cachedData != nil {
+  > 52: 		b.cachedData.Close()
+    53: 	}
+
+Autofix: 
+
+[[37;40m/root/projects/active/uxin-api-gateway/setting/console_setting/validation.go:58[0m] - G104 (CWE-703): Errors unhandled (Confidence: HIGH, Severity: LOW)
+    57: 	var list []map[string]interface{}
+  > 58: 	json.Unmarshal([]byte(jsonStr), &list)
+    59: 	return list
+
+Autofix: 
+
+[[37;40m/root/projects/active/uxin-api-gateway/service/webhook/event_notify.go:90[0m] - G104 (CWE-703): Errors unhandled (Confidence: HIGH, Severity: LOW)
+    89: 	}
+  > 90: 	resp.Body.Close()
+    91: }
+
+Autofix: 
+
+[[37;40m/root/projects/active/uxin-api-gateway/service/str.go:93[0m] - G104 (CWE-703): Errors unhandled (Confidence: HIGH, Severity: LOW)
+    92: 		hasher.Write([]byte{0})
+  > 93: 		hasher.Write([]byte(w))
+    94: 	}
+
+Autofix: 
+
+[[37;40m/root/projects/active/uxin-api-gateway/service/str.go:92[0m] - G104 (CWE-703): Errors unhandled (Confidence: HIGH, Severity: LOW)
+    91: 	for _, w := range normalized {
+  > 92: 		hasher.Write([]byte{0})
+    93: 		hasher.Write([]byte(w))
+
+Autofix: 
+
+[[37;40m/root/projects/active/uxin-api-gateway/service/file_service.go:473[0m] - G104 (CWE-703): Errors unhandled (Confidence: HIGH, Severity: LOW)
+    472: 
+  > 473: 	reader.Seek(0, io.SeekStart)
+    474: 	config, err = webp.DecodeConfig(reader)
+
+Autofix: 
+
+[[37;40m/root/projects/active/uxin-api-gateway/service/file_service.go:149[0m] - G104 (CWE-703): Errors unhandled (Confidence: HIGH, Severity: LOW)
+    148: 			if cache := source.GetCache(); cache != nil {
+  > 149: 				cache.Close()
+    150: 			}
+
+Autofix: 
+
+[[37;40m/root/projects/active/uxin-api-gateway/relay/channel/xunfei/relay-xunfei.go:222[0m] - G104 (CWE-703): Errors unhandled (Confidence: HIGH, Severity: LOW)
+    221: 		defer func() {
+  > 222: 			conn.Close()
+    223: 		}()
+
+Autofix: 
+
+[[37;40m/root/projects/active/uxin-api-gateway/relay/channel/task/sora/adaptor.go:214[0m] - G104 (CWE-703): Errors unhandled (Confidence: HIGH, Severity: LOW)
+    213: 		}
+  > 214: 		writer.Close()
+    215: 		c.Request.Header.Set("Content-Type", writer.FormDataContentType())
+
+Autofix: 
+
+[[37;40m/root/projects/active/uxin-api-gateway/relay/channel/task/sora/adaptor.go:211[0m] - G104 (CWE-703): Errors unhandled (Confidence: HIGH, Severity: LOW)
+    210: 				io.Copy(part, f)
+  > 211: 				f.Close()
+    212: 			}
+
+Autofix: 
+
+[[37;40m/root/projects/active/uxin-api-gateway/relay/channel/task/sora/adaptor.go:210[0m] - G104 (CWE-703): Errors unhandled (Confidence: HIGH, Severity: LOW)
+    209: 				}
+  > 210: 				io.Copy(part, f)
+    211: 				f.Close()
+
+Autofix: 
+
+[[37;40m/root/projects/active/uxin-api-gateway/relay/channel/task/sora/adaptor.go:207[0m] - G104 (CWE-703): Errors unhandled (Confidence: HIGH, Severity: LOW)
+    206: 				if err != nil {
+  > 207: 					f.Close()
+    208: 					continue
+
+Autofix: 
+
+[[37;40m/root/projects/active/uxin-api-gateway/relay/channel/task/sora/adaptor.go:196[0m] - G104 (CWE-703): Errors unhandled (Confidence: HIGH, Severity: LOW)
+    195: 					// Re-open after sniffing so the full content is copied below
+  > 196: 					f.Close()
+    197: 					f, err = fh.Open()
+
+Autofix: 
+
+[[37;40m/root/projects/active/uxin-api-gateway/relay/channel/task/sora/adaptor.go:181[0m] - G104 (CWE-703): Errors unhandled (Confidence: HIGH, Severity: LOW)
+    180: 			for _, v := range values {
+  > 181: 				writer.WriteField(key, v)
+    182: 			}
+
+Autofix: 
+
+[[37;40m/root/projects/active/uxin-api-gateway/relay/channel/task/sora/adaptor.go:175[0m] - G104 (CWE-703): Errors unhandled (Confidence: HIGH, Severity: LOW)
+    174: 		writer := multipart.NewWriter(&buf)
+  > 175: 		writer.WriteField("model", info.UpstreamModelName)
+    176: 		for key, values := range formData.Value {
+
+Autofix: 
+
+[[37;40m/root/projects/active/uxin-api-gateway/relay/channel/task/jimeng/adaptor.go:156[0m] - G104 (CWE-703): Errors unhandled (Confidence: HIGH, Severity: LOW)
+    155: 				fileBytes, err := io.ReadAll(file)
+  > 156: 				file.Close()
+    157: 				if err != nil {
+
+Autofix: 
+
+[[37;40m/root/projects/active/uxin-api-gateway/relay/channel/replicate/adaptor.go:466[0m] - G104 (CWE-703): Errors unhandled (Confidence: HIGH, Severity: LOW)
+    465: 	formContentType := writer.FormDataContentType()
+  > 466: 	writer.Close()
+    467: 
+
+Autofix: 
+
+[[37;40m/root/projects/active/uxin-api-gateway/relay/channel/replicate/adaptor.go:462[0m] - G104 (CWE-703): Errors unhandled (Confidence: HIGH, Severity: LOW)
+    461: 	if _, err := io.Copy(part, file); err != nil {
+  > 462: 		writer.Close()
+    463: 		return "", fmt.Errorf("replicate adaptor: copy image content failed: %w", err)
+
+Autofix: 
+
+[[37;40m/root/projects/active/uxin-api-gateway/relay/channel/replicate/adaptor.go:458[0m] - G104 (CWE-703): Errors unhandled (Confidence: HIGH, Severity: LOW)
+    457: 	if err != nil {
+  > 458: 		writer.Close()
+    459: 		return "", fmt.Errorf("replicate adaptor: create upload form failed: %w", err)
+
+Autofix: 
+
+[[37;40m/root/projects/active/uxin-api-gateway/relay/channel/openai/responses_via_chat.go:87[0m] - G104 (CWE-703): Errors unhandled (Confidence: HIGH, Severity: LOW)
+    86: 		}
+  > 87: 		helper.ResponseChunkData(c, dto.ResponsesStreamResponse{Type: event.Type}, string(data))
+    88: 		return true
+
+Autofix: 
+
+[[37;40m/root/projects/active/uxin-api-gateway/relay/channel/openai/relay-openai.go:86[0m] - G104 (CWE-703): Errors unhandled (Confidence: HIGH, Severity: LOW)
+    85: 			info.ThinkingContentInfo.SendLastThinkingContent = true
+  > 86: 			helper.ObjectData(c, response)
+    87: 		}
+
+Autofix: 
+
+[[37;40m/root/projects/active/uxin-api-gateway/relay/channel/openai/helper.go:171[0m] - G104 (CWE-703): Errors unhandled (Confidence: HIGH, Severity: LOW)
+    170: 			response.SetSystemFingerprint(systemFingerprint)
+  > 171: 			helper.ObjectData(c, response)
+    172: 		}
+
+Autofix: 
+
+[[37;40m/root/projects/active/uxin-api-gateway/relay/channel/openai/helper.go:55[0m] - G104 (CWE-703): Errors unhandled (Confidence: HIGH, Severity: LOW)
+    54: 	for _, resp := range claudeResponses {
+  > 55: 		helper.ClaudeData(c, *resp)
+    56: 	}
+
+Autofix: 
+
+[[37;40m/root/projects/active/uxin-api-gateway/relay/channel/openai/adaptor.go:568[0m] - G104 (CWE-703): Errors unhandled (Confidence: HIGH, Severity: LOW)
+    567: 		// 关闭 multipart 编写器以设置分界线
+  > 568: 		writer.Close()
+    569: 		c.Request.Header.Set("Content-Type", writer.FormDataContentType())
+
+Autofix: 
+
+[[37;40m/root/projects/active/uxin-api-gateway/relay/channel/openai/adaptor.go:473[0m] - G104 (CWE-703): Errors unhandled (Confidence: HIGH, Severity: LOW)
+    472: 				for _, value := range values {
+  > 473: 					writer.WriteField(key, value)
+    474: 				}
+
+Autofix: 
+
+[[37;40m/root/projects/active/uxin-api-gateway/relay/channel/openai/adaptor.go:453[0m] - G104 (CWE-703): Errors unhandled (Confidence: HIGH, Severity: LOW)
+    452: 
+  > 453: 		writer.WriteField("model", request.Model)
+    454: 		// 使用已解析的 multipart 表单，避免重复解析
+
+Autofix: 
+
+[[37;40m/root/projects/active/uxin-api-gateway/relay/channel/openai/adaptor.go:436[0m] - G104 (CWE-703): Errors unhandled (Confidence: HIGH, Severity: LOW)
+    435: 		// 关闭 multipart 编写器以设置分界线
+  > 436: 		writer.Close()
+    437: 		c.Request.Header.Set("Content-Type", writer.FormDataContentType())
+
+Autofix: 
+
+[[37;40m/root/projects/active/uxin-api-gateway/relay/channel/openai/adaptor.go:405[0m] - G104 (CWE-703): Errors unhandled (Confidence: HIGH, Severity: LOW)
+    404: 			for _, value := range values {
+  > 405: 				writer.WriteField(key, value)
+    406: 				logger.LogDebug(c.Request.Context(), "--form '%s=\"%s\"'", key, value)
+
+Autofix: 
+
+[[37;40m/root/projects/active/uxin-api-gateway/relay/channel/openai/adaptor.go:389[0m] - G104 (CWE-703): Errors unhandled (Confidence: HIGH, Severity: LOW)
+    388: 
+  > 389: 		writer.WriteField("model", request.Model)
+    390: 
+
+Autofix: 
+
+[[37;40m/root/projects/active/uxin-api-gateway/relay/channel/gemini/relay_responses.go:103[0m] - G104 (CWE-703): Errors unhandled (Confidence: HIGH, Severity: LOW)
+    102: 		}
+  > 103: 		helper.ResponseChunkData(c, dto.ResponsesStreamResponse{Type: event.Type}, string(data))
+    104: 		return true
+
+Autofix: 
+
+[[37;40m/root/projects/active/uxin-api-gateway/relay/channel/gemini/relay-gemini.go:520[0m] - G104 (CWE-703): Errors unhandled (Confidence: HIGH, Severity: LOW)
+    519: 		body, err := io.ReadAll(response.Body)
+  > 520: 		response.Body.Close()
+    521: 		cancel()
+
+Autofix: 
+
+[[37;40m/root/projects/active/uxin-api-gateway/relay/channel/gemini/relay-gemini.go:514[0m] - G104 (CWE-703): Errors unhandled (Confidence: HIGH, Severity: LOW)
+    513: 			body, _ := io.ReadAll(response.Body)
+  > 514: 			response.Body.Close()
+    515: 			cancel()
+
+Autofix: 
+
+[[37;40m/root/projects/active/uxin-api-gateway/relay/channel/dify/relay-dify.go:299[0m] - G104 (CWE-703): Errors unhandled (Confidence: HIGH, Severity: LOW)
+    298: 	c.Writer.WriteHeader(resp.StatusCode)
+  > 299: 	c.Writer.Write(jsonResponse)
+    300: 	return &difyResponse.MetaData.Usage, nil
+
+Autofix: 
+
+[[37;40m/root/projects/active/uxin-api-gateway/relay/channel/dify/relay-dify.go:88[0m] - G104 (CWE-703): Errors unhandled (Confidence: HIGH, Severity: LOW)
+    87: 		}
+  > 88: 		writer.Close()
+    89: 
+
+Autofix: 
+
+[[37;40m/root/projects/active/uxin-api-gateway/relay/channel/coze/relay-coze.go:202[0m] - G104 (CWE-703): Errors unhandled (Confidence: HIGH, Severity: LOW)
+    201: 
+  > 202: 		helper.ObjectData(c, openaiResponse)
+    203: 
+
+Autofix: 
+
+[[37;40m/root/projects/active/uxin-api-gateway/relay/channel/coze/relay-coze.go:169[0m] - G104 (CWE-703): Errors unhandled (Confidence: HIGH, Severity: LOW)
+    168: 		stopResponse := helper.GenerateStopResponse(id, common.GetTimestamp(), info.UpstreamModelName, finishReason)
+  > 169: 		helper.ObjectData(c, stopResponse)
+    170: 
+
+Autofix: 
+
+[[37;40m/root/projects/active/uxin-api-gateway/relay/channel/aws/relay-aws.go:109[0m] - G104 (CWE-703): Errors unhandled (Confidence: HIGH, Severity: LOW)
+    108: 	requestHeader := http.Header{}
+  > 109: 	a.SetupRequestHeader(c, &requestHeader, info)
+    110: 	headerOverride, err := channel.ResolveHeaderOverride(info, c)
+
+Autofix: 
+
+[[37;40m/root/projects/active/uxin-api-gateway/relay/channel/ali/rerank.go:73[0m] - G104 (CWE-703): Errors unhandled (Confidence: HIGH, Severity: LOW)
+    72: 	c.Writer.WriteHeader(resp.StatusCode)
+  > 73: 	c.Writer.Write(jsonResponse)
+    74: 	return nil, &usage
+
+Autofix: 
+
+[[37;40m/root/projects/active/uxin-api-gateway/relay/channel/ali/image.go:156[0m] - G104 (CWE-703): Errors unhandled (Confidence: HIGH, Severity: LOW)
+    155: 		imageBase64s = append(imageBase64s, dataURL)
+  > 156: 		image.Close()
+    157: 	}
+
+Autofix: 
+
+[[37;40m/root/projects/active/uxin-api-gateway/model/user.go:685[0m] - G104 (CWE-703): Errors unhandled (Confidence: HIGH, Severity: LOW)
+    684: 			createdUser.SetSetting(currentSetting)
+  > 685: 			createdUser.Update(false)
+    686: 			common.SysLog(fmt.Sprintf("为新用户 %s (角色: %d) 初始化边栏配置", createdUser.Username, createdUser.Role))
+
+Autofix: 
+
+[[37;40m/root/projects/active/uxin-api-gateway/model/user.go:628[0m] - G104 (CWE-703): Errors unhandled (Confidence: HIGH, Severity: LOW)
+    627: 			createdUser.SetSetting(currentSetting)
+  > 628: 			createdUser.Update(false)
+    629: 			common.SysLog(fmt.Sprintf("为新用户 %s (角色: %d) 初始化边栏配置", createdUser.Username, createdUser.Role))
+
+Autofix: 
+
+[[37;40m/root/projects/active/uxin-api-gateway/model/option.go:605[0m] - G104 (CWE-703): Errors unhandled (Confidence: HIGH, Severity: LOW)
+    604: 	}
+  > 605: 	config.UpdateConfigFromMap(cfg, configMap)
+    606: 
+
+Autofix: 
+
+[[37;40m/root/projects/active/uxin-api-gateway/controller/uptime_kuma.go:153[0m] - G104 (CWE-703): Errors unhandled (Confidence: HIGH, Severity: LOW)
+    152: 
+  > 153: 	g.Wait()
+    154: 	c.JSON(http.StatusOK, gin.H{"success": true, "message": "", "data": results})
+
+Autofix: 
+
+[[37;40m/root/projects/active/uxin-api-gateway/controller/midjourney.go:150[0m] - G104 (CWE-703): Errors unhandled (Confidence: HIGH, Severity: LOW)
+    149: 		resp.Body.Close()
+  > 150: 		req.Body.Close()
+    151: 		cancel()
+
+Autofix: 
+
+[[37;40m/root/projects/active/uxin-api-gateway/controller/midjourney.go:149[0m] - G104 (CWE-703): Errors unhandled (Confidence: HIGH, Severity: LOW)
+    148: 		}
+  > 149: 		resp.Body.Close()
+    150: 		req.Body.Close()
+
+Autofix: 
+
+[[37;40m/root/projects/active/uxin-api-gateway/controller/midjourney.go:145[0m] - G104 (CWE-703): Errors unhandled (Confidence: HIGH, Severity: LOW)
+    144: 			logger.LogError(ctx, fmt.Sprintf("Get Mjp Task parse body error2: %v, body: %s", err, string(responseBody)))
+  > 145: 			resp.Body.Close()
+    146: 			cancel()
+
+Autofix: 
+
+[[37;40m/root/projects/active/uxin-api-gateway/controller/midjourney.go:137[0m] - G104 (CWE-703): Errors unhandled (Confidence: HIGH, Severity: LOW)
+    136: 			logger.LogError(ctx, fmt.Sprintf("Get Mjp Task parse body error: %v", err))
+  > 137: 			resp.Body.Close()
+    138: 			cancel()
+
+Autofix: 
+
+[[37;40m/root/projects/active/uxin-api-gateway/controller/midjourney.go:130[0m] - G104 (CWE-703): Errors unhandled (Confidence: HIGH, Severity: LOW)
+    129: 			logger.LogError(ctx, fmt.Sprintf("Get Task status code: %d", resp.StatusCode))
+  > 130: 			resp.Body.Close()
+    131: 			cancel()
+
+Autofix: 
+
+[[37;40m/root/projects/active/uxin-api-gateway/common/pprof.go:41[0m] - G104 (CWE-703): Errors unhandled (Confidence: HIGH, Severity: LOW)
+    40: 			pprof.StopCPUProfile()
+  > 41: 			f.Close()
+    42: 		}
+
+Autofix: 
+
+[[37;40m/root/projects/active/uxin-api-gateway/common/gin.go:102[0m] - G104 (CWE-703): Errors unhandled (Confidence: HIGH, Severity: LOW)
+    101: 		if bs, ok := storage.(BodyStorage); ok {
+  > 102: 			bs.Close()
+    103: 		}
+
+Autofix: 
+
+[[37;40m/root/projects/active/uxin-api-gateway/common/disk_cache.go:75[0m] - G104 (CWE-703): Errors unhandled (Confidence: HIGH, Severity: LOW)
+    74: 	if err := file.Close(); err != nil {
+  > 75: 		os.Remove(filePath)
+    76: 		return "", fmt.Errorf("failed to close cache file: %w", err)
+
+Autofix: 
+
+[[37;40m/root/projects/active/uxin-api-gateway/common/disk_cache.go:70[0m] - G104 (CWE-703): Errors unhandled (Confidence: HIGH, Severity: LOW)
+    69: 		file.Close()
+  > 70: 		os.Remove(filePath)
+    71: 		return "", fmt.Errorf("failed to write cache file: %w", err)
+
+Autofix: 
+
+[[37;40m/root/projects/active/uxin-api-gateway/common/disk_cache.go:69[0m] - G104 (CWE-703): Errors unhandled (Confidence: HIGH, Severity: LOW)
+    68: 	if err != nil {
+  > 69: 		file.Close()
+    70: 		os.Remove(filePath)
+
+Autofix: 
+
+[[37;40m/root/projects/active/uxin-api-gateway/common/custom-event.go:68[0m] - G104 (CWE-703): Errors unhandled (Confidence: HIGH, Severity: LOW)
+    67: 	if strings.HasPrefix(data.(string), "data") {
+  > 68: 		w.writeString("\n\n")
+    69: 	}
+
+Autofix: 
+
+[[37;40m/root/projects/active/uxin-api-gateway/common/custom-event.go:66[0m] - G104 (CWE-703): Errors unhandled (Confidence: HIGH, Severity: LOW)
+    65: func writeData(w stringWriter, data interface{}) error {
+  > 66: 	dataReplacer.WriteString(w, fmt.Sprint(data))
+    67: 	if strings.HasPrefix(data.(string), "data") {
+
+Autofix: 
+
+[[37;40m/root/projects/active/uxin-api-gateway/common/body_storage.go:314[0m] - G104 (CWE-703): Errors unhandled (Confidence: HIGH, Severity: LOW)
+    313: 	// 使用统一的缓存管理
+  > 314: 	CleanupOldDiskCacheFiles(5 * time.Minute)
+    315: }
+
+Autofix: 
+
+[[37;40m/root/projects/active/uxin-api-gateway/common/body_storage.go:192[0m] - G104 (CWE-703): Errors unhandled (Confidence: HIGH, Severity: LOW)
+    191: 		d.file.Close()
+  > 192: 		os.Remove(d.filePath)
+    193: 		DecrementDiskFiles(d.size)
+
+Autofix: 
+
+[[37;40m/root/projects/active/uxin-api-gateway/common/body_storage.go:191[0m] - G104 (CWE-703): Errors unhandled (Confidence: HIGH, Severity: LOW)
+    190: 	if atomic.CompareAndSwapInt32(&d.closed, 0, 1) {
+  > 191: 		d.file.Close()
+    192: 		os.Remove(d.filePath)
+
+Autofix: 
+
+[[37;40m/root/projects/active/uxin-api-gateway/common/body_storage.go:156[0m] - G104 (CWE-703): Errors unhandled (Confidence: HIGH, Severity: LOW)
+    155: 		file.Close()
+  > 156: 		os.Remove(filePath)
+    157: 		return nil, fmt.Errorf("failed to seek temp file: %w", err)
+
+Autofix: 
+
+[[37;40m/root/projects/active/uxin-api-gateway/common/body_storage.go:155[0m] - G104 (CWE-703): Errors unhandled (Confidence: HIGH, Severity: LOW)
+    154: 	if _, err := file.Seek(0, io.SeekStart); err != nil {
+  > 155: 		file.Close()
+    156: 		os.Remove(filePath)
+
+Autofix: 
+
+[[37;40m/root/projects/active/uxin-api-gateway/common/body_storage.go:149[0m] - G104 (CWE-703): Errors unhandled (Confidence: HIGH, Severity: LOW)
+    148: 		file.Close()
+  > 149: 		os.Remove(filePath)
+    150: 		return nil, ErrRequestBodyTooLarge
+
+Autofix: 
+
+[[37;40m/root/projects/active/uxin-api-gateway/common/body_storage.go:148[0m] - G104 (CWE-703): Errors unhandled (Confidence: HIGH, Severity: LOW)
+    147: 	if written > maxBytes {
+  > 148: 		file.Close()
+    149: 		os.Remove(filePath)
+
+Autofix: 
+
+[[37;40m/root/projects/active/uxin-api-gateway/common/body_storage.go:143[0m] - G104 (CWE-703): Errors unhandled (Confidence: HIGH, Severity: LOW)
+    142: 		file.Close()
+  > 143: 		os.Remove(filePath)
+    144: 		return nil, fmt.Errorf("failed to write to temp file: %w", err)
+
+Autofix: 
+
+[[37;40m/root/projects/active/uxin-api-gateway/common/body_storage.go:142[0m] - G104 (CWE-703): Errors unhandled (Confidence: HIGH, Severity: LOW)
+    141: 	if err != nil {
+  > 142: 		file.Close()
+    143: 		os.Remove(filePath)
+
+Autofix: 
+
+[[37;40m/root/projects/active/uxin-api-gateway/common/body_storage.go:118[0m] - G104 (CWE-703): Errors unhandled (Confidence: HIGH, Severity: LOW)
+    117: 		file.Close()
+  > 118: 		os.Remove(filePath)
+    119: 		return nil, fmt.Errorf("failed to seek temp file: %w", err)
+
+Autofix: 
+
+[[37;40m/root/projects/active/uxin-api-gateway/common/body_storage.go:117[0m] - G104 (CWE-703): Errors unhandled (Confidence: HIGH, Severity: LOW)
+    116: 	if _, err := file.Seek(0, io.SeekStart); err != nil {
+  > 117: 		file.Close()
+    118: 		os.Remove(filePath)
+
+Autofix: 
+
+[[37;40m/root/projects/active/uxin-api-gateway/common/body_storage.go:111[0m] - G104 (CWE-703): Errors unhandled (Confidence: HIGH, Severity: LOW)
+    110: 		file.Close()
+  > 111: 		os.Remove(filePath)
+    112: 		return nil, fmt.Errorf("failed to write to temp file: %w", err)
+
+Autofix: 
+
+[[37;40m/root/projects/active/uxin-api-gateway/common/body_storage.go:110[0m] - G104 (CWE-703): Errors unhandled (Confidence: HIGH, Severity: LOW)
+    109: 	if err != nil {
+  > 110: 		file.Close()
+    111: 		os.Remove(filePath)
+
+Autofix: 
+
+[[37;40m/root/projects/active/uxin-api-gateway/common/audio.go:99[0m] - G104 (CWE-703): Errors unhandled (Confidence: HIGH, Severity: LOW)
+    98: 		// 恢复位置（虽然如果不继续读也没关系）
+  > 99: 		r.Seek(currentPos, io.SeekStart)
+    100: 
+
+Autofix: 
+
+[[37;40m/root/projects/active/uxin-api-gateway/common/audio.go:75[0m] - G104 (CWE-703): Errors unhandled (Confidence: HIGH, Severity: LOW)
+    74: 	// 1. 强制复位指针
+  > 75: 	r.Seek(0, io.SeekStart)
+    76: 
+
+Autofix: 
+
+[1;36mSummary:[0m
+  Gosec  : dev
+  Files  : 629
+  Lines  : 118874
+  Nosec  : 1
+  Issues : [1;31m121[0m
+

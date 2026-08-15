@@ -29,6 +29,8 @@ import { BillingHistoryDialog } from './components/dialogs/billing-history-dialo
 import { CreemConfirmDialog } from './components/dialogs/creem-confirm-dialog'
 import { PaymentConfirmDialog } from './components/dialogs/payment-confirm-dialog'
 import { TransferDialog } from './components/dialogs/transfer-dialog'
+import { WechatQrDialog } from './components/dialogs/wechat-qr-dialog'
+import { AlipayQrDialog } from './components/dialogs/alipay-qr-dialog'
 import { RechargeFormCard } from './components/recharge-form-card'
 import { SubscriptionPlansCard } from './components/subscription-plans-card'
 import { WalletStatsCard } from './components/wallet-stats-card'
@@ -41,6 +43,8 @@ import {
   useCreemPayment,
   useWaffoPayment,
   useWaffoPancakePayment,
+  useWechatPayment,
+  useAlipayPayment,
 } from './hooks'
 import {
   getDefaultPaymentType,
@@ -53,6 +57,8 @@ import type {
   PresetAmount,
   CreemProduct,
   WaffoPayMethod,
+  WechatPayMethod,
+  AlipayPayMethod,
 } from './types'
 
 interface WalletProps {
@@ -79,6 +85,15 @@ export function Wallet(props: WalletProps) {
   const [selectedCreemProduct, setSelectedCreemProduct] =
     useState<CreemProduct | null>(null)
   const [showSubscriptionPanel, setShowSubscriptionPanel] = useState(true)
+  const [wechatQrOpen, setWechatQrOpen] = useState(false)
+  const [wechatQrAmount, setWechatQrAmount] = useState(0)
+  const [genericQr, setGenericQr] = useState<{
+    orderId: string
+    codeUrl: string
+    expiresAt: number
+  } | null>(null)
+  const [alipayQrOpen, setAlipayQrOpen] = useState(false)
+  const [alipayQrAmount, setAlipayQrAmount] = useState(0)
 
   const { status } = useStatus()
   const { currency } = useSystemConfig()
@@ -96,6 +111,8 @@ export function Wallet(props: WalletProps) {
     processing,
     calculatePaymentAmount,
     processPayment,
+    qrPayload,
+    clearQrPayload,
   } = usePayment()
   const {
     affiliateLink,
@@ -108,6 +125,20 @@ export function Wallet(props: WalletProps) {
   const { processing: waffoProcessing, processWaffoPayment } = useWaffoPayment()
   const { processing: pancakeProcessing, processWaffoPancakePayment } =
     useWaffoPancakePayment()
+  const {
+    qrCodeUrl: wechatQrUrl,
+    orderId: wechatOrderId,
+    expireAt: wechatExpireAt,
+    processWechatPayment,
+    resetWechatPayment,
+  } = useWechatPayment()
+  const {
+    qrCodeUrl: alipayQrUrl,
+    orderId: alipayOrderId,
+    expireAt: alipayExpireAt,
+    processAlipayPayment,
+    resetAlipayPayment,
+  } = useAlipayPayment()
 
   // Fetch and refresh user data
   const fetchUser = useCallback(async () => {
@@ -180,6 +211,17 @@ export function Wallet(props: WalletProps) {
         return
       }
 
+      // 微信/支付宝 Native：直接下单弹二维码，不走确认弹窗（通用流程只认 epay url）
+      if (method.type === PAYMENT_TYPES.WECHAT || method.type === PAYMENT_TYPES.ALIPAY) {
+        setPaymentLoading(null)
+        const result = await processWechatPayment(topupAmount, 0)
+        if (result) {
+          setWechatQrAmount(topupAmount)
+          setWechatQrOpen(true)
+        }
+        return
+      }
+
       // Calculate payment amount and show confirmation dialog
       await calculatePaymentAmount(topupAmount, method.type)
       setConfirmDialogOpen(true)
@@ -205,6 +247,21 @@ export function Wallet(props: WalletProps) {
 
     if (success) {
       setConfirmDialogOpen(false)
+      if (qrPayload) {
+        setGenericQr(qrPayload)
+        clearQrPayload()
+        if (
+          selectedPaymentMethod.type === 'wechat' ||
+          selectedPaymentMethod.type === 'wxpay'
+        ) {
+          setWechatQrAmount(topupAmount)
+          setWechatQrOpen(true)
+        } else {
+          setAlipayQrAmount(topupAmount)
+          setAlipayQrOpen(true)
+        }
+        return
+      }
       await fetchUser()
     }
   }
@@ -268,6 +325,44 @@ export function Wallet(props: WalletProps) {
     }
   }
 
+  // Handle WeChat Native payment: create order then open QR dialog
+  const handleWechatMethodSelect = async (
+    method: WechatPayMethod,
+    index: number
+  ) => {
+    if (method.payMethodType && method.payMethodType !== 'NATIVE') return
+    const loadingKey = `wechat-${index}`
+    setPaymentLoading(loadingKey)
+    try {
+      const result = await processWechatPayment(topupAmount, index)
+      if (result) {
+        setWechatQrAmount(topupAmount)
+        setWechatQrOpen(true)
+      }
+    } finally {
+      setPaymentLoading(null)
+    }
+  }
+
+  // Handle Alipay precreate: create order then open QR dialog
+  const handleAlipayMethodSelect = async (
+    method: AlipayPayMethod,
+    index: number
+  ) => {
+    if (method.payMethodType && method.payMethodType !== 'PRECREATE') return
+    const loadingKey = `alipay-${index}`
+    setPaymentLoading(loadingKey)
+    try {
+      const result = await processAlipayPayment(topupAmount, index)
+      if (result) {
+        setAlipayQrAmount(topupAmount)
+        setAlipayQrOpen(true)
+      }
+    } finally {
+      setPaymentLoading(null)
+    }
+  }
+
   // Get discount rate for current topup amount
   const getDiscountRate = useCallback(() => {
     return topupInfo?.discount?.[topupAmount] || DEFAULT_DISCOUNT_RATE
@@ -326,6 +421,14 @@ export function Wallet(props: WalletProps) {
                   enableWaffoPancakeTopup={
                     topupInfo?.enable_waffo_pancake_topup
                   }
+                  enableWechatTopup={topupInfo?.enable_wechat_topup}
+                  wechatPayMethods={topupInfo?.wechat_pay_methods}
+                  wechatMinTopup={topupInfo?.wechat_min_topup}
+                  onWechatMethodSelect={handleWechatMethodSelect}
+                  enableAlipayTopup={topupInfo?.enable_alipay_topup}
+                  alipayPayMethods={topupInfo?.alipay_pay_methods}
+                  alipayMinTopup={topupInfo?.alipay_min_topup}
+                  onAlipayMethodSelect={handleAlipayMethodSelect}
                 />
               </div>
 
@@ -374,6 +477,46 @@ export function Wallet(props: WalletProps) {
       <BillingHistoryDialog
         open={billingDialogOpen}
         onOpenChange={setBillingDialogOpen}
+      />
+
+      <WechatQrDialog
+        open={wechatQrOpen}
+        onOpenChange={(open) => {
+          setWechatQrOpen(open)
+          if (!open) {
+            resetWechatPayment()
+            setGenericQr(null)
+          }
+        }}
+        codeUrl={wechatQrUrl ?? genericQr?.codeUrl ?? null}
+        orderId={wechatOrderId ?? genericQr?.orderId ?? null}
+        expireAt={wechatExpireAt || genericQr?.expiresAt || 0}
+        topupAmount={wechatQrAmount}
+        onSuccess={() => {
+          setWechatQrOpen(false)
+          resetWechatPayment()
+          void fetchUser()
+        }}
+      />
+
+      <AlipayQrDialog
+        open={alipayQrOpen}
+        onOpenChange={(open) => {
+          setAlipayQrOpen(open)
+          if (!open) {
+            resetAlipayPayment()
+            setGenericQr(null)
+          }
+        }}
+        qrCode={alipayQrUrl ?? genericQr?.codeUrl ?? null}
+        orderId={alipayOrderId ?? genericQr?.orderId ?? null}
+        expireAt={alipayExpireAt || genericQr?.expiresAt || 0}
+        topupAmount={alipayQrAmount}
+        onSuccess={() => {
+          setAlipayQrOpen(false)
+          resetAlipayPayment()
+          void fetchUser()
+        }}
       />
 
       <CreemConfirmDialog

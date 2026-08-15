@@ -1,7 +1,7 @@
 # 豫鑫 API 中转站 · 用户操作手册
 
 > 版本: v1.0.0-yuxin · 2026-08-03
-> 访问地址(本环境): https://203.0.113.10
+> 访问地址(本环境): https://103.55.131.130
 > 文档对象: 终端用户(调用方)、渠道管理员、系统管理员
 
 ---
@@ -21,8 +21,8 @@
 
 | 角色 | 入口 | 权限范围 |
 |---|---|---|
-| 终端用户(普通) | https://203.0.113.10/login | 查看公开定价、注册账户、生成 API Key、调用模型、查询用量 |
-| 渠道管理员 | https://203.0.113.10/admin | 渠道列表、渠道测试、状态查询、用户管理 |
+| 终端用户(普通) | https://103.55.131.130/login | 查看公开定价、注册账户、生成 API Key、调用模型、查询用量 |
+| 渠道管理员 | https://103.55.131.130/admin | 渠道列表、渠道测试、状态查询、用户管理 |
 | 系统管理员 | 同上 + 管理员设置页 | 系统设置、模型管理、订阅套餐、审计日志 |
 
 > 超级管理员 `role=100`,普通管理员 `role=10`(系统设置页可见性受限),普通用户 `role=1`。
@@ -33,10 +33,10 @@
 
 ### 1.1 注册与登录
 
-1. 打开 `https://203.0.113.10/register`
+1. 打开 `https://103.55.131.130/register`
 2. 填写用户名(>=3 字符)、邮箱(可留空)、密码(>=8 字符,需含字母+数字)
 3. 提交后系统跳转首页 → 已自动登录
-4. **登录**:`https://203.0.113.10/login` → 输入用户名/邮箱 + 密码 → 进入控制台
+4. **登录**:`https://103.55.131.130/login` → 输入用户名/邮箱 + 密码 → 进入控制台
 
 > **可选**:开启两步验证(`设置 → 安全 → 两步验证`),扫码绑定 Authenticator;开启后每次登录除密码外还需输入 6 位动态码。
 
@@ -59,7 +59,7 @@
 **A. cURL**
 
 ```bash
-curl https://203.0.113.10/v1/chat/completions \
+curl https://103.55.131.130/v1/chat/completions \
   -H "Authorization: Bearer sk-yuxin-XXXX" \
   -H "Content-Type: application/json" \
   -d '{"model":"gpt-4o-mini","messages":[{"role":"user","content":"你好"}],"stream":false}'
@@ -71,7 +71,7 @@ curl https://203.0.113.10/v1/chat/completions \
 from openai import OpenAI
 client = OpenAI(
     api_key="sk-yuxin-XXXX",
-    base_url="https://203.0.113.10/v1",
+    base_url="https://103.55.131.130/v1",
 )
 resp = client.chat.completions.create(
     model="gpt-4o-mini",
@@ -88,7 +88,7 @@ print(resp.choices[0].message.content)
 - API:
 
 ```bash
-curl https://203.0.113.10/api/user/tokenlog \
+curl https://103.55.131.130/api/user/tokenlog \
   -H "Authorization: Bearer sk-yuxin-XXXX" \
   -H "Content-Type: application/json" \
   -d '{"start_timestamp":1754000000,"end_timestamp":1754100000}'

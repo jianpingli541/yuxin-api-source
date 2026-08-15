@@ -50,6 +50,8 @@ import type {
   TopupInfo,
   CreemProduct,
   WaffoPayMethod,
+  WechatPayMethod,
+  AlipayPayMethod,
 } from '../types'
 import { CreemProductsSection } from './creem-products-section'
 
@@ -81,6 +83,14 @@ interface RechargeFormCardProps {
   waffoMinTopup?: number
   onWaffoMethodSelect?: (method: WaffoPayMethod, index: number) => void
   enableWaffoPancakeTopup?: boolean
+  enableWechatTopup?: boolean
+  wechatPayMethods?: WechatPayMethod[]
+  wechatMinTopup?: number
+  onWechatMethodSelect?: (method: WechatPayMethod, index: number) => void
+  enableAlipayTopup?: boolean
+  alipayPayMethods?: AlipayPayMethod[]
+  alipayMinTopup?: number
+  onAlipayMethodSelect?: (method: AlipayPayMethod, index: number) => void
 }
 
 export function RechargeFormCard({
@@ -111,6 +121,14 @@ export function RechargeFormCard({
   waffoMinTopup,
   onWaffoMethodSelect,
   enableWaffoPancakeTopup,
+  enableWechatTopup,
+  wechatPayMethods,
+  wechatMinTopup,
+  onWechatMethodSelect,
+  enableAlipayTopup,
+  alipayPayMethods,
+  alipayMinTopup,
+  onAlipayMethodSelect,
 }: RechargeFormCardProps) {
   const { t } = useTranslation()
   const [localAmount, setLocalAmount] = useState(topupAmount.toString())
@@ -130,6 +148,8 @@ export function RechargeFormCard({
   const hasConfigurableTopup =
     topupInfo?.enable_online_topup ||
     topupInfo?.enable_stripe_topup ||
+    topupInfo?.enable_wechat_topup ||
+    topupInfo?.enable_alipay_topup ||
     enableWaffoTopup ||
     enableWaffoPancakeTopup
   const hasAnyTopup = hasConfigurableTopup || enableCreemTopup
@@ -137,6 +157,10 @@ export function RechargeFormCard({
     Array.isArray(topupInfo?.pay_methods) && topupInfo.pay_methods.length > 0
   const hasWaffoPaymentMethods =
     Array.isArray(waffoPayMethods) && waffoPayMethods.length > 0
+  const hasWechatPaymentMethods =
+    Array.isArray(wechatPayMethods) && wechatPayMethods.length > 0
+  const hasAlipayPaymentMethods =
+    Array.isArray(alipayPayMethods) && alipayPayMethods.length > 0
   const minTopup = getMinTopupAmount(topupInfo)
   const redemptionEnabled = topupInfo?.enable_redemption !== false
 
@@ -378,15 +402,18 @@ export function RechargeFormCard({
                     })}
                   </div>
                 ) : null}
-                {!hasStandardPaymentMethods && !hasWaffoPaymentMethods && (
-                  <Alert>
-                    <AlertDescription>
-                      {t(
-                        'No payment methods available. Please contact administrator.'
-                      )}
-                    </AlertDescription>
-                  </Alert>
-                )}
+                {!hasStandardPaymentMethods &&
+                  !hasWaffoPaymentMethods &&
+                  !hasWechatPaymentMethods &&
+                  !hasAlipayPaymentMethods && (
+                    <Alert>
+                      <AlertDescription>
+                        {t(
+                          'No payment methods available. Please contact administrator.'
+                        )}
+                      </AlertDescription>
+                    </Alert>
+                  )}
               </div>
 
               {enableWaffoTopup &&
@@ -431,6 +458,166 @@ export function RechargeFormCard({
                             key={methodKey}
                             variant='outline'
                             onClick={() => onWaffoMethodSelect(method, index)}
+                            disabled={belowMin || !!paymentLoading}
+                            title={disabledReason}
+                            aria-label={
+                              disabledReason
+                                ? `${method.name}. ${disabledReason}`
+                                : method.name
+                            }
+                            className='min-h-14 min-w-0 justify-start gap-2 rounded-lg px-3 py-2 text-left'
+                          >
+                            {methodIcon}
+                            <span className='flex min-w-0 flex-col items-start gap-0.5'>
+                              <span className='max-w-full truncate'>
+                                {method.name}
+                              </span>
+                              {disabledLabel && (
+                                <span className='text-muted-foreground max-w-full truncate text-[11px] leading-4 font-normal'>
+                                  {disabledLabel}
+                                </span>
+                              )}
+                            </span>
+                          </Button>
+                        )
+
+                        return belowMin ? (
+                          <TooltipProvider key={methodKey}>
+                            <Tooltip>
+                              <TooltipTrigger render={button} />
+                              <TooltipContent>{disabledReason}</TooltipContent>
+                            </Tooltip>
+                          </TooltipProvider>
+                        ) : (
+                          button
+                        )
+                      })}
+                    </div>
+                  </div>
+                )}
+
+              {enableWechatTopup &&
+                hasWechatPaymentMethods &&
+                onWechatMethodSelect && (
+                  <div className='space-y-2.5 sm:space-y-3'>
+                    <Label className='text-muted-foreground text-xs font-medium tracking-wider uppercase'>
+                      {t('WeChat Pay')}
+                    </Label>
+                    <div className='grid grid-cols-2 gap-1.5 sm:gap-3 lg:grid-cols-3'>
+                      {wechatPayMethods?.map((method, index) => {
+                        const loadingKey = `wechat-${index}`
+                        const methodKey = `${method.payMethodType ?? 'native'}-${method.payMethodName ?? method.name}`
+                        const wechatMin = wechatMinTopup || 0
+                        const belowMin = wechatMin > topupAmount
+                        const disabledReason = belowMin
+                          ? t('Minimum topup amount: {{amount}}', {
+                              amount: wechatMin,
+                            })
+                          : undefined
+                        const disabledLabel = belowMin
+                          ? `${t('Minimum:')} ${wechatMin}`
+                          : undefined
+
+                        let methodIcon = getPaymentIcon('wechat')
+                        if (paymentLoading === loadingKey) {
+                          methodIcon = (
+                            <Loader2 className='h-4 w-4 animate-spin' />
+                          )
+                        } else if (method.icon) {
+                          methodIcon = (
+                            <img
+                              src={method.icon}
+                              alt={method.name}
+                              className='h-4 w-4 object-contain'
+                            />
+                          )
+                        }
+
+                        const button = (
+                          <Button
+                            key={methodKey}
+                            variant='outline'
+                            onClick={() => onWechatMethodSelect(method, index)}
+                            disabled={belowMin || !!paymentLoading}
+                            title={disabledReason}
+                            aria-label={
+                              disabledReason
+                                ? `${method.name}. ${disabledReason}`
+                                : method.name
+                            }
+                            className='min-h-14 min-w-0 justify-start gap-2 rounded-lg px-3 py-2 text-left'
+                          >
+                            {methodIcon}
+                            <span className='flex min-w-0 flex-col items-start gap-0.5'>
+                              <span className='max-w-full truncate'>
+                                {method.name}
+                              </span>
+                              {disabledLabel && (
+                                <span className='text-muted-foreground max-w-full truncate text-[11px] leading-4 font-normal'>
+                                  {disabledLabel}
+                                </span>
+                              )}
+                            </span>
+                          </Button>
+                        )
+
+                        return belowMin ? (
+                          <TooltipProvider key={methodKey}>
+                            <Tooltip>
+                              <TooltipTrigger render={button} />
+                              <TooltipContent>{disabledReason}</TooltipContent>
+                            </Tooltip>
+                          </TooltipProvider>
+                        ) : (
+                          button
+                        )
+                      })}
+                    </div>
+                  </div>
+                )}
+
+              {enableAlipayTopup &&
+                hasAlipayPaymentMethods &&
+                onAlipayMethodSelect && (
+                  <div className='space-y-2.5 sm:space-y-3'>
+                    <Label className='text-muted-foreground text-xs font-medium tracking-wider uppercase'>
+                      {t('Alipay')}
+                    </Label>
+                    <div className='grid grid-cols-2 gap-1.5 sm:gap-3 lg:grid-cols-3'>
+                      {alipayPayMethods?.map((method, index) => {
+                        const loadingKey = `alipay-${index}`
+                        const methodKey = `${method.payMethodType ?? 'precreate'}-${method.payMethodName ?? method.name}`
+                        const alipayMin = alipayMinTopup || 0
+                        const belowMin = alipayMin > topupAmount
+                        const disabledReason = belowMin
+                          ? t('Minimum topup amount: {{amount}}', {
+                              amount: alipayMin,
+                            })
+                          : undefined
+                        const disabledLabel = belowMin
+                          ? `${t('Minimum:')} ${alipayMin}`
+                          : undefined
+
+                        let methodIcon = getPaymentIcon('alipay')
+                        if (paymentLoading === loadingKey) {
+                          methodIcon = (
+                            <Loader2 className='h-4 w-4 animate-spin' />
+                          )
+                        } else if (method.icon) {
+                          methodIcon = (
+                            <img
+                              src={method.icon}
+                              alt={method.name}
+                              className='h-4 w-4 object-contain'
+                            />
+                          )
+                        }
+
+                        const button = (
+                          <Button
+                            key={methodKey}
+                            variant='outline'
+                            onClick={() => onAlipayMethodSelect(method, index)}
                             disabled={belowMin || !!paymentLoading}
                             title={disabledReason}
                             aria-label={

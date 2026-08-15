@@ -2,7 +2,7 @@
 
 > 测试日期: 2026-08-03(修复 R9 后)
 > 测试工具: Playwright 1.62.1(headless)
-> 被测环境: https://203.0.113.10(自签证书,ignoreHTTPSErrors)
+> 被测环境: https://103.55.131.130(自签证书,ignoreHTTPSErrors)
 > 测试脚本: `acceptance/compat-test.mjs`
 
 ## 测试范围

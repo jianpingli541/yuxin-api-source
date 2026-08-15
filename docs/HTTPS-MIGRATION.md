@@ -1,7 +1,7 @@
 # HTTPS 证书切换手册(自签 → Let's Encrypt)
 
 > 版本: v1.0.0-yuxin · 2026-08-03
-> 适用: feifei 服务器(203.0.113.10)
+> 适用: feifei 服务器(103.55.131.130)
 > 当前状态: **自签证书**(nginx/ssl/selfsigned.*),浏览器会提示不安全
 > 目标状态: Let's Encrypt 正式证书,浏览器无警告
 
@@ -11,11 +11,11 @@
 - 80 端口:仅放行 `/metrics`(内网)与 ACME 挑战路径,其余 301 → HTTPS
 - 443 端口:TLS 1.2/1.3,完整安全头(HSTS/CSP/COOP/CORP/Permissions-Policy)
 - 证书挂载:`./nginx/ssl:/etc/nginx/ssl:ro`
-- 应用层:`SESSION_COOKIE_SECURE=true` + `SESSION_COOKIE_TRUSTED_URL=https://203.0.113.10` 已启用
+- 应用层:`SESSION_COOKIE_SECURE=true` + `SESSION_COOKIE_TRUSTED_URL=https://103.55.131.130` 已启用
 
 ## 二、切换前置条件
 
-1. **域名解析**:将一个真实域名(如 `api.yuxin.net`)的 A 记录指向 `203.0.113.10`
+1. **域名解析**:将一个真实域名(如 `api.yuxin.net`)的 A 记录指向 `103.55.131.130`
    - 注意:`yuxin.com` 目前指向 146.235.218.82,需确认是否改用该 IP 或启用新子域
 2. 80 端口从公网可达(ufw 已放行)
 

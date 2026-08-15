@@ -8,5 +8,5 @@ docs
 .eslintcache
 .gocache
 /web/node_modules
-/web/dist
+# /web/dist  # allow host-built dist to ship
 !THIRD-PARTY-LICENSES.md

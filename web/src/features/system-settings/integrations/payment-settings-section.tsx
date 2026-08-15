@@ -48,6 +48,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Textarea } from '@/components/ui/textarea'
 import { cn } from '@/lib/utils'
 
+import { AlipaySettingsSection, type AlipaySettingsValues } from './alipay-settings-section'
+import { WechatSettingsSection, type WechatSettingsValues } from './wechat-settings-section'
 import { confirmPaymentCompliance } from '../api'
 import {
   SettingsForm,
@@ -176,13 +178,40 @@ const paymentSchema = z.object({
   WaffoPancakeMerchantID: z.string(),
   WaffoPancakePrivateKey: z.string(),
   WaffoPancakeReturnURL: z.string(),
+  WechatEnabled: z.boolean(),
+  WechatMerchantId: z.string(),
+  WechatAppId: z.string(),
+  WechatApiV3Key: z.string(),
+  WechatPrivateKey: z.string(),
+  WechatCertSerialNo: z.string(),
+  WechatCertPublicKey: z.string(),
+  WechatNotifyUrl: z.string(),
+  WechatReturnUrl: z.string(),
+  WechatUnitPrice: z.coerce.number().min(0),
+  WechatMinTopUp: z.coerce.number().min(1),
+  AlipayEnabled: z.boolean(),
+  AlipayAppId: z.string(),
+  AlipayPrivateKey: z.string(),
+  AlipayPublicKey: z.string(),
+  AlipayUseCertMode: z.boolean(),
+  AlipayAppCertPublicKey: z.string(),
+  AlipayPublicCert: z.string(),
+  AlipayRootCert: z.string(),
+  AlipaySandbox: z.boolean(),
+  AlipayNotifyUrl: z.string(),
+  AlipayReturnUrl: z.string(),
+  AlipayUnitPrice: z.coerce.number().min(0),
+  AlipayMinTopUp: z.coerce.number().min(1),
 })
 
 type PaymentFormValues = z.infer<typeof paymentSchema>
 type WaffoFormFieldValues = Omit<WaffoSettingsValues, 'WaffoPayMethods'>
 type PaymentBaseFormValues = Omit<
   PaymentFormValues,
-  keyof WaffoFormFieldValues | keyof WaffoPancakeSettingsValues
+  | keyof WaffoFormFieldValues
+  | keyof WaffoPancakeSettingsValues
+  | keyof WechatSettingsValues
+  | keyof AlipaySettingsValues
 >
 
 const CURRENT_COMPLIANCE_TERMS_VERSION = 'v1'
@@ -199,6 +228,8 @@ type PaymentSettingsSectionProps = {
   defaultValues: PaymentBaseFormValues
   waffoDefaultValues: WaffoSettingsValues
   waffoPancakeDefaultValues: WaffoPancakeSettingsValues
+  wechatDefaultValues: WechatSettingsValues
+  alipayDefaultValues: AlipaySettingsValues
   waffoPancakeProvisionedStoreID?: string
   waffoPancakeProvisionedProductID?: string
   complianceDefaults: PaymentComplianceDefaults
@@ -217,6 +248,8 @@ export function PaymentSettingsSection({
   defaultValues,
   waffoDefaultValues,
   waffoPancakeDefaultValues,
+  wechatDefaultValues,
+  alipayDefaultValues,
   waffoPancakeProvisionedStoreID,
   waffoPancakeProvisionedProductID,
   complianceDefaults,
@@ -229,8 +262,10 @@ export function PaymentSettingsSection({
       ...defaultValues,
       ...waffoDefaultValues,
       ...waffoPancakeDefaultValues,
+      ...wechatDefaultValues,
+      ...alipayDefaultValues,
     }),
-    [defaultValues, waffoDefaultValues, waffoPancakeDefaultValues]
+    [defaultValues, waffoDefaultValues, waffoPancakeDefaultValues, wechatDefaultValues, alipayDefaultValues]
   )
   const initialRef = React.useRef(initialFormValues)
   const defaultsSignature = React.useMemo(
@@ -390,6 +425,32 @@ export function PaymentSettingsSection({
     },
     [setPaymentValue]
   )
+  const setWechatValue = React.useCallback(
+    <K extends keyof WechatSettingsValues>(
+      key: K,
+      value: WechatSettingsValues[K]
+    ) => {
+      setPaymentValue(
+        key as keyof PaymentFormValues,
+        value as PaymentFormValues[keyof PaymentFormValues]
+      )
+    },
+    [setPaymentValue]
+  )
+
+  const setAlipayValue = React.useCallback(
+    <K extends keyof AlipaySettingsValues>(
+      key: K,
+      value: AlipaySettingsValues[K]
+    ) => {
+      setPaymentValue(
+        key as keyof PaymentFormValues,
+        value as PaymentFormValues[keyof PaymentFormValues]
+      )
+    },
+    [setPaymentValue]
+  )
+
 
   const setWaffoPancakeValue = React.useCallback(
     <K extends keyof WaffoPancakeSettingsValues>(
@@ -457,6 +518,30 @@ export function PaymentSettingsSection({
       WaffoPancakeReturnURL: removeTrailingSlash(
         values.WaffoPancakeReturnURL.trim()
       ),
+      WechatEnabled: values.WechatEnabled,
+      WechatMerchantId: values.WechatMerchantId.trim(),
+      WechatAppId: values.WechatAppId.trim(),
+      WechatApiV3Key: values.WechatApiV3Key.trim(),
+      WechatPrivateKey: values.WechatPrivateKey.trim(),
+      WechatCertSerialNo: values.WechatCertSerialNo.trim(),
+      WechatCertPublicKey: values.WechatCertPublicKey.trim(),
+      WechatNotifyUrl: values.WechatNotifyUrl.trim(),
+      WechatReturnUrl: values.WechatReturnUrl.trim(),
+      WechatUnitPrice: values.WechatUnitPrice,
+      WechatMinTopUp: values.WechatMinTopUp,
+      AlipayEnabled: values.AlipayEnabled,
+      AlipayAppId: values.AlipayAppId.trim(),
+      AlipayPrivateKey: values.AlipayPrivateKey.trim(),
+      AlipayPublicKey: values.AlipayPublicKey.trim(),
+      AlipayUseCertMode: values.AlipayUseCertMode,
+      AlipayAppCertPublicKey: values.AlipayAppCertPublicKey.trim(),
+      AlipayPublicCert: values.AlipayPublicCert.trim(),
+      AlipayRootCert: values.AlipayRootCert.trim(),
+      AlipaySandbox: values.AlipaySandbox,
+      AlipayNotifyUrl: values.AlipayNotifyUrl.trim(),
+      AlipayReturnUrl: values.AlipayReturnUrl.trim(),
+      AlipayUnitPrice: values.AlipayUnitPrice,
+      AlipayMinTopUp: values.AlipayMinTopUp,
     }
 
     const initial = {
@@ -504,6 +589,30 @@ export function PaymentSettingsSection({
       WaffoPancakeReturnURL: removeTrailingSlash(
         initialRef.current.WaffoPancakeReturnURL.trim()
       ),
+      WechatEnabled: initialRef.current.WechatEnabled,
+      WechatMerchantId: initialRef.current.WechatMerchantId.trim(),
+      WechatAppId: initialRef.current.WechatAppId.trim(),
+      WechatApiV3Key: initialRef.current.WechatApiV3Key.trim(),
+      WechatPrivateKey: initialRef.current.WechatPrivateKey.trim(),
+      WechatCertSerialNo: initialRef.current.WechatCertSerialNo.trim(),
+      WechatCertPublicKey: initialRef.current.WechatCertPublicKey.trim(),
+      WechatNotifyUrl: initialRef.current.WechatNotifyUrl.trim(),
+      WechatReturnUrl: initialRef.current.WechatReturnUrl.trim(),
+      WechatUnitPrice: initialRef.current.WechatUnitPrice,
+      WechatMinTopUp: initialRef.current.WechatMinTopUp,
+      AlipayEnabled: initialRef.current.AlipayEnabled,
+      AlipayAppId: initialRef.current.AlipayAppId.trim(),
+      AlipayPrivateKey: initialRef.current.AlipayPrivateKey.trim(),
+      AlipayPublicKey: initialRef.current.AlipayPublicKey.trim(),
+      AlipayUseCertMode: initialRef.current.AlipayUseCertMode,
+      AlipayAppCertPublicKey: initialRef.current.AlipayAppCertPublicKey.trim(),
+      AlipayPublicCert: initialRef.current.AlipayPublicCert.trim(),
+      AlipayRootCert: initialRef.current.AlipayRootCert.trim(),
+      AlipaySandbox: initialRef.current.AlipaySandbox,
+      AlipayNotifyUrl: initialRef.current.AlipayNotifyUrl.trim(),
+      AlipayReturnUrl: initialRef.current.AlipayReturnUrl.trim(),
+      AlipayUnitPrice: initialRef.current.AlipayUnitPrice,
+      AlipayMinTopUp: initialRef.current.AlipayMinTopUp,
     }
 
     const updates: Array<{ key: string; value: string | number | boolean }> = []
@@ -701,6 +810,79 @@ export function PaymentSettingsSection({
       updates.push({ key: 'WaffoPayMethods', value: sanitized.WaffoPayMethods })
     }
 
+    if (sanitized.WechatEnabled !== initial.WechatEnabled) {
+      updates.push({ key: 'WechatEnabled', value: sanitized.WechatEnabled })
+    }
+    if (sanitized.WechatMerchantId !== initial.WechatMerchantId) {
+      updates.push({ key: 'WechatMerchantId', value: sanitized.WechatMerchantId })
+    }
+    if (sanitized.WechatAppId !== initial.WechatAppId) {
+      updates.push({ key: 'WechatAppId', value: sanitized.WechatAppId })
+    }
+    if (sanitized.WechatApiV3Key !== initial.WechatApiV3Key) {
+      updates.push({ key: 'WechatApiV3Key', value: sanitized.WechatApiV3Key })
+    }
+    if (sanitized.WechatPrivateKey !== initial.WechatPrivateKey) {
+      updates.push({ key: 'WechatPrivateKey', value: sanitized.WechatPrivateKey })
+    }
+    if (sanitized.WechatCertSerialNo !== initial.WechatCertSerialNo) {
+      updates.push({ key: 'WechatCertSerialNo', value: sanitized.WechatCertSerialNo })
+    }
+    if (sanitized.WechatCertPublicKey && sanitized.WechatCertPublicKey !== initial.WechatCertPublicKey) {
+      updates.push({ key: 'WechatCertPublicKey', value: sanitized.WechatCertPublicKey })
+    }
+    if (sanitized.WechatNotifyUrl !== initial.WechatNotifyUrl) {
+      updates.push({ key: 'WechatNotifyUrl', value: sanitized.WechatNotifyUrl })
+    }
+    if (sanitized.WechatReturnUrl !== initial.WechatReturnUrl) {
+      updates.push({ key: 'WechatReturnUrl', value: sanitized.WechatReturnUrl })
+    }
+    if (sanitized.WechatUnitPrice !== initial.WechatUnitPrice) {
+      updates.push({ key: 'WechatUnitPrice', value: sanitized.WechatUnitPrice })
+    }
+    if (sanitized.WechatMinTopUp !== initial.WechatMinTopUp) {
+      updates.push({ key: 'WechatMinTopUp', value: sanitized.WechatMinTopUp })
+    }
+    if (sanitized.AlipayEnabled !== initial.AlipayEnabled) {
+      updates.push({ key: 'AlipayEnabled', value: sanitized.AlipayEnabled })
+    }
+    if (sanitized.AlipayAppId !== initial.AlipayAppId) {
+      updates.push({ key: 'AlipayAppId', value: sanitized.AlipayAppId })
+    }
+    if (sanitized.AlipayPrivateKey !== initial.AlipayPrivateKey) {
+      updates.push({ key: 'AlipayPrivateKey', value: sanitized.AlipayPrivateKey })
+    }
+    if (sanitized.AlipayPublicKey !== initial.AlipayPublicKey) {
+      updates.push({ key: 'AlipayPublicKey', value: sanitized.AlipayPublicKey })
+    }
+    if (sanitized.AlipayUseCertMode !== initial.AlipayUseCertMode) {
+      updates.push({ key: 'AlipayUseCertMode', value: sanitized.AlipayUseCertMode })
+    }
+    if (sanitized.AlipayAppCertPublicKey !== initial.AlipayAppCertPublicKey) {
+      updates.push({ key: 'AlipayAppCertPublicKey', value: sanitized.AlipayAppCertPublicKey })
+    }
+    if (sanitized.AlipayPublicCert !== initial.AlipayPublicCert) {
+      updates.push({ key: 'AlipayPublicCert', value: sanitized.AlipayPublicCert })
+    }
+    if (sanitized.AlipayRootCert !== initial.AlipayRootCert) {
+      updates.push({ key: 'AlipayRootCert', value: sanitized.AlipayRootCert })
+    }
+    if (sanitized.AlipaySandbox !== initial.AlipaySandbox) {
+      updates.push({ key: 'AlipaySandbox', value: sanitized.AlipaySandbox })
+    }
+    if (sanitized.AlipayNotifyUrl !== initial.AlipayNotifyUrl) {
+      updates.push({ key: 'AlipayNotifyUrl', value: sanitized.AlipayNotifyUrl })
+    }
+    if (sanitized.AlipayReturnUrl !== initial.AlipayReturnUrl) {
+      updates.push({ key: 'AlipayReturnUrl', value: sanitized.AlipayReturnUrl })
+    }
+    if (sanitized.AlipayUnitPrice !== initial.AlipayUnitPrice) {
+      updates.push({ key: 'AlipayUnitPrice', value: sanitized.AlipayUnitPrice })
+    }
+    if (sanitized.AlipayMinTopUp !== initial.AlipayMinTopUp) {
+      updates.push({ key: 'AlipayMinTopUp', value: sanitized.AlipayMinTopUp })
+    }
+
     const hasWaffoPancakeChanges =
       sanitized.WaffoPancakeMerchantID !== initial.WaffoPancakeMerchantID ||
       sanitized.WaffoPancakePrivateKey.length > 0 ||
@@ -773,6 +955,43 @@ export function PaymentSettingsSection({
   }
 
   const currentFormValues = form.watch()
+  const values = form.watch()
+  const wechatValues: WechatSettingsValues = {
+    WechatEnabled: values.WechatEnabled,
+    WechatMerchantId: values.WechatMerchantId,
+    WechatAppId: values.WechatAppId,
+    WechatApiV3Key: values.WechatApiV3Key,
+    WechatPrivateKey: values.WechatPrivateKey,
+    WechatCertSerialNo: values.WechatCertSerialNo,
+    WechatCertPublicKey: values.WechatCertPublicKey,
+    WechatNotifyUrl: values.WechatNotifyUrl,
+    WechatReturnUrl: values.WechatReturnUrl,
+    WechatUnitPrice: values.WechatUnitPrice,
+    WechatMinTopUp: values.WechatMinTopUp,
+  }
+
+  // 对 4 个新证书字段做精确订阅，确保 setValue 触发条件渲染重计算
+  const alipayUseCertMode = form.watch('AlipayUseCertMode')
+  const alipayAppCertPublicKey = form.watch('AlipayAppCertPublicKey')
+  const alipayPublicCert = form.watch('AlipayPublicCert')
+  const alipayRootCert = form.watch('AlipayRootCert')
+
+  const alipayValues: AlipaySettingsValues = {
+    AlipayEnabled: values.AlipayEnabled,
+    AlipayAppId: values.AlipayAppId,
+    AlipayPrivateKey: values.AlipayPrivateKey,
+    AlipayPublicKey: values.AlipayPublicKey,
+    AlipayUseCertMode: alipayUseCertMode,
+    AlipayAppCertPublicKey: alipayAppCertPublicKey,
+    AlipayPublicCert: alipayPublicCert,
+    AlipayRootCert: alipayRootCert,
+    AlipaySandbox: values.AlipaySandbox,
+    AlipayNotifyUrl: values.AlipayNotifyUrl,
+    AlipayReturnUrl: values.AlipayReturnUrl,
+    AlipayUnitPrice: values.AlipayUnitPrice,
+    AlipayMinTopUp: values.AlipayMinTopUp,
+  }
+
   const waffoValues: WaffoSettingsValues = {
     WaffoEnabled: currentFormValues.WaffoEnabled,
     WaffoApiKey: currentFormValues.WaffoApiKey,
@@ -877,13 +1096,15 @@ export function PaymentSettingsSection({
           />
           <Tabs defaultValue='general' className='min-w-0'>
             <div className='overflow-x-auto pb-1'>
-              <TabsList className='grid min-w-[44rem] grid-cols-6'>
+              <TabsList className='grid min-w-[44rem] grid-cols-8'>
                 <TabsTrigger value='general'>{t('General')}</TabsTrigger>
                 <TabsTrigger value='epay'>Epay</TabsTrigger>
                 <TabsTrigger value='stripe'>{t('Stripe')}</TabsTrigger>
                 <TabsTrigger value='creem'>Creem</TabsTrigger>
                 <TabsTrigger value='waffo-pancake'>Waffo Pancake</TabsTrigger>
                 <TabsTrigger value='waffo'>Waffo</TabsTrigger>
+                <TabsTrigger value='wechat'>微信支付</TabsTrigger>
+                <TabsTrigger value='alipay'>支付宝</TabsTrigger>
               </TabsList>
             </div>
 
@@ -1608,6 +1829,26 @@ export function PaymentSettingsSection({
                 onValueChange={setWaffoValue}
                 payMethods={waffoPayMethods}
                 onPayMethodsChange={setWaffoPayMethods}
+              />
+            </TabsContent>
+
+            <TabsContent
+              value='wechat'
+              className={paymentTabContentClassName}
+            >
+              <WechatSettingsSection
+                values={wechatValues}
+                onValueChange={setWechatValue}
+              />
+            </TabsContent>
+
+            <TabsContent
+              value='alipay'
+              className={paymentTabContentClassName}
+            >
+              <AlipaySettingsSection
+                values={alipayValues}
+                onValueChange={setAlipayValue}
               />
             </TabsContent>
           </Tabs>

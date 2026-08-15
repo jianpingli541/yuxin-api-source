@@ -95,11 +95,76 @@ func GetTopUpInfo(c *gin.Context) {
 		}
 	}
 
+
+	// 如果启用了微信支付，添加到支付方法列表
+	// 默认 PayMethods 中的 type=wxpay 是历史聚合通道的占位条目，启用微信原生支付后用新条目替换，
+	// 避免前端同时显示两条微信按钮。
+	enableWechat := isWechatTopUpEnabled()
+	if enableWechat {
+		filtered := make([]map[string]string, 0, len(payMethods))
+		for _, method := range payMethods {
+			if method["type"] == "wxpay" {
+				continue
+			}
+			filtered = append(filtered, method)
+		}
+		payMethods = filtered
+
+		hasWechat := false
+		for _, method := range payMethods {
+			if method["type"] == model.PaymentMethodWechat {
+				hasWechat = true
+				break
+			}
+		}
+		if !hasWechat {
+			payMethods = append(payMethods, map[string]string{
+				"name":      "微信支付",
+				"type":      model.PaymentMethodWechat,
+				"color":     "#07C160",
+				"min_topup": strconv.Itoa(setting.WechatMinTopUp),
+			})
+		}
+	}
+
+
+	// 如果启用了支付宝，添加到支付方法列表
+	// 默认 PayMethods 中的 type=alipay 是历史聚合通道的占位条目，启用支付宝原生支付后用新条目替换。
+	enableAlipay := isAlipayTopUpEnabled()
+	if enableAlipay {
+		filtered := make([]map[string]string, 0, len(payMethods))
+		for _, method := range payMethods {
+			if method["type"] == "alipay" {
+				continue
+			}
+			filtered = append(filtered, method)
+		}
+		payMethods = filtered
+
+		hasAlipay := false
+		for _, method := range payMethods {
+			if method["type"] == model.PaymentMethodAlipay {
+				hasAlipay = true
+				break
+			}
+		}
+		if !hasAlipay {
+			payMethods = append(payMethods, map[string]string{
+				"name":      "支付宝",
+				"type":      model.PaymentMethodAlipay,
+				"color":     "#1677FF",
+				"min_topup": strconv.Itoa(setting.AlipayMinTopUp),
+			})
+		}
+	}
+
 	data := gin.H{
 		"enable_online_topup":              isEpayTopUpEnabled(),
 		"enable_stripe_topup":              isStripeTopUpEnabled(),
 		"enable_creem_topup":               isCreemTopUpEnabled(),
 		"enable_waffo_topup":               enableWaffo,
+		"enable_wechat_topup":              enableWechat,
+		"enable_alipay_topup":             enableAlipay,
 		"enable_waffo_pancake_topup":       enableWaffoPancake,
 		"enable_redemption":                complianceConfirmed,
 		"payment_compliance_confirmed":     complianceConfirmed,
@@ -111,10 +176,24 @@ func GetTopUpInfo(c *gin.Context) {
 			return nil
 		}(),
 		"creem_products":          setting.CreemProducts,
+		"wechat_pay_methods": func() interface{} {
+			if enableWechat {
+				return setting.GetWechatPayMethods()
+			}
+			return nil
+		}(),
+		"alipay_pay_methods": func() interface{} {
+			if enableAlipay {
+				return setting.GetAlipayPayMethods()
+			}
+			return nil
+		}(),
 		"pay_methods":             payMethods,
 		"min_topup":               operation_setting.MinTopUp,
 		"stripe_min_topup":        setting.StripeMinTopUp,
 		"waffo_min_topup":         setting.WaffoMinTopUp,
+		"wechat_min_topup":        setting.WechatMinTopUp,
+		"alipay_min_topup":       setting.AlipayMinTopUp,
 		"waffo_pancake_min_topup": setting.WaffoPancakeMinTopUp,
 		"amount_options":          operation_setting.GetPaymentSetting().AmountOptions,
 		"discount":                operation_setting.GetPaymentSetting().AmountDiscount,
@@ -191,6 +270,20 @@ func RequestEpay(c *gin.Context) {
 	err := c.ShouldBindJSON(&req)
 	if err != nil {
 		c.JSON(http.StatusOK, gin.H{"message": "error", "data": "参数错误"})
+		return
+	}
+	// 聚合通道分发：微信 Native / 支付宝当面付 走原子内部函数，
+	// 用户入口统一走 /api/user/self/pay（聚合），不暴露 /wechat/pay /alipay/pay。
+	// 回调仍走 /api/wechat/notify /api/alipay/notify（用户已配置微信/支付宝后台 URL）。
+	// wxpay / alipay 是默认 PayMethods 中的 type 字符串，兼容老配置与 PaymentMethod 常量两种写法。
+	switch req.PaymentMethod {
+	case model.PaymentMethodWechat, "wxpay":
+		idx := 0
+		requestWechatPayCore(c, req.Amount, &idx)
+		return
+	case model.PaymentMethodAlipay:
+		idx := 0
+		requestAlipayPayCore(c, req.Amount, &idx)
 		return
 	}
 	if req.Amount < getMinTopup() {

@@ -319,6 +319,30 @@ export type BillingSettings = {
   WaffoPayMethods: string
   WaffoPancakeMerchantID: string
   WaffoPancakePrivateKey: string
+  WechatEnabled: boolean
+  WechatMerchantId: string
+  WechatAppId: string
+  WechatApiV3Key: string
+  WechatPrivateKey: string
+  WechatCertSerialNo: string
+  WechatCertPublicKey: string
+  WechatNotifyUrl: string
+  WechatReturnUrl: string
+  WechatUnitPrice: number
+  WechatMinTopUp: number
+  AlipayEnabled: boolean
+  AlipayAppId: string
+  AlipayPrivateKey: string
+  AlipayPublicKey: string
+  AlipayUseCertMode: boolean
+  AlipayAppCertPublicKey: string
+  AlipayPublicCert: string
+  AlipayRootCert: string
+  AlipaySandbox: boolean
+  AlipayNotifyUrl: string
+  AlipayReturnUrl: string
+  AlipayUnitPrice: number
+  AlipayMinTopUp: number
   WaffoPancakeReturnURL: string
   // Bound by the operator through the catalog flow in the admin Pancake
   // section (saved via /api/option/waffo-pancake/save).

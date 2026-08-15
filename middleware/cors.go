@@ -13,7 +13,7 @@ var corsAllowedOrigins = []string{
 	"http://localhost:3000",
 	"http://127.0.0.1",
 	"http://127.0.0.1:3000",
-	"http://203.0.113.10", "https://203.0.113.10", // 过渡期双协议
+	"http://103.55.131.130", "https://103.55.131.130", // 过渡期双协议
 }
 
 func CORS() gin.HandlerFunc {

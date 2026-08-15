@@ -79,8 +79,16 @@ export async function requestPaymentAmount(
   return Number.parseFloat(response.data)
 }
 
+export interface QrPaymentPayload {
+  orderId: string
+  codeUrl: string
+  expiresAt: number
+}
+
 export function usePayment() {
   const [amount, setAmount] = useState<number>(0)
+  const [qrPayload, setQrPayload] = useState<QrPaymentPayload | null>(null)
+  const clearQrPayload = useCallback(() => setQrPayload(null), [])
   const [calculating, setCalculating] = useState(false)
   const [processing, setProcessing] = useState(false)
 
@@ -138,6 +146,18 @@ export function usePayment() {
 
         // Handle non-Stripe payment
         if (!isStripe && response.data) {
+          // 微信/支付宝 Native 返回 code_url + order_id：surface 给调用方渲染 QR 弹窗
+          const d = response.data as Record<string, unknown>
+          const codeUrl = typeof d.code_url === 'string' ? d.code_url
+            : typeof d.qr_code === 'string' ? d.qr_code : null
+          const orderId = typeof d.order_id === 'string' ? d.order_id
+            : typeof d.trade_no === 'string' ? d.trade_no : null
+          const expireAt = typeof d.expire_at === 'number' ? d.expire_at
+            : typeof d.expires_at === 'number' ? d.expires_at : 0
+          if (codeUrl && orderId) {
+            setQrPayload({ orderId, codeUrl, expiresAt: expireAt })
+            return true
+          }
           const url = (response as unknown as { url?: string }).url
           if (url) {
             submitPaymentForm(url, response.data)
@@ -164,5 +184,7 @@ export function usePayment() {
     calculatePaymentAmount,
     processPayment,
     setAmount,
+    qrPayload,
+    clearQrPayload,
   }
 }

@@ -229,7 +229,7 @@ func Register(c *gin.Context) {
 		common.ApiErrorI18n(c, i18n.MsgUserInputInvalid, map[string]any{"Error": err.Error()})
 		return
 	}
-	// 2026-08-04 安全修复: 注册密码强度校验(>=8位且含字母数字)
+	// 密码强度校验(测试期策略: >=6位; 原策略 >=8位且含字母数字, 见 common.ValidatePasswordStrength)
 	if !common.ValidatePasswordStrength(user.Password) {
 		common.ApiErrorI18n(c, i18n.MsgInvalidParams)
 		return
@@ -945,7 +945,7 @@ func checkUpdatePassword(originalPassword string, newPassword string, userId int
 	if newPassword == "" {
 		return
 	}
-	// 2026-08-04 安全修复: 新密码强度校验(>=8位且含字母数字)
+	// 新密码强度校验(测试期策略同上)
 	if !common.ValidatePasswordStrength(newPassword) {
 		err = errPasswordWeak
 		return

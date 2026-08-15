@@ -3,7 +3,7 @@
 // 检查项:页面加载、无严重 JS 错误、关键元素渲染、HTTP 状态
 import { chromium, firefox, webkit } from 'playwright';
 
-const BASE = process.env.YUXIN_BASE_URL || 'https://203.0.113.10';
+const BASE = process.env.YUXIN_BASE_URL || 'https://103.55.131.130';
 const RESULTS = [];
 
 const DEVICES = [

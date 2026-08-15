@@ -33,15 +33,15 @@ cd /root/projects/api-gateway
 
 | 服务 | 地址 |
 |------|------|
-| 网站首页 | http://203.0.113.10 |
-| 服务状态页 | http://203.0.113.10/status-page |
-| 模型定价页 | http://203.0.113.10/pricing-page |
+| 网站首页 | http://103.55.131.130 |
+| 服务状态页 | http://103.55.131.130/status-page |
+| 模型定价页 | http://103.55.131.130/pricing-page |
 | Prometheus | 仅内网 127.0.0.1:9090，SSH 隧道访问 |
 | Grafana | 仅内网，SSH 隧道 `ssh -L 3001:127.0.0.1:3001 hk5708` 后开 localhost:3001 (admin/见 .env GF_SECURITY_ADMIN_PASSWORD) |
 
 ## 管理后台
 
-- 地址: http://203.0.113.10
+- 地址: http://103.55.131.130
 - 管理员: `lijianping`
 - 登录后可管理: 渠道 / 用户 / 令牌 / 定价 / 系统设置
 
