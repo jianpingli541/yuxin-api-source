@@ -1,0 +1,4 @@
+# 每行一个 webhook URL。格式后缀: #dingtalk / #wecom / #feishu (自动包装机器人 JSON)
+# 示例:
+# https://oapi.dingtalk.com/robot/send?access_token=XXXX#dingtalk
+# https://qyapi.weixin.qq.com/cgi-bin/webhook/send?key=XXXX#wecom

@@ -1,0 +1,86 @@
+{
+  "id": null,
+  "uid": "yuxin-auto-route",
+  "title": "豫鑫 · 智能调度(auto)分布",
+  "tags": [
+    "yuxin",
+    "auto-route",
+    "clickhouse"
+  ],
+  "timezone": "browser",
+  "schemaVersion": 39,
+  "version": 0,
+  "refresh": "30s",
+  "time": {
+    "from": "now-7d",
+    "to": "now"
+  },
+  "panels": [
+    {
+      "id": 1,
+      "type": "piechart",
+      "title": "近7天 各模型调用量分布",
+      "gridPos": {
+        "h": 9,
+        "w": 12,
+        "x": 0,
+        "y": 0
+      },
+      "datasource": {
+        "type": "grafana-clickhouse-datasource",
+        "uid": "yuxin-clickhouse"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "rawSql": "SELECT model_name, count() AS calls FROM new_api_logs.logs WHERE created_at > toUnixTimestamp(now() - INTERVAL 7 DAY) AND model_name != '' GROUP BY model_name ORDER BY calls DESC",
+          "format": 0
+        }
+      ]
+    },
+    {
+      "id": 2,
+      "type": "table",
+      "title": "近7天 模型调用/费用/token 明细",
+      "gridPos": {
+        "h": 9,
+        "w": 12,
+        "x": 12,
+        "y": 0
+      },
+      "datasource": {
+        "type": "grafana-clickhouse-datasource",
+        "uid": "yuxin-clickhouse"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "rawSql": "SELECT model_name, count() AS calls, sum(quota) AS quota, sum(prompt_tokens) AS in_tok, sum(completion_tokens) AS out_tok FROM new_api_logs.logs WHERE created_at > toUnixTimestamp(now() - INTERVAL 7 DAY) AND model_name != '' GROUP BY model_name ORDER BY calls DESC",
+          "format": 0
+        }
+      ]
+    },
+    {
+      "id": 3,
+      "type": "timeseries",
+      "title": "每日调用量趋势(按模型)",
+      "gridPos": {
+        "h": 9,
+        "w": 24,
+        "x": 0,
+        "y": 9
+      },
+      "datasource": {
+        "type": "grafana-clickhouse-datasource",
+        "uid": "yuxin-clickhouse"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "rawSql": "SELECT toDate(toDateTime(created_at)) AS day, model_name, count() AS calls FROM new_api_logs.logs WHERE created_at > toUnixTimestamp(now() - INTERVAL 14 DAY) AND model_name != '' GROUP BY day, model_name ORDER BY day",
+          "format": 0
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,45 @@
+FROM oven/bun:1@sha256:0733e50325078969732ebe3b15ce4c4be5082f18c4ac1a0f0ca4839c2e4e42a7 AS builder
+
+WORKDIR /build/web
+COPY ./web ./
+COPY ./VERSION /build/VERSION
+# 直接用 host 已构建的 dist（跳过 builder 内 bun build，避免缓存旧 bundle）
+
+FROM golang:1.26.6-alpine@sha256:af8d6740070b8906d12eae1c3e3ea0957fb63f492051ea05e354c38ef9fe88df AS builder2
+ENV GO111MODULE=on CGO_ENABLED=0 GOWORK=off
+
+ARG TARGETOS
+ARG TARGETARCH
+ENV GOOS=${TARGETOS:-linux} GOARCH=${TARGETARCH:-amd64}
+ENV GOEXPERIMENT=greenteagc
+
+WORKDIR /build
+
+ADD go.mod go.sum ./
+ADD relaykit/go.mod ./relaykit/go.mod
+RUN go mod download
+
+COPY . .
+COPY --from=builder /build/web/dist ./web/dist
+RUN go build -ldflags "-s -w -X 'github.com/QuantumNous/new-api/common.Version=$(cat VERSION)'" -o new-api
+RUN go build -ldflags "-s -w" -o payment-setup ./cmd/payment-setup
+
+FROM debian:bookworm-slim@sha256:f06537653ac770703bc45b4b113475bd402f451e85223f0f2837acbf89ab020a
+
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends ca-certificates tzdata libasan8 wget \
+    && rm -rf /var/lib/apt/lists/* \
+    && update-ca-certificates
+
+COPY --from=builder2 /build/new-api /
+COPY --from=builder2 /build/payment-setup /
+COPY LICENSE NOTICE THIRD-PARTY-LICENSES.md /licenses/
+EXPOSE 3000
+WORKDIR /data
+
+RUN groupadd -g 65532 newapi \
+    && useradd -r -u 65532 -g newapi -d /data -s /usr/sbin/nologin newapi \
+    && chown -R newapi:newapi /data
+USER newapi:newapi
+
+ENTRYPOINT ["/new-api"]
